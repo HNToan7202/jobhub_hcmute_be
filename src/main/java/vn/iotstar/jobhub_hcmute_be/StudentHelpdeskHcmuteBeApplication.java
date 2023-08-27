@@ -1,4 +1,4 @@
-package vn.iotstar.student_helpdesk_hcmute_be;
+package vn.iotstar.jobhub_hcmute_be;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

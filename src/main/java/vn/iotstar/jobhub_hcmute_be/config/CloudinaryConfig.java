@@ -1,4 +1,4 @@
-package vn.iotstar.student_helpdesk_hcmute_be.config;
+package vn.iotstar.jobhub_hcmute_be.config;
 
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Value;
