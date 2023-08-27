@@ -1,6 +1,10 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.LoginDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 
 import java.util.List;
@@ -23,4 +27,12 @@ public interface UserService {
     void delete(User entity);
 
     List<User> findAll(Sort sort);
+
+    ResponseEntity<GenericResponse> getProfile(String userId);
+
+    Optional<User> findByEmail(String email);
+
+    ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO);
+
+    ResponseEntity<GenericResponse> userRegisterEmail(SignUpMailDTO signUpMailDTO);
 }

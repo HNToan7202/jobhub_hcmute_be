@@ -22,9 +22,10 @@ public class JwtTokenProvider {
 
     private final Long JWT_ACCESS_EXPIRATION = 3600000L;
     private final Long JWT_REFRESH_EXPIRATION = 604800000L;
+    //Sau 1 ngay token se het han
 
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-    private final String issuer = "Nhom 2";
+    private final String issuer = "Nhom 8 TLCN";
 
     private Key getSigningKey() {
         // byte[] keyBytes = this.JWT_SECRET.getBytes();

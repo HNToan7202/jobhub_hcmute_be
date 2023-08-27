@@ -7,4 +7,5 @@ import vn.iotstar.jobhub_hcmute_be.entity.Role;
 @Hidden
 @Repository
 public interface RoleRepository extends JpaRepository<Role, String> {
+    Role findByName(String name);
 }
