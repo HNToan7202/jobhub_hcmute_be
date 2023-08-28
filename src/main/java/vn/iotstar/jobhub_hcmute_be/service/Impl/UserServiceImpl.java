@@ -17,6 +17,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.UserProfileResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.RefreshToken;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
@@ -116,7 +117,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO) {
 
+        if (findByEmail(loginDTO.getUserLogin()).isEmpty())
+            throw new UserNotFoundException("Account does not exist");
         Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+        if (optionalUser.isPresent() && !optionalUser.get().isVerified()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(GenericResponse.builder()
+                    .success(false)
+                    .message("Your account is not verified!")
+                    .result(null)
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .build());
+        }
+
+        //Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(),
                         loginDTO.getPassword()));

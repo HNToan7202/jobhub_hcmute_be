@@ -13,6 +13,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -126,8 +128,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(genericResponse,HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
+    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
+    public ResponseEntity<?> handleAccessDeniedException(HttpClientErrorException.Unauthorized ex) {
         GenericResponse genericResponse = GenericResponse.builder()
                 .success(false)
                 .message("Invalid token. Please login again!")
@@ -137,6 +139,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(genericResponse,HttpStatus.UNAUTHORIZED);
     }
 
+//    @ExceptionHandler({AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class})
+//    public ResponseEntity<?> handleAccessDeniedException(Exception ex) {
+//        GenericResponse genericResponse = GenericResponse.builder()
+//                .success(false)
+//                .message("Access denied: You do not have the required role.")
+//                .result(ex.getMessage())
+//                .statusCode(HttpStatus.FORBIDDEN.value())
+//                .build();
+//        return new ResponseEntity<>(genericResponse, HttpStatus.FORBIDDEN);
+//    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         GenericResponse genericResponse = GenericResponse.builder()
@@ -145,7 +158,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 .result(ex.getMessage())
                 .statusCode(HttpStatus.PAYLOAD_TOO_LARGE.value())
                 .build();
-         return new ResponseEntity<>(genericResponse,HttpStatus.PAYLOAD_TOO_LARGE);
+        return new ResponseEntity<>(genericResponse,HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(IOException.class)
@@ -166,7 +179,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         GenericResponse genericResponse = GenericResponse.builder()
                 .success(false)
                 .message(ex.getMessage())
-                .result("InternalError")
+                .result("Internal Error")
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .build();
         return new ResponseEntity<>(genericResponse,HttpStatus.INTERNAL_SERVER_ERROR);
@@ -181,6 +194,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(genericResponse);
     }
+
+    @ExceptionHandler({ AccessDeniedException.class })
+    public ResponseEntity<Object> handleForbidden(AccessDeniedException ex) {
+        GenericResponse genericResponse = new GenericResponse(
+                false,
+                ex.getMessage(),
+                "Forbidden",
+                HttpStatus.FORBIDDEN.value());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(genericResponse);
+    }
+
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<Object> handleExpiredJwtException(Exception ex) {
