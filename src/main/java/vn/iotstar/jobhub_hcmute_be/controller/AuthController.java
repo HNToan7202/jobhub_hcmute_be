@@ -56,6 +56,23 @@ public class AuthController {
 
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader,
+                                    @RequestParam("refreshToken") String refreshToken) {
+        String accessToken = authorizationHeader.substring(7);
+        if (jwtTokenProvider.getUserIdFromJwt(accessToken).equals(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken))) {
+            return refreshTokenService.logout(refreshToken);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(GenericResponse.builder()
+                        .success(false)
+                        .message("Logout failed!")
+                        .result("Please login before logout!")
+                        .statusCode(HttpStatus.UNAUTHORIZED.value())
+                        .build());
+    }
+
+
     @PostMapping("/create-admin")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> create(@Valid @RequestBody SignUpMailDTO signUpMailDTO) {

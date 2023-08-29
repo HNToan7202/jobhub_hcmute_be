@@ -1,7 +1,11 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.RefreshToken;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.repository.RefreshTokenRepository;
@@ -49,6 +53,51 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             }
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> logout(String refreshToken){
+        try{
+            if(jwtTokenProvider.validateToken(refreshToken)){
+                Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByTokenAndExpiredIsFalseAndRevokedIsFalse(refreshToken);
+                if(optionalRefreshToken.isPresent()){
+                    optionalRefreshToken.get().setRevoked(true);
+                    optionalRefreshToken.get().setExpired(true);
+                    refreshTokenRepository.save(optionalRefreshToken.get());
+                    SecurityContextHolder.clearContext();
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(GenericResponse.builder()
+                                    .success(true)
+                                    .message("Logout successfully!")
+                                    .result("")
+                                    .statusCode(HttpStatus.OK.value())
+                                    .build());
+                }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(GenericResponse.builder()
+                                .success(false)
+                                .message("Logout failed!")
+                                .result("")
+                                .statusCode(HttpStatus.NOT_FOUND.value())
+                                .build());
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Logout failed!")
+                            .result("")
+                            .statusCode(HttpStatus.UNAUTHORIZED.value())
+                            .build());
+
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .result("")
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .build());
         }
     }
 

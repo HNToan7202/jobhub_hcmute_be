@@ -4,9 +4,15 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.context.SecurityContext;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @OpenAPIDefinition
@@ -18,9 +24,11 @@ public class OpenApiConfig {
                         .description("Your API Description")
                         .version("1.0"))
                 .components(new Components()
-                        .addSecuritySchemes("bearer-key", new SecurityScheme()
+                        .addSecuritySchemes("Bearer Token", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
-                                .bearerFormat("JWT"))); // Change bearer format as needed
+                                .bearerFormat("JWT")));
     }
+
+
 }
