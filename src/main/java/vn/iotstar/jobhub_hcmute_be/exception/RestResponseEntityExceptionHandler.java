@@ -128,8 +128,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(genericResponse,HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
-    public ResponseEntity<?> handleAccessDeniedException(HttpClientErrorException.Unauthorized ex) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         GenericResponse genericResponse = GenericResponse.builder()
                 .success(false)
                 .message("Invalid token. Please login again!")
@@ -139,16 +139,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(genericResponse,HttpStatus.UNAUTHORIZED);
     }
 
-//    @ExceptionHandler({AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class})
-//    public ResponseEntity<?> handleAccessDeniedException(Exception ex) {
-//        GenericResponse genericResponse = GenericResponse.builder()
-//                .success(false)
-//                .message("Access denied: You do not have the required role.")
-//                .result(ex.getMessage())
-//                .statusCode(HttpStatus.FORBIDDEN.value())
-//                .build();
-//        return new ResponseEntity<>(genericResponse, HttpStatus.FORBIDDEN);
-//    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
@@ -187,22 +177,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler({ Exception.class })
     public ResponseEntity<Object> handleBadRequest(Exception ex) {
-        GenericResponse genericResponse = new GenericResponse(
-                false,
-                ex.getMessage(),
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(genericResponse);
-    }
+        GenericResponse genericResponse = GenericResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .result("Bad Requestr")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build();
 
-    @ExceptionHandler({ AccessDeniedException.class })
-    public ResponseEntity<Object> handleForbidden(AccessDeniedException ex) {
-        GenericResponse genericResponse = new GenericResponse(
-                false,
-                ex.getMessage(),
-                "Forbidden",
-                HttpStatus.FORBIDDEN.value());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(genericResponse);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(genericResponse);
     }
 
 

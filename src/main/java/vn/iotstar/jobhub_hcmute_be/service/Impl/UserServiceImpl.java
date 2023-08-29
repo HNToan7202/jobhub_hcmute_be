@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(signUpMailDTO.getEmail());
         //user.setPhone(registerRequest.getPhone());
         user.setUserId(UUID.randomUUID().toString().split("-")[0]);
-        user.setPassword(passwordEncoder.encode(signUpMailDTO.getPassword()));
+        user.setPassword(passwordEncoder.encode(signUpMailDTO.getEmail()));
         user.setRole(roleRepository.findByName("STUDENT"));
 
         save(user);

@@ -85,13 +85,14 @@ public class AuthController {
             String errorMessage = Objects.requireNonNull(
                     bindingResult.getFieldError()).getDefaultMessage();
 
-            return ResponseEntity.status(500)
-                    .body(new GenericResponse(
-                            false,
-                            errorMessage,
-                            null,
-                            HttpStatus.INTERNAL_SERVER_ERROR.value()
-                    ));
+            return ResponseEntity.internalServerError().body(
+                    GenericResponse.builder()
+                            .success(true)
+                            .message(errorMessage)
+                            .statusCode(200)
+                            .build()
+            );
+
         }
         return userService.userRegisterEmail(signUpMailDTO);
     }

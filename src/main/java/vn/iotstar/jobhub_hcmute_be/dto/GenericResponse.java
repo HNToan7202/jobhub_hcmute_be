@@ -2,10 +2,7 @@ package vn.iotstar.jobhub_hcmute_be.dto;
 
 import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Value
 @Builder
 public class GenericResponse {
     private Boolean success;
