@@ -1,6 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +54,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailVerificationService emailVerificationService;
 
+
+
     @Override
     @Deprecated
     public User getById(String s) {
@@ -90,6 +95,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll(Sort sort) {
         return userRepository.findAll(sort);
+    }
+
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Override
@@ -201,6 +211,29 @@ public class UserServiceImpl implements UserService {
                         .statusCode(200)
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception {
+        if (page < 0) {
+            return ResponseEntity.ok(GenericResponse.builder()
+                    .message("Page index must not be less than 0")
+                    .statusCode(500)
+                    .success(false)
+                    .build());
+        }
+        Pageable pageable = PageRequest.of(page,size);
+        Page<User> users = findAll(pageable);
+
+        System.out.println("In ra 5 user đầu tiên: ");
+        users.forEach(System.out::println);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(GenericResponse.builder()
+                        .success(true)
+                        .message("Get user successful")
+                        .result(users)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
     }
 
 

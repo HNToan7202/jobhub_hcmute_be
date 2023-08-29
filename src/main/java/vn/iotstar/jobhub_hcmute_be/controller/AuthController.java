@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Validated
+@Tag(name="Authentication", description="Auth API")
 public class AuthController {
 
     @Autowired

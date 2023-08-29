@@ -1,6 +1,8 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
 import org.springframework.data.domain.Example;
+import org.springframework.http.ResponseEntity;
+import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
 
 import java.util.List;

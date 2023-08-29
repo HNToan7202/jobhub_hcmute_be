@@ -1,5 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
@@ -28,6 +30,8 @@ public interface UserService {
 
     List<User> findAll(Sort sort);
 
+    Page<User> findAll(Pageable pageable);
+
     ResponseEntity<GenericResponse> getProfile(String userId);
 
     Optional<User> findByEmail(String email);
@@ -35,4 +39,6 @@ public interface UserService {
     ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO);
 
     ResponseEntity<GenericResponse> userRegisterEmail(SignUpMailDTO signUpMailDTO);
+
+    ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception;
 }

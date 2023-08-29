@@ -12,10 +12,13 @@ import vn.iotstar.jobhub_hcmute_be.entity.User;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 public class UserDetail implements UserDetails {
+
+    private static final long serialVersionUID = 1L;
 
     private User user;
 
