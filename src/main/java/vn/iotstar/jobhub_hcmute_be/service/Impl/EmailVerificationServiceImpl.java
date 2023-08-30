@@ -76,9 +76,9 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     public boolean verifyOtp(String email, String otp) {
-        Optional<EmailVerification> emailVerification = emailVerificationRepository.findByEmail(email);
+        Optional<EmailVerification> emailVerification = emailVerificationRepository.findByEmailAndOtp(email,otp);
         Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent() && emailVerification.isPresent() && emailVerification.get().getOtp().equals(otp)) {
+        if (optionalUser.isPresent() && emailVerification.isPresent()) {
             User user = optionalUser.get();
             user.setVerified(true);
             userRepository.save(user);

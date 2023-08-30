@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,12 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.Context;
+import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
+import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
@@ -46,6 +50,8 @@ public class AuthController {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     @PostMapping("/login")
     @Transactional
@@ -99,8 +105,16 @@ public class AuthController {
     public ResponseEntity<GenericResponse> signUpMail(
             @RequestBody @Valid SignUpMailDTO signUpMailDTO,
             BindingResult bindingResult) {
+        if(!signUpMailDTO.isStudentEmail()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Please use your HCMUTE email!")
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .build());
+        }
 
-        if (bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors() ) {
             String errorMessage = Objects.requireNonNull(
                     bindingResult.getFieldError()).getDefaultMessage();
 
@@ -114,6 +128,28 @@ public class AuthController {
 
         }
         return userService.userRegisterEmail(signUpMailDTO);
+    }
+    @PostMapping("/sendOTP")
+    public ResponseEntity<GenericResponse> sendOtp(@RequestBody EmailVerificationRequest emailVerificationRequest) {
+        try {
+            emailVerificationService.sendOtp(emailVerificationRequest.getEmail());
+            return ResponseEntity.ok()
+                    .body(GenericResponse.builder()
+                            .success(true)
+                            .message("OTP sent successfully!")
+                            .result(null)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("An error occurred while sending OTP.")
+                            .result(null)
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .build());
+        }
     }
 
 }

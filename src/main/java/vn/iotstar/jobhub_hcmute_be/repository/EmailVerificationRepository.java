@@ -14,5 +14,8 @@ import java.util.Optional;
 public interface EmailVerificationRepository extends JpaRepository<EmailVerification, String> {
 
     List<EmailVerification> findByExpirationTimeBefore(LocalDateTime expirationTime);
+    Optional<EmailVerification> findByEmailAndOtp(String email, String otp  );
+
     Optional<EmailVerification> findByEmail(String email);
+
 }

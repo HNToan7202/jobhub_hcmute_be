@@ -41,4 +41,6 @@ public interface UserService {
     ResponseEntity<GenericResponse> userRegisterEmail(SignUpMailDTO signUpMailDTO);
 
     ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception;
+
+    ResponseEntity<GenericResponse> validateVerificationAccount(String token);
 }

@@ -7,4 +7,5 @@ import vn.iotstar.jobhub_hcmute_be.entity.VerificationToken;
 @Hidden
 @Repository
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, String> {
+    <Optional> VerificationToken findByToken(String token);
 }

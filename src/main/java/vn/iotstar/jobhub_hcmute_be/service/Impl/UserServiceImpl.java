@@ -13,16 +13,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.UserProfileResponse;
-import vn.iotstar.jobhub_hcmute_be.entity.RefreshToken;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
-import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.VerificationTokenRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
@@ -54,6 +55,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailVerificationService emailVerificationService;
 
+    @Autowired
+    VerificationTokenRepository tokenRepository;
+
+    @Autowired
+    TemplateEngine templateEngine;
 
 
     @Override
@@ -225,8 +231,7 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page,size);
         Page<User> users = findAll(pageable);
 
-        System.out.println("In ra 5 user đầu tiên: ");
-        users.forEach(System.out::println);
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(GenericResponse.builder()
                         .success(true)
@@ -236,5 +241,25 @@ public class UserServiceImpl implements UserService {
                         .build());
     }
 
+    @Override
+    public ResponseEntity<GenericResponse> validateVerificationAccount(String token) {
 
+//        String message = "Invalid token, please check the token again!";
+//        EmailVerification emailVerification = emailVerificationService.findByToken(token);
+//        if (verificationToken != null) {
+//            message = "Account verification successful, please login!";
+//            Context context = new Context();
+//            context.setVariable("result", message);
+//            String content = templateEngine.process("result-confirm", context);
+//            User user = verificationToken.getUser();
+//            user.setVerified(true);
+//            user = userRepository.save(user);
+//        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(GenericResponse.builder()
+                        .success(true)
+                        .message("message")
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
 }

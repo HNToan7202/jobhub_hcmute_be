@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,4 +31,7 @@ public class Employer extends User{
     @MapKeyColumn(name = "linkContact_key")
     @Column(name = "linkContact_value")
     private Map<String, String> linkContacts = new HashMap<>();
+
+    @Enumerated(EnumType.STRING)
+    private EmployState employState;
 }

@@ -5,20 +5,22 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.Context;
+import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.UserProfileResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.VerifyOtpRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
+import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 @RestController
@@ -31,6 +33,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     @GetMapping("/profile")
     @Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
@@ -63,5 +68,29 @@ public class UserController {
             throw new UsernameNotFoundException("Invalid user principal type", e);
         }
     }
+
+    @PostMapping("/verifyOTP")
+    public ResponseEntity<GenericResponse> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
+        boolean isOtpVerified = emailVerificationService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
+        if (isOtpVerified) {
+            return ResponseEntity.ok()
+                    .body(GenericResponse.builder()
+                            .success(true)
+                            .message("OTP verified successfully!")
+                            .result(null)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
+        }
+        return ResponseEntity.badRequest()
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Invalid OTP or expired.")
+                            .result(null)
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .build());
+    }
+
+
+
 
 }

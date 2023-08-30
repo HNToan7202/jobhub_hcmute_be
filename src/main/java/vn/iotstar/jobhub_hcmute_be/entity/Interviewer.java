@@ -28,4 +28,6 @@ public class Interviewer extends User{
     @JsonBackReference
     @ToString.Exclude
     private List<QuestionCandidate> questionCandidates;
+
+    //Khoá ngoại tới Employer
 }
