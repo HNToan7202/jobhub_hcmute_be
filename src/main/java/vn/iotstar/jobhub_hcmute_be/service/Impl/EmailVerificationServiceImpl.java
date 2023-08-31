@@ -52,7 +52,45 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             String mailContent = templateEngine.process("send-otp", context);
 
             helper.setText(mailContent, true);
-            helper.setSubject("The verification token for JobPort");
+            helper.setSubject("The verification token for JobHub account");
+            mailSender.send(message);
+
+            LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(5);
+            EmailVerification emailVerification = new EmailVerification();
+            emailVerification.setEmail(email);
+            emailVerification.setOtp(otp);
+            emailVerification.setExpirationTime(expirationTime);
+
+            Optional<EmailVerification> existingEmailVerification = findByEmail(email);
+            if (existingEmailVerification.isPresent()) {
+                emailVerificationRepository.delete(existingEmailVerification.get());
+            }
+
+            emailVerificationRepository.save(emailVerification);
+            return otp;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String sendOtpEmployer(String email, String fullname) {
+        String otp = generateOtp();
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(email);
+
+            // Load Thymeleaf template
+            Context context = new Context();
+            context.setVariable("otpCode", otp);
+            context.setVariable("verifyEmail", email);
+            String mailContent = templateEngine.process("send-otp-employer", context);
+
+            helper.setText(mailContent, true);
+            helper.setSubject("Congratulations! Your Employer Account Registration is Successful!");
             mailSender.send(message);
 
             LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(5);

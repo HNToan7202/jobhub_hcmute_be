@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface EmailVerificationService {
     String sendOtp(String email);
 
+    String sendOtpEmployer(String email, String fullname);
+
     boolean verifyOtp(String email, String otp);
 
     String generateOtp();

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,11 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.context.Context;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.LoginDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.SignUpMailDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
@@ -63,11 +63,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader,
-                                    @RequestParam("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader) {
         String accessToken = authorizationHeader.substring(7);
-        if (jwtTokenProvider.getUserIdFromJwt(accessToken).equals(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken))) {
-            return refreshTokenService.logout(refreshToken);
+        String userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
+        if (userId!= null){
+            return refreshTokenService.logout(userId);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(GenericResponse.builder()
@@ -96,14 +96,11 @@ public class AuthController {
                         .build()
         );
 
-
-
-
     }
 
     @PostMapping("/signup-email")
     public ResponseEntity<GenericResponse> signUpMail(
-            @RequestBody @Valid SignUpMailDTO signUpMailDTO,
+            @RequestBody @Valid RegisterRequest signUpMailDTO,
             BindingResult bindingResult) {
         if(!signUpMailDTO.isStudentEmail()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -129,7 +126,28 @@ public class AuthController {
         }
         return userService.userRegisterEmail(signUpMailDTO);
     }
-    @PostMapping("/sendOTP")
+
+    @PostMapping("/employer-signup-email")
+    public ResponseEntity<?> employerSignUpMail(
+            @RequestBody @Valid EmployerRegisterDTO employerRegisterDTO,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors() ) {
+            String errorMessage = Objects.requireNonNull(
+                    bindingResult.getFieldError()).getDefaultMessage();
+
+            return ResponseEntity.internalServerError().body(
+                    GenericResponse.builder()
+                            .success(true)
+                            .message(errorMessage)
+                            .statusCode(200)
+                            .build()
+            );
+
+        }
+        return userService.employerRegister(employerRegisterDTO);
+    }
+    @PostMapping("/send-otp")
     public ResponseEntity<GenericResponse> sendOtp(@RequestBody EmailVerificationRequest emailVerificationRequest) {
         try {
             emailVerificationService.sendOtp(emailVerificationRequest.getEmail());

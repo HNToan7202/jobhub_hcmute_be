@@ -1,4 +1,4 @@
-package vn.iotstar.jobhub_hcmute_be.dto;
+package vn.iotstar.jobhub_hcmute_be.dto.Auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

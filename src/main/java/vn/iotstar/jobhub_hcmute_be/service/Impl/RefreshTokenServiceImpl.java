@@ -57,10 +57,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public ResponseEntity<?> logout(String refreshToken){
+    public ResponseEntity<?> logout(String userId){
         try{
-            if(jwtTokenProvider.validateToken(refreshToken)){
-                Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByTokenAndExpiredIsFalseAndRevokedIsFalse(refreshToken);
+            Optional<User> optionalUser = userRepository.findById(userId);
+            if(optionalUser.isPresent()&&optionalUser.get().isActive()) {
+                Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByUserAndExpiredIsFalseAndRevokedIsFalse(optionalUser.get());
                 if(optionalRefreshToken.isPresent()){
                     optionalRefreshToken.get().setRevoked(true);
                     optionalRefreshToken.get().setExpired(true);
