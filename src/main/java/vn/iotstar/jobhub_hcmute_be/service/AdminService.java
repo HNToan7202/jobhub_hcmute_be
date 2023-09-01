@@ -21,4 +21,6 @@ public interface AdminService {
     Optional<Admin> findById(String s);
 
     void deleteById(String s);
+
+    ResponseEntity<?> acceptEmployer(String employerId);
 }

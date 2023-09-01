@@ -5,10 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
@@ -21,6 +20,9 @@ public class AdminController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AdminService adminService;
+
     //@PostAuthorize("hasRole('ADMIN')")
     @GetMapping("/hello")
     public ResponseEntity hello(){
@@ -31,6 +33,20 @@ public class AdminController {
     public ResponseEntity getListUser(@RequestParam(name = "size", required = false, defaultValue = "10") int size,
                                       @RequestParam(name = "page", required = false, defaultValue = "0") int page) throws Exception {
         return userService.getAccounts(size, page);
+    }
+
+    @GetMapping("/get-list-user")
+    public ResponseEntity<GenericResponse> getAccounts(
+            @RequestParam(name = "role", required = false, defaultValue = "") String role,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page
+    ) throws Exception {
+        return userService.getAccounts(role, size, page);
+    }
+
+    @PostMapping("/accept-employer")
+    public ResponseEntity<?> acceptEmployer(@RequestBody EmployerRequest employerRequest) throws Exception {
+        return adminService.acceptEmployer(employerRequest.getEmployerId());
     }
 
 }

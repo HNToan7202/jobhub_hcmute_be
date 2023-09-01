@@ -71,6 +71,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().permitAll()
                 )
+                .logout((logout) -> logout.logoutUrl("/my/logout/uri"))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic((basic)-> basic
                         .authenticationEntryPoint(myBasicAuthenticationEntryPoint))

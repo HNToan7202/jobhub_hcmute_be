@@ -14,7 +14,4 @@ public class SignUpMailDTO {
     @NotBlank(message = "Password cannot be blank")
     private String password;
 
-    public boolean isStudentEmail() {
-        return email != null && email.endsWith("@student.hcmute.edu.vn");
-    }
 }

@@ -49,9 +49,12 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception;
 
+    ResponseEntity<GenericResponse> getAccounts(String role,int size, int page) throws Exception;
+
     ResponseEntity<GenericResponse> validateVerificationAccount(String token);
 
     ResponseEntity<?> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 
     ResponseEntity<Object> updateProfile(String userId, UserUpdateRequest request) throws Exception;
+
 }

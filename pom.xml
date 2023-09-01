@@ -97,10 +97,12 @@
             <scope>runtime</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+        <!-- webclient-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
@@ -213,11 +215,12 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>com.microsoft.graph</groupId>
-            <artifactId>microsoft-graph</artifactId>
-            <version>[5.0,)</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.microsoft.graph</groupId>-->
+<!--            <artifactId>microsoft-graph</artifactId>-->
+<!--            <version>[5.0,)</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -229,8 +232,6 @@
             <artifactId>json</artifactId>
             <version>20210307</version> <!-- Sử dụng phiên bản mới nhất có sẵn -->
         </dependency>
-
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

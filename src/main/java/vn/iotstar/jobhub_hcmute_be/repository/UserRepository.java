@@ -1,6 +1,8 @@
 package vn.iotstar.jobhub_hcmute_be.repository;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
@@ -18,5 +20,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByUserIdAndIsActiveIsTrue(String userId);
 
     Optional<User> findByEmail(String email);
+
+    Page<User> findByRole_NameAndIsActiveIsTrue(String roleId, Pageable pageable);
 
 }

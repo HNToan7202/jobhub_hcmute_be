@@ -1,10 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import org.apache.commons.text.StringEscapeUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -292,6 +291,11 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page,size);
         Page<User> users = findAll(pageable);
 
+        return getGenericResponseResponseEntity(users);
+    }
+
+    @NotNull
+    private ResponseEntity<GenericResponse> getGenericResponseResponseEntity(Page<User> users) {
         Map<String, Object> response = new HashMap<>();
         response.put("users", users.getContent());
         response.put("currentPage", users.getNumber());
@@ -305,6 +309,34 @@ public class UserServiceImpl implements UserService {
                         .result(response)
                         .statusCode(HttpStatus.OK.value())
                         .build());
+    }
+
+    @Override
+    public ResponseEntity<GenericResponse> getAccounts(String role, int size, int page) throws Exception {
+        if (page < 0) {
+            return ResponseEntity.ok(GenericResponse.builder()
+                    .message("Page index must not be less than 0")
+                    .statusCode(500)
+                    .success(false)
+                    .build());
+        }
+        Pageable pageable = PageRequest.of(page,size);
+        Page<User> users;
+        Role roleUser = roleRepository.findByName(role);
+        if(role.isEmpty()){
+            users = findAll(pageable);
+            return getGenericResponseResponseEntity(users);
+        }
+        if(roleUser == null){
+            return ResponseEntity.ok(GenericResponse.builder()
+                    .message("Role not found")
+                    .statusCode(500)
+                    .success(false)
+                    .build());
+        }
+        users = userRepository.findByRole_NameAndIsActiveIsTrue(role, pageable);
+
+        return getGenericResponseResponseEntity(users);
     }
 
     @Override
@@ -376,5 +408,80 @@ public class UserServiceImpl implements UserService {
                         .build()
         );
     }
+
+//    @Override
+//    public ResponseEntity<GenericResponse> getAccounts(
+//            String name,
+//            String role,
+//            String phone,
+//            String email,
+//            boolean blackList,
+//            int size,
+//            int page
+//    ) throws Exception {
+//        Pageable pageable = PageRequest.of(page, size);
+//        String decodedName = StringEscapeUtils.unescapeHtml4(name.replace("&amp;", "&"));
+//        Page<User> userPage;
+//        if (blackList)
+//            userPage = getPageUserByBlacklist(decodedName, phone, email, role, pageable);
+//        else {
+//            if (decodedName.isEmpty())
+//                userPage = userRepository.searchUserByPhoneContainingAndEmailContainingAndIsActiveIsTrueAndRole_NameContaining(
+//                        phone,
+//                        email,
+//                        role,
+//                        pageable
+//                );
+//            else
+//                userPage = userRepository.searchUserByNamePhoneEmailAndRole(
+//                        decodedName,
+//                        phone,
+//                        email,
+//                        role,
+//                        pageable
+//                );
+//        }
+//
+//        List<UserProfileResponse> userProfileResponses = new ArrayList<>();
+//        for (User user : userPage.getContent())
+//            userProfileResponses.add(new UserProfileResponse(user));
+//
+//        PaginationResponse response = PaginationResponse
+//                .builder()
+//                .pageNumber(page + 1)
+//                .pageSize(size)
+//                .totalPages(userPage.getTotalPages())
+//                .content(userProfileResponses)
+//                .build();
+//
+//        return ResponseEntity.ok(GenericResponse.builder()
+//                .message("successful")
+//                .result(response)
+//                .statusCode(200)
+//                .success(true)
+//                .build());
+//    }
+//
+//    private Page<User> getPageUserByBlacklist(String name, String phone, String email, String role, Pageable pageable) {
+//        Page<BlackList> blackListPage = blackListRepository
+//                .findBlackListsByCandidate_FullNameContainingAndCandidate_PhoneContainingAndCandidate_EmailContainingAndCandidate_IsActiveIsTrueAndCandidate_Role_NameContaining(
+//                        name,
+//                        phone,
+//                        email,
+//                        role,
+//                        pageable
+//                );
+//
+//        List<User> userProfileResponses = new ArrayList<>();
+//        for (BlackList blackList : blackListPage.getContent())
+//            userProfileResponses.add(blackList.getCandidate());
+//
+//        return new PageImpl<>(
+//                userProfileResponses,
+//                blackListPage.getPageable(),
+//                blackListPage.getTotalElements()
+//        );
+//    }
+
 }
 

@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
@@ -45,6 +46,9 @@ public class UserController {
 
     @Autowired
     private EmailVerificationService emailVerificationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/profile")
     @Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
@@ -90,13 +94,28 @@ public class UserController {
                             .statusCode(HttpStatus.OK.value())
                             .build());
         }
-        return ResponseEntity.badRequest()
+        else if(userRepository.findByEmailAndIsActiveIsTrue(verifyOtpRequest.getEmail()).isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(GenericResponse.builder()
-                            .success(false)
-                            .message("Invalid OTP or expired.")
-                            .result(null)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .success(true)
+                            .message("Account is already verified!")
+                            .statusCode(HttpStatus.NOT_FOUND.value())
                             .build());
+        }else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(GenericResponse.builder()
+                            .success(true)
+                            .message("Account is not found!")
+                            .statusCode(HttpStatus.NOT_FOUND.value())
+                            .build());
+        }
+//        return ResponseEntity.badRequest()
+//                    .body(GenericResponse.builder()
+//                            .success(false)
+//                            .message("Invalid OTP or expired.")
+//                            .result(null)
+//                            .statusCode(HttpStatus.BAD_REQUEST.value())
+//                            .build());
     }
 
     @PutMapping("/change-avatar")

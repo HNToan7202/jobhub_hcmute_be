@@ -22,7 +22,4 @@ public class RegisterRequest {
     @NotEmpty(message = "Confirm Password is required")
     private String confirmPassword;
 
-    public boolean isStudentEmail() {
-        return email != null && email.endsWith("@student.hcmute.edu.vn");
-    }
 }
