@@ -25,7 +25,10 @@ public class Job implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String jobId;
 
+    //Tên công việc
     private String name;
+
+    //private String jobTitle;
 
     @Enumerated(EnumType.STRING)
     private JobType jobType;
@@ -55,8 +58,8 @@ public class Job implements Serializable {
 
     private Date deadline;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    //@JsonBackReference
     @ToString.Exclude
     private Position position;
 
@@ -70,7 +73,7 @@ public class Job implements Serializable {
     @ToString.Exclude
     private List<JobApply> jobApplies;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(name = "job_skill", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     @JsonManagedReference
     private List<Skill> skills;
@@ -83,20 +86,6 @@ public class Job implements Serializable {
     @PreUpdate
     void updatedAt() {
         this.updatedAt = new Date();
-    }
-
-    public Job(String name, JobType jobType, Integer quantity, String benefit, String salaryRange, String requirement, String location, String description, Date deadline, Position position, List<Skill> skills) {
-        this.name = name;
-        this.jobType = jobType;
-        this.quantity = quantity;
-        this.benefit = benefit;
-        this.salaryRange = salaryRange;
-        this.requirement = requirement;
-        this.location = location;
-        this.description = description;
-        this.deadline = deadline;
-        this.position = position;
-        this.skills = skills;
     }
 
 }
