@@ -28,8 +28,7 @@ Dự án này nhằm phát triển một ứng dụng giúp sinh viên trường
 
    ```bash
    git clone https://github.com/your-username/your-repo.git
-   1.Chạy ứng dụng: Di chuyển vào thư mục dự án và chạy ứng dụng Spring Boot:
-   cd your-project-folder
+   cd jobhub_hcmute_be
    mvn spring-boot:run
 
 
