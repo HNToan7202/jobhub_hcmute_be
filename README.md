@@ -44,5 +44,5 @@ Dự án này nhằm phát triển một ứng dụng giúp sinh viên trường
 ## Phản hồi
 Nếu bạn gặp bất kỳ vấn đề hoặc có ý kiến đóng góp, vui lòng báo cáo lỗi hoặc liên hệ với chúng tôi qua email:
 
-**Nguyễn Hoàng Toàn: 20110739@student.hcmute.edu.vn**
-**Nguyễn Công Thành: 20110267@student.hcmute.edu.vn**
+- **Nguyễn Hoàng Toàn: 20110739@student.hcmute.edu.vn**
+- **Nguyễn Công Thành: 20110267@student.hcmute.edu.vn**
