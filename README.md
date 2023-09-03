@@ -30,8 +30,6 @@ Dự án này nhằm phát triển một ứng dụng giúp sinh viên trường
    git clone https://github.com/HNToan7202/jobhub_hcmute_be.git
    cd jobhub_hcmute_be
    mvn spring-boot:run
-
-
 ## Sử dụng
 - Truy cập ứng dụng: Mở trình duyệt web và truy cập http://localhost:8080 để bắt đầu sử dụng ứng dụng.
 
