@@ -24,7 +24,9 @@ public class ResumeUpload {
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
-    private Student student;
+    private Resume resume;
+
+    private boolean isMain;
 
     @JsonBackReference
     private Boolean isActive;

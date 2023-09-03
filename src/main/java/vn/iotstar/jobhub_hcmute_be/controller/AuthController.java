@@ -56,7 +56,6 @@ public class AuthController {
     @PostMapping("/login")
     @Transactional
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
-
         //Xử lý login ở đây
         return userService.userLogin(loginDTO);
 

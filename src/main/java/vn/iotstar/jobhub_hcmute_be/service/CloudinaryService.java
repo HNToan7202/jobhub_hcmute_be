@@ -8,4 +8,6 @@ public interface CloudinaryService {
     String uploadImage(MultipartFile imageFile) throws IOException;
 
     void deleteImage(String imageUrl) throws IOException;
+
+    String uploadResume(MultipartFile imageFile, String userId) throws IOException;
 }

@@ -34,7 +34,7 @@ public class Resume implements Serializable {
 
     private String socialActivity;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
     private Student student;
@@ -42,10 +42,6 @@ public class Resume implements Serializable {
     private Date createAt;
 
     private Date updateAt;
-
-    private String name;
-
-    private Boolean upload;
 
     @JsonBackReference
     private Boolean isActive;
@@ -63,5 +59,10 @@ public class Resume implements Serializable {
     @JsonBackReference
     @ToString.Exclude
     private List<JobApply> jobApplies;
+
+    @OneToMany(mappedBy = "resume",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonBackReference
+    @ToString.Exclude
+    private List<ResumeUpload> resumeUploads;
 
 }

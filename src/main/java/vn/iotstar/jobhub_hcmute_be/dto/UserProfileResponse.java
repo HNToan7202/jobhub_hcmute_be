@@ -24,9 +24,8 @@ public class UserProfileResponse {
     private Date createdAt;
     private Date updatedAt;
     private String role;
-    private List<String> skills = new ArrayList<>();
+    //private List<String> skills = new ArrayList<>();
     private boolean blacklist;
-
 
     public UserProfileResponse(User user) {
         this.userId = user.getUserId();

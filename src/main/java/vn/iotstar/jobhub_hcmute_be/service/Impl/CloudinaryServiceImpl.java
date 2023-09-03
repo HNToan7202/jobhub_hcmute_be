@@ -9,6 +9,7 @@ import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class CloudinaryServiceImpl implements CloudinaryService {
@@ -48,4 +49,19 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         return publicId;
     }
 
+    @Override
+    public String uploadResume(MultipartFile imageFile, String userId) throws IOException {
+
+        String id = UUID.randomUUID().toString().split("-")[0];
+        String nameCV= "cv_"+userId+"_"+id;
+        Map<String, String> params= ObjectUtils.asMap(
+                "folder", "Recruiment Assets/CV",
+                "public_id",imageFile.getOriginalFilename(),
+                "resource_type", "auto",
+                "format","pdf");
+        Map uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);
+//        return cloudinary.url().format().generate(uploadResult.get("public_id").toString());
+        System.out.println(uploadResult.get("public_id").toString());
+        return (String) uploadResult.get("secure_url");
+    }
 }
