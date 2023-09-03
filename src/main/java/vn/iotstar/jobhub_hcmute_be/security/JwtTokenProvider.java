@@ -28,8 +28,6 @@ public class JwtTokenProvider {
     private final String issuer = "Nhom 8 TLCN";
 
     private Key getSigningKey() {
-        // byte[] keyBytes = this.JWT_SECRET.getBytes();
-        // return Keys.hmacShaKeyFor(keyBytes);
         return secretKey;
     }
 
