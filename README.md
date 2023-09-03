@@ -29,12 +29,9 @@ Dự án này nhằm phát triển một ứng dụng giúp sinh viên trường
    ```bash
    git clone https://github.com/your-username/your-repo.git
    1.Chạy ứng dụng: Di chuyển vào thư mục dự án và chạy ứng dụng Spring Boot:
-
-   ```bash
-   Copy code
    cd your-project-folder
    mvn spring-boot:run
-- Ứng dụng sẽ chạy trên http://localhost:8080.
+
 
 ## Sử dụng
 - Truy cập ứng dụng: Mở trình duyệt web và truy cập http://localhost:8080 để bắt đầu sử dụng ứng dụng.
