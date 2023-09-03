@@ -27,7 +27,7 @@ Dự án này nhằm phát triển một ứng dụng giúp sinh viên trường
 2. **Sao chép dự án:** Clone dự án này từ kho lưu trữ GitHub:
 
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone [https://github.com/your-username/your-repo.git](https://github.com/HNToan7202/jobhub_hcmute_be.git)
    cd jobhub_hcmute_be
    mvn spring-boot:run
 
