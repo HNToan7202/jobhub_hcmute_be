@@ -33,6 +33,14 @@ public class Job implements Serializable {
     @Enumerated(EnumType.STRING)
     private JobType jobType;
 
+    //thơi gian làm việc trong 1 ngày
+    private String time;
+
+    //link dẫn qua trang web của công ty
+    private String link;
+
+    private String logo;
+
     private Integer quantity;
 
     @Column(columnDefinition = "Nvarchar(max)")
@@ -58,7 +66,7 @@ public class Job implements Serializable {
 
     private Date deadline;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
     //@JsonBackReference
     @ToString.Exclude
     private Position position;
@@ -73,7 +81,7 @@ public class Job implements Serializable {
     @ToString.Exclude
     private List<JobApply> jobApplies;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "job_skill", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     @JsonManagedReference
     private List<Skill> skills;

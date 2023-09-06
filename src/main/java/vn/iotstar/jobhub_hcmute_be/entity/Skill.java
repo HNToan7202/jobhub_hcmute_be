@@ -26,7 +26,7 @@ public class Skill implements Serializable {
     @ToString.Exclude
     private List<Resume> resumes;
 
-    @ManyToMany(mappedBy = "skills")
+    @ManyToMany(mappedBy = "skills", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     private List<Job> jobs;

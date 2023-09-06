@@ -69,7 +69,6 @@ public class User implements Serializable {
     @JsonBackReference
     private List<RefreshToken> refreshTokens;
 
-
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();

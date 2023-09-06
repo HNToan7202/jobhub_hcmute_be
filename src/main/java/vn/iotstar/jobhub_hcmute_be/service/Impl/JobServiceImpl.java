@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.JobDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
@@ -146,11 +148,15 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-
     @Override
     public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable){
         try {
+
             Page<Job> jobs = jobRepository.findAll(pageable);
+
+//            List<Job> jobList = jobs.getContent();
+//
+//            List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
 
             Map<String, Object> response = new HashMap<>();
             response.put("jobs", jobs.getContent());
@@ -176,10 +182,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId) {
+    public ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId, String avatarUrl) {
         try {
             Job job = new Job();
-
             job.setName(jobRequest.getName());
             job.setJobType(JobType.valueOf(jobRequest.getJobType()));
             job.setQuantity(jobRequest.getQuantity());
@@ -190,6 +195,8 @@ public class JobServiceImpl implements JobService {
             job.setLocation(jobRequest.getLocation());
             job.setDescription(jobRequest.getDescription());
             job.setDeadline(jobRequest.getDeadline());
+            job.setTime(jobRequest.getTime());
+            job.setLink(jobRequest.getLink());
 //            Position position = new Position();
 //            position.setName(jobRequest.getPositionName());
 //            job.setPosition(position);
@@ -201,6 +208,7 @@ public class JobServiceImpl implements JobService {
             } else {
                 Position newPosition = new Position();
                 newPosition.setName(jobRequest.getPositionName());
+                newPosition = positionRepository.save(newPosition);
                 job.setPosition(newPosition);
             }
             List<Skill> skills = new ArrayList<>();
@@ -219,6 +227,9 @@ public class JobServiceImpl implements JobService {
             }
             job.setSkills(skills);
             job.setIsActive(true);
+            if(avatarUrl != null){
+                job.setLogo(avatarUrl);
+            }
             Optional<Employer> optionalRecruiter = employerRepository.findById(recruiterId);
             if (optionalRecruiter.isPresent()) {
                 job.setEmployer(optionalRecruiter.get());

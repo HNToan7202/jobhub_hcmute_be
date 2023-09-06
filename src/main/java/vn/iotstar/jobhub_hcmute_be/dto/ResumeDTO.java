@@ -22,4 +22,6 @@ public class ResumeDTO implements Serializable {
     Date createAt;
     Date updateAt;
     Boolean isActive;
+
+    //List<ResumeUpload> resumeUploads;
 }

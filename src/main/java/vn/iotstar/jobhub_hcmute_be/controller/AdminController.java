@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
+
+import java.util.Objects;
 
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
@@ -45,7 +48,13 @@ public class AdminController {
     }
 
     @PostMapping("/accept-employer")
-    public ResponseEntity<?> acceptEmployer(@RequestBody EmployerRequest employerRequest) throws Exception {
+    public ResponseEntity<?> acceptEmployer(@RequestBody EmployerRequest employerRequest, BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()) {
+            throw new Exception(Objects.requireNonNull(bindingResult
+                            .getFieldError())
+                    .getDefaultMessage()
+            );
+        }
         return adminService.acceptEmployer(employerRequest.getEmployerId());
     }
 

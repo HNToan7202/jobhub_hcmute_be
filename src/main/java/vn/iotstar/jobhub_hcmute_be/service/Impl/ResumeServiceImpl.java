@@ -146,6 +146,7 @@ public class ResumeServiceImpl implements ResumeService {
             }
             BeanUtils.copyProperties(resumeDTO, resume);
             resume.setUpdateAt(new Date());
+            resume.setStudent(student);
             student = studentRepository.save(student);
             return ResponseEntity.status(200).body(GenericResponse.builder()
                     .success(true)
@@ -161,6 +162,61 @@ public class ResumeServiceImpl implements ResumeService {
                     .build());
             // Xử lý ngoại lệ nếu cần
         }
+
+    }
+
+    @Override
+    public ResponseEntity<?> getDetailResume(String studentId){
+        Optional<Student> opt = studentRepository.findById(studentId);
+
+        Student student = opt.get();
+        return ResponseEntity.status(200).body(GenericResponse.builder()
+                .success(true)
+                .message("Get Resume Successfully!")
+                .result(student.getResume())
+                .statusCode(HttpStatus.OK.value())
+                .build());
+    }
+
+
+    @Override
+    public ResponseEntity<?> deleteResume(String resumeId, String userId) throws IOException {
+
+        Optional<Student> opt = studentRepository.findById(userId);
+        if(!opt.isPresent()){
+            return ResponseEntity.status(404).body(GenericResponse.builder()
+                    .success(false)
+                    .message("User Not Found")
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .build());
+        }
+        Student student = opt.get();
+        Resume resume = student.getResume();
+        if(resume == null){
+            return ResponseEntity.status(404).body(GenericResponse.builder()
+                    .success(false)
+                    .message("Resume Not Found")
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .build());
+        }
+
+        List<ResumeUpload> resumeUploads = resume.getResumeUploads();
+        if(resumeUploads == null){
+            return ResponseEntity.status(404).body(GenericResponse.builder()
+                    .success(false)
+                    .message("Resume Not Found")
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .build());
+        }
+        //delete(cv);
+        return ResponseEntity.status(200)
+                .body(
+                        GenericResponse.builder()
+                                .success(true)
+                                .message("Delete Resume Success")
+                                .statusCode(200)
+                                .build()
+                );
 
     }
 }

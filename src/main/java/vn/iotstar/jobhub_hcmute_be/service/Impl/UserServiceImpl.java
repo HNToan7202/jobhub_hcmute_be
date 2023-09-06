@@ -266,6 +266,7 @@ public class UserServiceImpl implements UserService {
         user.setUserId(UUID.randomUUID().toString().split("-")[0]);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(roleRepository.findByName("STUDENT"));
+        user.setResume(new Resume());
         user = save(user);
         emailVerificationService.sendOtp(registerRequest.getEmail());
 

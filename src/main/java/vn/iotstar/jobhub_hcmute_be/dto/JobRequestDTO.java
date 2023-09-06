@@ -1,20 +1,21 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Value;
+import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class PostJobRequest {
+/**
+ * DTO for {@link vn.iotstar.jobhub_hcmute_be.entity.Job}
+ */
+@Value
+public class JobRequestDTO implements Serializable {
+
     @NotBlank(message = "Name cannot be blank")
     String name;
 
@@ -22,7 +23,7 @@ public class PostJobRequest {
     String jobType;
     String time;
     String link;
-    String logo;
+    //String logo;
     @Min(value = 1,message = "Min of quantity is 1")
     Integer quantity;
     String benefit;
@@ -36,4 +37,5 @@ public class PostJobRequest {
 
     @NotNull
     private List<String> skillsRequired;
+
 }

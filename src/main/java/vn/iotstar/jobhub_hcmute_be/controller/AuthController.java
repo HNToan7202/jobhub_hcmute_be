@@ -101,14 +101,6 @@ public class AuthController {
     public ResponseEntity<GenericResponse> signUpMail(
             @RequestBody @Valid RegisterRequest signUpMailDTO,
             BindingResult bindingResult) {
-//        if(!signUpMailDTO.isStudentEmail()){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body(GenericResponse.builder()
-//                            .success(false)
-//                            .message("Please use your HCMUTE email!")
-//                            .statusCode(HttpStatus.BAD_REQUEST.value())
-//                            .build());
-//        }
 
         if (bindingResult.hasErrors() ) {
             String errorMessage = Objects.requireNonNull(

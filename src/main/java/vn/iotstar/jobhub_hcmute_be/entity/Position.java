@@ -23,7 +23,7 @@ public class Position implements Serializable {
     @NotNull
     private String name;
 
-    @OneToMany(mappedBy = "position")
+    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     private List<Job> jobs;
