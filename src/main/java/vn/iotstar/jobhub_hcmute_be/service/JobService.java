@@ -16,6 +16,8 @@ public interface JobService {
 
     List<Job> findAll();
 
+    ResponseEntity<GenericResponse> getAlls();
+
     <S extends Job> S save(S entity);
 
     Optional<Job> findById(String s);

@@ -38,6 +38,7 @@ public class JobServiceImpl implements JobService {
     @Autowired
     SkillRepository skillRepository;
 
+
     @Override
     public <S extends Job> List<S> saveAll(Iterable<S> entities) {
         return jobRepository.saveAll(entities);
@@ -48,6 +49,24 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findAll();
     }
 
+    @Override
+    public ResponseEntity<GenericResponse> getAlls(){
+
+        List<Job> jobs = jobRepository.findAll();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("jobs", jobs);
+        response.put("total", jobs.size());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(GenericResponse.builder()
+                        .success(true)
+                        .message("Get jobs successfully!")
+                        .result(response)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+
+    }
     @Override
     public <S extends Job> S save(S entity) {
         return jobRepository.save(entity);

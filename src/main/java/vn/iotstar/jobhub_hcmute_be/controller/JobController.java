@@ -35,6 +35,11 @@ public class JobController {
         return jobService.getAllJobs(PageRequest.of(index,size));
     }
 
+    @GetMapping("/get-all")
+    public ResponseEntity<GenericResponse> getAllJob(){
+        return jobService.getAlls();
+    }
+
     @GetMapping("{employerId}/get-list-jobs")
     public ResponseEntity<?> getJobsByEmployer(@PathVariable("employerId") String id,
                                                @RequestParam(defaultValue = "0") int index,
