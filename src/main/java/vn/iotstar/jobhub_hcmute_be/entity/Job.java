@@ -26,6 +26,7 @@ public class Job implements Serializable {
     private String jobId;
 
     //Tên công việc
+    @Nationalized
     private String name;
 
     //private String jobTitle;

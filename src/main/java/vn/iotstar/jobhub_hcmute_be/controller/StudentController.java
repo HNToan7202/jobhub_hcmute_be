@@ -11,11 +11,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import vn.iotstar.jobhub_hcmute_be.dto.ApplyJobRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.ResumeDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
+import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
@@ -33,6 +35,9 @@ public class StudentController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    JobApplyService jobApplyService;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;

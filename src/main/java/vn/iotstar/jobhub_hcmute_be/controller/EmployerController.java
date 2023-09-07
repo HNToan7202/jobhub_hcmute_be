@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,8 @@ public class EmployerController {
     @Autowired
     JobService jobService;
     //@PreAuthorize("hasRole('EMPLOYER')")
+
+    @Transactional
     @PostMapping("/post-job")
     public ResponseEntity<?> addJob(@Valid @RequestBody PostJobRequest jobRequest, BindingResult bindingResult) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
