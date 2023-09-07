@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ApplyJobRequest {
     @NotNull(message = "jobType cannot be empty")
-    private String resumeId;
+    private String resumeLink;
 }

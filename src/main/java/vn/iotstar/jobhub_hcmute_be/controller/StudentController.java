@@ -69,6 +69,15 @@ public class StudentController {
         return resumeService.updateResume(resumeDTO,user.getUserId());
     }
 
+    @PostMapping("/{jobId}/apply-job")
+    public ResponseEntity<?> applyForJob(
+            @PathVariable("jobId") String jobId,
+            @RequestBody ApplyJobRequest request) {
+       UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Xử lý ứng tuyển vào công việc
+        return jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
+    }
+
     @PutMapping("/post-cv")
     public ResponseEntity<?> uploadResume(@ModelAttribute MultipartFile resumeFile) throws IOException {
 

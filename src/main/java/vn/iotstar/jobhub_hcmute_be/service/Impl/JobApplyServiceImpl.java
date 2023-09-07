@@ -11,14 +11,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
+import vn.iotstar.jobhub_hcmute_be.constant.State;
+import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
+import vn.iotstar.jobhub_hcmute_be.entity.ResumeUpload;
+import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -26,6 +32,12 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
     JobApplyRepository jobApplyRepository;
+
+    @Autowired
+    JobRepository jobRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     @Override
     public <S extends JobApply> List<S> saveAll(Iterable<S> entities) {
@@ -110,5 +122,80 @@ public class JobApplyServiceImpl implements JobApplyService {
     @Override
     public <S extends JobApply, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return jobApplyRepository.findBy(example, queryFunction);
+    }
+
+    @Override
+    public ResponseEntity<?> applyForJob(String userId, String jobId, String resumeLink) {
+
+        Optional<Job> optionalJob = jobRepository.findById(jobId);
+        if (!optionalJob.isPresent()) {
+            throw new NotFoundException("Job not found");
+        }
+        Job job = optionalJob.get();
+        // Kiểm tra xem công việc còn hạn apply hay không
+        Date expirationDate = job.getDeadline();
+        Date currentDate = new Date();
+        if (job.getIsActive() && expirationDate.before(currentDate)) {
+            // Nếu công việc đang active nhưng đã hết hạn apply, set trạng thái isActive thành false
+            job.setIsActive(false);
+            jobRepository.save(job);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Job application has expired");
+        } else if (!job.getIsActive()) {
+            // Nếu công việc đã không còn active, trả về thông báo hết hạn với status code 410 (Gone)
+            return ResponseEntity.status(HttpStatus.GONE).body("Job application has expired");
+        }
+
+        // Tìm ứng viên trong cơ sở dữ liệu
+        Optional<Student> optionalCandidate = studentRepository.findById(userId);
+        if (!optionalCandidate.isPresent()) {
+            throw new NotFoundException("Candidate not found");
+        }
+        //Check xem ứng viên đã apply vào job hay chưa
+        Student candidate = optionalCandidate.get();
+        if(jobApplyRepository.findByStudentAndJob(candidate,job) != null){
+            return ResponseEntity.status(409)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Candidate has already applied to this job.")
+                            .statusCode(409)
+                            .build());
+        }
+
+        List<ResumeUpload> resumeUploadList = optionalCandidate.get().getResume().getResumeUploads();
+        for (ResumeUpload resumeUpload : resumeUploadList) {
+            if(resumeUpload.getLinkUpload().equals(resumeLink)){
+                return ResponseEntity.status(409)
+                        .body(GenericResponse.builder()
+                                .success(false)
+                                .message("Cannot Found CV Link.")
+                                .statusCode(409)
+                                .build());
+            }
+        }
+
+//        // Kiểm tra xem CV có tồn tại trong database không
+//        Optional<ResumeUpload> optionalResume = resumeRepository.findById(resumeId);
+//        if (!optionalResume.isPresent()) {
+//            throw new NotFoundException("Resume not found");
+//        }
+//
+//        Resume resume = optionalResume.get();
+//        // Tạo đơn ứng tuyển
+        JobApply application = new JobApply();
+        application.setJob(job);
+        application.setState(State.NOT_RECEIVED);
+        application.setStudent(candidate);
+        application.setResumeUpoad(resumeLink);
+        //Ánh xạ những thứ còn lại của candidate qua cho JobApply
+        BeanUtils.copyProperties(candidate, application);
+        // Lưu đơn ứng tuyển vào database
+        JobApply jobApply = jobApplyRepository.save(application);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(GenericResponse.builder()
+                        .success(true)
+                        .message("Apply Successful!")
+                        .result(jobApply)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
     }
 }
