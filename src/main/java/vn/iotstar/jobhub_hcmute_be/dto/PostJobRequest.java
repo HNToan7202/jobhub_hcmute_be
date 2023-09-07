@@ -9,11 +9,7 @@ import lombok.*;
 import java.util.Date;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class PostJobRequest {
     @NotBlank(message = "Name cannot be blank")
     String name;

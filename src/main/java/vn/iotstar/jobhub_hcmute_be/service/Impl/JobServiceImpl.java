@@ -147,6 +147,15 @@ public class JobServiceImpl implements JobService {
                             .build());
         }
     }
+    public List<JobDTO> convertJobToJobDTO(List<Job> jobs){
+        List<JobDTO> jobDTOs = new ArrayList<>();
+        for(Job job : jobs){
+            JobDTO jobDTO = new JobDTO();
+            BeanUtils.copyProperties(job, jobDTO);
+            jobDTOs.add(jobDTO);
+        }
+        return jobDTOs;
+    }
 
     @Override
     public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable){
@@ -154,12 +163,12 @@ public class JobServiceImpl implements JobService {
 
             Page<Job> jobs = jobRepository.findAll(pageable);
 
-//            List<Job> jobList = jobs.getContent();
-//
-//            List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
+            List<Job> jobList = jobs.getContent();
+
+            List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("jobs", jobs.getContent());
+            response.put("jobs", jobDTOs);
             response.put("currentPage", jobs.getNumber());
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
@@ -197,6 +206,8 @@ public class JobServiceImpl implements JobService {
             job.setDeadline(jobRequest.getDeadline());
             job.setTime(jobRequest.getTime());
             job.setLink(jobRequest.getLink());
+
+            //Check trước dùng beanutils để ánh xạ
 //            Position position = new Position();
 //            position.setName(jobRequest.getPositionName());
 //            job.setPosition(position);
@@ -222,6 +233,7 @@ public class JobServiceImpl implements JobService {
                 } else {
                     Skill newSkill = new Skill();
                     newSkill.setName(skillName);
+                    newSkill = skillRepository.save(newSkill);
                     skills.add(newSkill);
                 }
             }

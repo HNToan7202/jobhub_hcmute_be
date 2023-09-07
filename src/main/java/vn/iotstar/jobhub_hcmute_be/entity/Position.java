@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "position")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Position implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,7 +25,7 @@ public class Position implements Serializable {
     @NotNull
     private String name;
 
-    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY)
     @JsonBackReference
     @ToString.Exclude
     private List<Job> jobs;
