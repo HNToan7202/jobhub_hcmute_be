@@ -25,7 +25,7 @@ public class Position implements Serializable {
     @NotNull
     private String name;
 
-    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "position", cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     private List<Job> jobs;

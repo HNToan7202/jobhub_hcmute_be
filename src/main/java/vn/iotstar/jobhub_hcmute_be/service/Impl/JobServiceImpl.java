@@ -238,7 +238,7 @@ public class JobServiceImpl implements JobService {
             } else {
                 Position newPosition = new Position();
                 newPosition.setName(jobRequest.getPositionName());
-                newPosition = positionRepository.save(newPosition);
+                //newPosition = positionRepository.save(newPosition);
                 job.setPosition(newPosition);
             }
             List<Skill> skills = new ArrayList<>();
@@ -252,7 +252,7 @@ public class JobServiceImpl implements JobService {
                 } else {
                     Skill newSkill = new Skill();
                     newSkill.setName(skillName);
-                    newSkill = skillRepository.save(newSkill);
+                    //newSkill = skillRepository.save(newSkill);
                     skills.add(newSkill);
                 }
             }
