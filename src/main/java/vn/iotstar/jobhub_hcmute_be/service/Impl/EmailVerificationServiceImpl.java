@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import org.springframework.scheduling.annotation.Async;
 import vn.iotstar.jobhub_hcmute_be.entity.EmailVerification;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.repository.EmailVerificationRepository;
@@ -35,6 +36,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private UserRepository userRepository;
     @Autowired
     TemplateEngine templateEngine;
+
 
     @Override
     public String sendOtp(String email) {

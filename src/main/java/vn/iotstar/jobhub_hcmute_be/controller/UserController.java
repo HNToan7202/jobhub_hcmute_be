@@ -113,7 +113,7 @@ public class UserController {
     }
 
     @PutMapping("/change-avatar")
-    public ResponseEntity<?> uploadAvatar(@RequestParam MultipartFile imageFile,
+    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile,
                                           @RequestHeader("Authorization") String token)
             throws IOException {
 

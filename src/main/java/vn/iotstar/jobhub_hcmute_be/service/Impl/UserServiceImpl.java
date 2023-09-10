@@ -263,12 +263,12 @@ public class UserServiceImpl implements UserService {
         Student user = new Student();
         user.setFullName(registerRequest.getFullName());
         user.setEmail(registerRequest.getEmail());
-        user.setUserId(UUID.randomUUID().toString().split("-")[0]);
+        //user.setUserId(UUID.randomUUID().toString().split("-")[0]);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(roleRepository.findByName("STUDENT"));
-        user.setResume(new Resume());
+        //user.setResume(new Resume());
         user = save(user);
-        emailVerificationService.sendOtp(registerRequest.getEmail());
+        emailVerificationService.sendOtp(user.getEmail());
 
         return ResponseEntity.ok(
                 GenericResponse.builder()
@@ -363,7 +363,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> changeAvatar(String userId, MultipartFile imageFile) throws IOException {
+    public ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException {
 
         User user = findById(userId).get();
         String avatarOld = user.getAvatar();

@@ -53,7 +53,7 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> validateVerificationAccount(String token);
 
-    ResponseEntity<?> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
+    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 
     ResponseEntity<Object> updateProfile(String userId, UserUpdateRequest request) throws Exception;
 
