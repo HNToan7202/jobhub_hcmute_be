@@ -11,12 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.*;
 import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
@@ -59,6 +56,12 @@ public class AuthController {
         //Xử lý login ở đây
         return userService.userLogin(loginDTO);
 
+    }
+
+    @PostMapping("/refresh-access-token")
+    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
+        String accessToken = authorizationHeader.substring(7);
+        return refreshTokenService.refreshAccessToken(accessToken);
     }
 
     @PostMapping("/logout")
@@ -123,7 +126,7 @@ public class AuthController {
             @RequestBody @Valid EmployerRegisterDTO employerRegisterDTO,
             BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors() ) {
+        if (bindingResult.hasErrors()) {
             String errorMessage = Objects.requireNonNull(
                     bindingResult.getFieldError()).getDefaultMessage();
 

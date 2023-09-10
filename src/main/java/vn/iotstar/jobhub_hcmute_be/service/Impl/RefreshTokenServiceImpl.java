@@ -11,10 +11,13 @@ import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.repository.RefreshTokenRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
+import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetailService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -37,12 +40,70 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 
     @Override
-    public void revokeRefreshToken(String userId){
-        try{
+    public ResponseEntity<GenericResponse> refreshAccessToken(String accesstoken) {
+        try {
+            String userId = jwtTokenProvider.getUserIdFromJwt(accesstoken);
+            if (userId.isEmpty()) {
+                return ResponseEntity.status(401)
+                        .body(GenericResponse.builder()
+                                .success(false)
+                                .message("Unauthorized. Please login again!")
+                                .result("")
+                                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                                .build());
+            }
             Optional<User> optionalUser = userRepository.findById(userId);
-            if(optionalUser.isPresent()&&optionalUser.get().isActive()) {
+            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
+                //List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
+                Optional<RefreshToken> token = refreshTokenRepository.findByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
+                if (token.isPresent() && jwtTokenProvider.validateToken(token.get().getToken())) {
+//                    return ResponseEntity.status(404)
+//                            .body(GenericResponse.builder()
+//                                    .success(false)
+//                                    .message("RefreshToken is not present. Please login again!")
+//                                    .result("")
+//                                    .statusCode(HttpStatus.NOT_FOUND.value())
+//                                    .build());
+                    UserDetail userDetail = (UserDetail) userDetailService.loadUserByUserId(jwtTokenProvider.getUserIdFromRefreshToken(token.get().getToken()));
+                    String accessToken = jwtTokenProvider.generateAccessToken(userDetail);
+                    Map<String, String> resultMap = new HashMap<>();
+                    resultMap.put("accessToken", accessToken);
+                    //resultMap.put("refreshToken", refreshToken);
+                    return ResponseEntity.status(200)
+                            .body(GenericResponse.builder()
+                                    .success(true)
+                                    .message("")
+                                    .result(resultMap)
+                                    .statusCode(HttpStatus.OK.value())
+                                    .build());
+                }
+            }
+            return ResponseEntity.status(401)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Unauthorized. Please login again!")
+                            .result("")
+                            .statusCode(HttpStatus.UNAUTHORIZED.value())
+                            .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .result("")
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .build());
+        }
+    }
+
+
+    @Override
+    public void revokeRefreshToken(String userId) {
+        try {
+            Optional<User> optionalUser = userRepository.findById(userId);
+            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
                 List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
-                if(refreshTokens.isEmpty()){
+                if (refreshTokens.isEmpty()) {
                     return;
                 }
                 refreshTokens.forEach(token -> {
@@ -51,18 +112,18 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 });
                 refreshTokenRepository.saveAll(refreshTokens);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public ResponseEntity<?> logout(String userId){
-        try{
+    public ResponseEntity<?> logout(String userId) {
+        try {
             Optional<User> optionalUser = userRepository.findById(userId);
-            if(optionalUser.isPresent()&&optionalUser.get().isActive()) {
+            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
                 Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByUserAndExpiredIsFalseAndRevokedIsFalse(optionalUser.get());
-                if(optionalRefreshToken.isPresent()){
+                if (optionalRefreshToken.isPresent()) {
                     optionalRefreshToken.get().setRevoked(true);
                     optionalRefreshToken.get().setExpired(true);
                     refreshTokenRepository.save(optionalRefreshToken.get());
@@ -91,7 +152,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                             .statusCode(HttpStatus.UNAUTHORIZED.value())
                             .build());
 
-        }catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(GenericResponse.builder()
                             .success(false)

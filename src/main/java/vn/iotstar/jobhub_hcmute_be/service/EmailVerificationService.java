@@ -1,15 +1,20 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import vn.iotstar.jobhub_hcmute_be.entity.EmailVerification;
 
 import java.util.Optional;
 
 public interface EmailVerificationService {
+
+    @Async
     String sendOtp(String email);
 
+    @Async
     String sendOtpEmployer(String email, String fullname);
 
+    @Async
     boolean verifyOtp(String email, String otp);
 
     String generateOtp();

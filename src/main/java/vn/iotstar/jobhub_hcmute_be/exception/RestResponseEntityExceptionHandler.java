@@ -127,6 +127,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(genericResponse,HttpStatus.UNAUTHORIZED);
     }
 
+    // AccessDenied result Forbiden 403
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         GenericResponse genericResponse = GenericResponse.builder()
