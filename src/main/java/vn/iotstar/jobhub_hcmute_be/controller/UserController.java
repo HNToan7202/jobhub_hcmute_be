@@ -53,7 +53,6 @@ public class UserController {
 
     @GetMapping("/profile")
     @Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
-    //@SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<GenericResponse> getProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -124,7 +123,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('STUDENT')")
     @PutMapping("/update-profile")
-    public ResponseEntity<Object> updateUser(
+    public ResponseEntity<GenericResponse> update(
             @RequestBody @Valid UserUpdateRequest request,
             @RequestHeader("Authorization") String authorizationHeader,
             BindingResult bindingResult) throws Exception {
@@ -137,7 +136,6 @@ public class UserController {
 
         String token = authorizationHeader.substring(7);
         String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
-
         return userService.updateProfile(userIdFromToken, request);
     }
 

@@ -136,4 +136,5 @@ public class StudentController {
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
         return resumeService.getDetailResume(user.getUserId());
     }
+
 }

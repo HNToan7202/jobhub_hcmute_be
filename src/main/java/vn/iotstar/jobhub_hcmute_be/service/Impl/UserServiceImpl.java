@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
+import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
@@ -386,14 +387,29 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ResponseEntity<Object> updateProfile(String userId, UserUpdateRequest request) throws Exception {
+    public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {
         Optional<User> user = findById(userId);
+        String phone = "";
         if (user.isEmpty())
             throw new Exception("User doesn't exist");
 
-        if (request.getDateOfBirth().after(new Date()))
-            throw new Exception("Invalid date of birth");
+//        if (request.getDateOfBirth().after(new Date()))
+//            throw new Exception("Invalid date of birth");
 
+        //Kiểm tra format của số điện thoại đúng định dạng của việt nam
+//        if (!request.getPhone().matches("^(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})$"))
+//            throw new Exception("Invalid phone number");
+        //Chỉ 1 định dạng duy nhất là 84 không có số 0 -> nhập 0 -> 84
+       if (request.getPhone().startsWith("0"))
+            phone = "84" + request.getPhone().substring(1);
+        if(!phone.isEmpty()){
+            Optional<User> optional = userRepository.findByPhoneAndIsActiveIsTrue(phone);
+            if(optional.isPresent() && !optional.get().getUserId().equals(userId))
+                throw new Exception("Phone number already in use");
+        }
+
+        user.get().setGender(Gender.valueOf(String.valueOf(request.getGender())));
+        user.get().setPhone(phone);
         user.get().setFullName(request.getFullName());
         user.get().setDateOfBirth(request.getDateOfBirth());
         user.get().setAddress(request.getAddress());
@@ -404,85 +420,11 @@ public class UserServiceImpl implements UserService {
                 GenericResponse.builder()
                         .success(true)
                         .message("Update successful")
-                        .result(new UserProfileResponse(user.get()))
+                        .result(user.get())
                         .statusCode(200)
                         .build()
         );
     }
-
-//    @Override
-//    public ResponseEntity<GenericResponse> getAccounts(
-//            String name,
-//            String role,
-//            String phone,
-//            String email,
-//            boolean blackList,
-//            int size,
-//            int page
-//    ) throws Exception {
-//        Pageable pageable = PageRequest.of(page, size);
-//        String decodedName = StringEscapeUtils.unescapeHtml4(name.replace("&amp;", "&"));
-//        Page<User> userPage;
-//        if (blackList)
-//            userPage = getPageUserByBlacklist(decodedName, phone, email, role, pageable);
-//        else {
-//            if (decodedName.isEmpty())
-//                userPage = userRepository.searchUserByPhoneContainingAndEmailContainingAndIsActiveIsTrueAndRole_NameContaining(
-//                        phone,
-//                        email,
-//                        role,
-//                        pageable
-//                );
-//            else
-//                userPage = userRepository.searchUserByNamePhoneEmailAndRole(
-//                        decodedName,
-//                        phone,
-//                        email,
-//                        role,
-//                        pageable
-//                );
-//        }
-//
-//        List<UserProfileResponse> userProfileResponses = new ArrayList<>();
-//        for (User user : userPage.getContent())
-//            userProfileResponses.add(new UserProfileResponse(user));
-//
-//        PaginationResponse response = PaginationResponse
-//                .builder()
-//                .pageNumber(page + 1)
-//                .pageSize(size)
-//                .totalPages(userPage.getTotalPages())
-//                .content(userProfileResponses)
-//                .build();
-//
-//        return ResponseEntity.ok(GenericResponse.builder()
-//                .message("successful")
-//                .result(response)
-//                .statusCode(200)
-//                .success(true)
-//                .build());
-//    }
-//
-//    private Page<User> getPageUserByBlacklist(String name, String phone, String email, String role, Pageable pageable) {
-//        Page<BlackList> blackListPage = blackListRepository
-//                .findBlackListsByCandidate_FullNameContainingAndCandidate_PhoneContainingAndCandidate_EmailContainingAndCandidate_IsActiveIsTrueAndCandidate_Role_NameContaining(
-//                        name,
-//                        phone,
-//                        email,
-//                        role,
-//                        pageable
-//                );
-//
-//        List<User> userProfileResponses = new ArrayList<>();
-//        for (BlackList blackList : blackListPage.getContent())
-//            userProfileResponses.add(blackList.getCandidate());
-//
-//        return new PageImpl<>(
-//                userProfileResponses,
-//                blackListPage.getPageable(),
-//                blackListPage.getTotalElements()
-//        );
-//    }
 
 }
 
