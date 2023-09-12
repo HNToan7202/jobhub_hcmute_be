@@ -23,7 +23,7 @@ public class UserUpdateRequest {
 
     private Date dateOfBirth;
 
-    @Pattern(regexp = "^(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})$", message = "Invalid phone number")
+    @Pattern(regexp = "(84|0[0-9])+([0-9]{8})\\b",message = "Invalid phone number")
     private String phone;
 
     private Gender gender;
