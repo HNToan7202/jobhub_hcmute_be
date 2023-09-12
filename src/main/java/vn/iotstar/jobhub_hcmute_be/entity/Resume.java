@@ -20,19 +20,43 @@ public class Resume implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String resumeId;
 
-    private String education;
+    //private String education;
 
-    private String experience;
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Education> educations;
 
-    private String certificate;
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Experience> experiences;
 
-    private String prize;
 
-    private String course;
+    //private String experience;
 
-    private String project;
+//    private String certificate;
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Certificate> certificates;
 
-    private String socialActivity;
+    //private String prize;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Prize> prizes;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Course> courses;
+
+    //private String course;
+
+    //private String project;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Project> projects;
+
+    //private String socialActivity;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<SocialActivity> socialActivities;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    private List<Social> socials;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JsonBackReference

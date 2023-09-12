@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.ResumeDTO;
-import vn.iotstar.jobhub_hcmute_be.entity.Resume;
-import vn.iotstar.jobhub_hcmute_be.entity.ResumeUpload;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
+import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.repository.ResumeRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
@@ -145,6 +143,47 @@ public class ResumeServiceImpl implements ResumeService {
                 student.setResume(resume);
             }
             BeanUtils.copyProperties(resumeDTO, resume);
+            //r
+            Education education = resumeDTO.getEducation();
+            List<Education> educations = resume.getEducations();
+            educations.add(education);
+            resume.setEducations(educations);
+
+            Experience experience = resumeDTO.getExperience();
+            List<Experience> experiences = resume.getExperiences();
+            experiences.add(experience);
+            resume.setExperiences(experiences);
+
+            Certificate certificate = resumeDTO.getCertificate();
+            List<Certificate> certificates = resume.getCertificates();
+            certificates.add(certificate);
+            resume.setCertificates(certificates);
+
+            Prize prize = resumeDTO.getPrize();
+            List<Prize> prizes = resume.getPrizes();
+            prizes.add(prize);
+            resume.setPrizes(prizes);
+
+            Course course = resumeDTO.getCourse();
+            List<Course> courses = resume.getCourses();
+            courses.add(course);
+            resume.setCourses(courses);
+
+            Project project = resumeDTO.getProject();
+            List<Project> projects = resume.getProjects();
+            projects.add(project);
+            resume.setProjects(projects);
+
+            SocialActivity socialActivity = resumeDTO.getSocialActivity();
+            List<SocialActivity> socialActivities = resume.getSocialActivities();
+            socialActivities.add(socialActivity);
+            resume.setSocialActivities(socialActivities);
+
+            Social social = resumeDTO.getSocial();
+            List<Social> socials = resume.getSocials();
+            socials.add(social);
+            resume.setSocials(socials);
+
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
             student = studentRepository.save(student);
