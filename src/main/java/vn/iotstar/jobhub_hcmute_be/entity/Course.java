@@ -13,11 +13,10 @@ import org.hibernate.annotations.Nationalized;
 public class Course {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     String title;
-
 
     String location;
 
@@ -28,7 +27,8 @@ public class Course {
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonBackReference
+    @ToString.Exclude
     private Resume resume;
 
 }

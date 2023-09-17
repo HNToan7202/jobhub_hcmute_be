@@ -14,8 +14,8 @@ public class Education {
 
     //Id identify the primary key
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     String title;
 
@@ -28,7 +28,7 @@ public class Education {
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonBackReference
+    @ToString.Exclude
     private Resume resume;
 }

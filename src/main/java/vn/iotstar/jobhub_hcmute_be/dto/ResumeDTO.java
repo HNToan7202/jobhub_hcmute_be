@@ -1,7 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
 import lombok.Data;
-import vn.iotstar.jobhub_hcmute_be.entity.*;
 
 import java.util.Date;
 import java.util.List;

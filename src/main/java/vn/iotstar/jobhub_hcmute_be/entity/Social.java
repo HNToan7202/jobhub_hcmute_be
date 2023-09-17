@@ -12,15 +12,16 @@ import org.hibernate.annotations.Nationalized;
 @Data
 public class Social {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     private String name;
 
     private String socialUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonBackReference
+    @ToString.Exclude
     private Resume resume;
 
 }

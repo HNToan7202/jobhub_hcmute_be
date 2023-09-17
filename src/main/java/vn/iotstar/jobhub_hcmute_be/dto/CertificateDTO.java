@@ -1,4 +1,4 @@
-package vn.iotstar.jobhub_hcmute_be.entity;
+package vn.iotstar.jobhub_hcmute_be.dto;
 
 import lombok.Data;
 

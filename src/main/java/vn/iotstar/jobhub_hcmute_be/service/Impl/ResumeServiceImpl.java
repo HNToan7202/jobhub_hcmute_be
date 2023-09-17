@@ -123,6 +123,77 @@ public class ResumeServiceImpl implements ResumeService {
                 .build());
     }
 
+    public Resume convertResumeDtoToResume(ResumeDTO resumeDTO, Resume resume1){
+        Resume resume = new Resume();
+        List<Education> educations = new ArrayList<>();
+        for(int i = 0; i < resumeDTO.getEducations().size(); i++){
+            Education education = new Education();
+            BeanUtils.copyProperties(resumeDTO.getEducations().get(i), education);
+            education.setResume(resume1);
+            educations.add(education);
+        }
+        List<Experience> experiences = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getExperiences().size(); i++){
+            Experience experience = new Experience();
+            BeanUtils.copyProperties(resumeDTO.getExperiences().get(i), experience);
+            experience.setResume(resume1);
+            experiences.add(experience);
+        }
+        List<Certificate> certificates = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getCertificates().size(); i++){
+            Certificate certificate = new Certificate();
+            BeanUtils.copyProperties(resumeDTO.getCertificates().get(i), certificate);
+            certificate.setResume(resume1);
+            certificates.add(certificate);
+        }
+        List<Prize> prizes = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getPrizes().size(); i++){
+            Prize prize = new Prize();
+            BeanUtils.copyProperties(resumeDTO.getPrizes().get(i), prize);
+            prize.setResume(resume1);
+            prizes.add(prize);
+        }
+        List<Course> courses = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getCourses().size(); i++){
+            Course course = new Course();
+            BeanUtils.copyProperties(resumeDTO.getCourses().get(i), course);
+            course.setResume(resume1);
+            courses.add(course);
+        }
+        List<Project> projects = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getProjects().size(); i++){
+            Project project = new Project();
+            BeanUtils.copyProperties(resumeDTO.getProjects().get(i), project);
+            project.setResume(resume1);
+            projects.add(project);
+        }
+        List<SocialActivity> socialActivities = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getSocialActivities().size(); i++){
+            SocialActivity socialActivity = new SocialActivity();
+            BeanUtils.copyProperties(resumeDTO.getSocialActivities().get(i), socialActivity);
+            socialActivity.setResume(resume1);
+            socialActivities.add(socialActivity);
+        }
+        List<Social> socials = new ArrayList<>();
+        for (int i = 0; i < resumeDTO.getSocials().size(); i++){
+            Social social = new Social();
+            BeanUtils.copyProperties(resumeDTO.getSocials().get(i), social);
+            social.setResume(resume1);
+            socials.add(social);
+        }
+        resume.setEducations(educations);
+        resume.setExperiences(experiences);
+        resume.setCertificates(certificates);
+        resume.setPrizes(prizes);
+        resume.setCourses(courses);
+        resume.setProjects(projects);
+        resume.setSocialActivities(socialActivities);
+        resume.setSocials(socials);
+        resume.setCreateAt(new Date());
+        resume.setUpdateAt(new Date());
+        return resume;
+    }
+
     @Override
     public ResponseEntity<?> updateResume(ResumeDTO resumeDTO, String studentId){
         Optional<Student> opt = studentRepository.findById(studentId);
@@ -143,42 +214,8 @@ public class ResumeServiceImpl implements ResumeService {
                 student.setResume(resume);
             }
 
-            List<Education> educations = new ArrayList<>();
-            for(int i = 0; i < resumeDTO.getEducations().size(); i++){
-                Education education = new Education();
-                BeanUtils.copyProperties(resumeDTO.getEducations().get(i), education);
-                educations.add(education);
-            }
-            //BeanUtils.copyProperties(educations, resumeDTO.getEducations());
-            resume.setEducations(educations);
-
-            List<Experience> experiences = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getExperiences(), experiences);
-            resume.setExperiences(experiences);
-
-            List<Certificate> certificates = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getCertificates(), certificates);
-            resume.setCertificates(certificates);
-
-            List<Prize> prizes = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getPrizes(), prizes);
-            resume.setPrizes(prizes);
-
-            List<Course> courses = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getCourses(), courses);
-            resume.setCourses(courses);
-
-            List<Project> projects = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getProjects(), projects);
-            resume.setProjects(projects);
-
-            List<SocialActivity> socialActivities = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getSocialActivities(), socialActivities);
-            resume.setSocialActivities(socialActivities);
-
-            List<Social> socials = new ArrayList<>();
-            BeanUtils.copyProperties(resumeDTO.getSocials(), socials);
-            resume.setSocials(socials);
+            Resume resume1 = convertResumeDtoToResume(resumeDTO, resume);
+            BeanUtils.copyProperties(resume1, resume);
 
             resume.setUpdateAt(new Date());
             resume.setStudent(student);

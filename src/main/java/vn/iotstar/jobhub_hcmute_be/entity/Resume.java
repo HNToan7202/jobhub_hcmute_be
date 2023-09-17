@@ -22,10 +22,16 @@ public class Resume implements Serializable {
 
     //private String education;
 
+    //@OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Education> educations;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Experience> experiences;
 
 
@@ -33,14 +39,20 @@ public class Resume implements Serializable {
 
 //    private String certificate;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Certificate> certificates;
 
     //private String prize;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Prize> prizes;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Course> courses;
 
     //private String course;
@@ -48,14 +60,20 @@ public class Resume implements Serializable {
     //private String project;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Project> projects;
 
     //private String socialActivity;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<SocialActivity> socialActivities;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
+    //@JsonBackReference
+    @ToString.Exclude
     private List<Social> socials;
 
     @OneToOne(fetch = FetchType.EAGER)

@@ -73,6 +73,8 @@ public class StudentController {
         return resumeService.updateResume(resumeDTO,user.getUserId());
     }
 
+
+
     @PostMapping("/{jobId}/apply-job")
     public ResponseEntity<?> applyForJob(
             @PathVariable("jobId") String jobId,
