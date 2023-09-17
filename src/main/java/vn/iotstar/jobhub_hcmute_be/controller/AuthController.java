@@ -55,13 +55,18 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         //Xử lý login ở đây
         return userService.userLogin(loginDTO);
-
     }
 
+//    @PostMapping("/refresh-access-token")
+//    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Authorization") String refreshToken) {
+//        String refresh_Token = refreshToken.substring(7);
+//        return refreshTokenService.refreshAccessToken(refresh_Token);
+//    }
+
     @PostMapping("/refresh-access-token")
-    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
-        String accessToken = authorizationHeader.substring(7);
-        return refreshTokenService.refreshAccessToken(accessToken);
+    public ResponseEntity<?> refreshAccessToken(@RequestBody TokenRequest tokenRequest) {
+        String refreshToken = tokenRequest.getRefreshToken();
+        return refreshTokenService.refreshAccessToken(refreshToken);
     }
 
     @PostMapping("/logout")

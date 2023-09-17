@@ -1,28 +1,26 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
-import lombok.Value;
+import lombok.Data;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 /**
  * DTO for {@link vn.iotstar.jobhub_hcmute_be.entity.Resume}
  */
-@Value
-public class ResumeDTO implements Serializable {
-    Education education;
-    Experience experience;
-    Certificate certificate;
-    Prize prize;
-    Course course;
-    Project project;
-    SocialActivity socialActivity;
-    Social social;
+@Data
+public class ResumeDTO{
+    List<EducationDTO> educations;
+    List<ExperienceDTO> experiences;
+    List<CertificateDTO> certificates;
+    List<PrizeDTO> prizes;
+    List<CourseDTO> courses;
+    List<ProjectDTO> projects;
+    List<SocialActivityDTO> socialActivities;
+    List<SocialDTO> socials;
     Date createAt;
     Date updateAt;
     Boolean isActive;
-
     //List<ResumeUpload> resumeUploads;
 }

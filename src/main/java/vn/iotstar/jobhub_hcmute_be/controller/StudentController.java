@@ -45,6 +45,7 @@ public class StudentController {
     private JwtTokenProvider jwtTokenProvider;
 
     @Procedure("application/json")
+    @ResponseBody
     @PostMapping("{studentId}/update-resume")
     public ResponseEntity<?> updateResume(@RequestBody ResumeDTO resumeDTO,
                                           @RequestHeader("Authorization") String authorizationHeader,
