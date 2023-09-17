@@ -1,6 +1,8 @@
 package vn.iotstar.jobhub_hcmute_be.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -26,7 +28,7 @@ public class Education {
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonBackReference
-    @ToString.Exclude
     private Resume resume;
 }

@@ -142,50 +142,47 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setUpdateAt(new Date());
                 student.setResume(resume);
             }
-            BeanUtils.copyProperties(resumeDTO, resume);
-            //r
-            Education education = resumeDTO.getEducation();
-            List<Education> educations = resume.getEducations();
-            educations.add(education);
+
+            List<Education> educations = new ArrayList<>();
+            for(int i = 0; i < resumeDTO.getEducations().size(); i++){
+                Education education = new Education();
+                BeanUtils.copyProperties(resumeDTO.getEducations().get(i), education);
+                educations.add(education);
+            }
+            //BeanUtils.copyProperties(educations, resumeDTO.getEducations());
             resume.setEducations(educations);
 
-            Experience experience = resumeDTO.getExperience();
-            List<Experience> experiences = resume.getExperiences();
-            experiences.add(experience);
+            List<Experience> experiences = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getExperiences(), experiences);
             resume.setExperiences(experiences);
 
-            Certificate certificate = resumeDTO.getCertificate();
-            List<Certificate> certificates = resume.getCertificates();
-            certificates.add(certificate);
+            List<Certificate> certificates = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getCertificates(), certificates);
             resume.setCertificates(certificates);
 
-            Prize prize = resumeDTO.getPrize();
-            List<Prize> prizes = resume.getPrizes();
-            prizes.add(prize);
+            List<Prize> prizes = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getPrizes(), prizes);
             resume.setPrizes(prizes);
 
-            Course course = resumeDTO.getCourse();
-            List<Course> courses = resume.getCourses();
-            courses.add(course);
+            List<Course> courses = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getCourses(), courses);
             resume.setCourses(courses);
 
-            Project project = resumeDTO.getProject();
-            List<Project> projects = resume.getProjects();
-            projects.add(project);
+            List<Project> projects = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getProjects(), projects);
             resume.setProjects(projects);
 
-            SocialActivity socialActivity = resumeDTO.getSocialActivity();
-            List<SocialActivity> socialActivities = resume.getSocialActivities();
-            socialActivities.add(socialActivity);
+            List<SocialActivity> socialActivities = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getSocialActivities(), socialActivities);
             resume.setSocialActivities(socialActivities);
 
-            Social social = resumeDTO.getSocial();
-            List<Social> socials = resume.getSocials();
-            socials.add(social);
+            List<Social> socials = new ArrayList<>();
+            BeanUtils.copyProperties(resumeDTO.getSocials(), socials);
             resume.setSocials(socials);
 
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
+
             student = studentRepository.save(student);
             return ResponseEntity.status(200).body(GenericResponse.builder()
                     .success(true)

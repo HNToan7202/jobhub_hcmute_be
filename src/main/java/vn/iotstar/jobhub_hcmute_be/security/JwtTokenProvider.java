@@ -20,7 +20,7 @@ public class JwtTokenProvider {
     @Autowired
     UserRepository userRepository;
 
-    private final Long JWT_ACCESS_EXPIRATION = 3600000L;
+    private final Long JWT_ACCESS_EXPIRATION = 36000000L;
     private final Long JWT_REFRESH_EXPIRATION = 604800000L;
     //Sau 1 ngay token se het han
 

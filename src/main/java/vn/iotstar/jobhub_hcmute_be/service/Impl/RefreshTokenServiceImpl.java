@@ -40,9 +40,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 
     @Override
-    public ResponseEntity<GenericResponse> refreshAccessToken(String accesstoken) {
+    public ResponseEntity<GenericResponse> refreshAccessToken(String refreshToken) {
         try {
-            String userId = jwtTokenProvider.getUserIdFromJwt(accesstoken);
+            String userId = jwtTokenProvider.getUserIdFromRefreshToken(refreshToken);
             if (userId.isEmpty()) {
                 return ResponseEntity.status(401)
                         .body(GenericResponse.builder()
@@ -54,16 +54,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             }
             Optional<User> optionalUser = userRepository.findById(userId);
             if (optionalUser.isPresent() && optionalUser.get().isActive()) {
-                //List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
                 Optional<RefreshToken> token = refreshTokenRepository.findByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
                 if (token.isPresent() && jwtTokenProvider.validateToken(token.get().getToken())) {
-//                    return ResponseEntity.status(404)
-//                            .body(GenericResponse.builder()
-//                                    .success(false)
-//                                    .message("RefreshToken is not present. Please login again!")
-//                                    .result("")
-//                                    .statusCode(HttpStatus.NOT_FOUND.value())
-//                                    .build());
                     UserDetail userDetail = (UserDetail) userDetailService.loadUserByUserId(jwtTokenProvider.getUserIdFromRefreshToken(token.get().getToken()));
                     String accessToken = jwtTokenProvider.generateAccessToken(userDetail);
                     Map<String, String> resultMap = new HashMap<>();
