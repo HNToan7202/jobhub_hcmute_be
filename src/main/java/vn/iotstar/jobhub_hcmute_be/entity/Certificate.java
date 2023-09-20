@@ -11,8 +11,8 @@ import org.hibernate.annotations.Nationalized;
 public class Certificate {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     String title;
 
