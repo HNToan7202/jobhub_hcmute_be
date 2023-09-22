@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class ProjectDTO {
+    String id;
     String title;
 
     String location;
@@ -13,4 +14,6 @@ public class ProjectDTO {
     String yearEnd;
 
     String description;
+
+    boolean isEdit;
 }

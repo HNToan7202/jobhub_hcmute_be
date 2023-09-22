@@ -9,11 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.ResumeDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
-import vn.iotstar.jobhub_hcmute_be.repository.ResumeRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
 
@@ -34,6 +32,30 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    EducationRepository educationRepository;
+
+    @Autowired
+    SocialActivityRepository socialActivityRepository;
+
+    @Autowired
+    SocialRepository socialRepository;
+
+    @Autowired
+    ExperienceRepository experienceRepository;
+
+    @Autowired
+    CertificateRepository certificateRepository;
+
+    @Autowired
+    PrizeRepository prizeRepository;
+
+    @Autowired
+    CourseRepository courseRepository;
+
+    @Autowired
+    ProjectRepository projectRepository;
 
     @Override
     public <S extends Resume> List<S> saveAll(Iterable<S> entities) {
@@ -126,11 +148,12 @@ public class ResumeServiceImpl implements ResumeService {
     public Resume convertResumeDtoToResume(ResumeDTO resumeDTO, Resume resume1){
         Resume resume = new Resume();
         List<Education> educations = new ArrayList<>();
-        for(int i = 0; i < resumeDTO.getEducations().size(); i++){
+        //List<Education> educationsUpdate = new ArrayList<>();
+        for(EducationDTO resu : resumeDTO.getEducations()){
             Education education = new Education();
-            BeanUtils.copyProperties(resumeDTO.getEducations().get(i), education);
-            education.setResume(resume1);
-            educations.add(education);
+            if(resu.getId() != null){
+
+            }
         }
         List<Experience> experiences = new ArrayList<>();
         for (int i = 0; i < resumeDTO.getExperiences().size(); i++){
@@ -200,7 +223,7 @@ public class ResumeServiceImpl implements ResumeService {
         if(!opt.isPresent()){
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
-                    .message("User Not Found")
+                    .message("Student Not Found")
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .build());
         }
@@ -214,17 +237,241 @@ public class ResumeServiceImpl implements ResumeService {
                 student.setResume(resume);
             }
 
-            Resume resume1 = convertResumeDtoToResume(resumeDTO, resume);
-            BeanUtils.copyProperties(resume1, resume);
+            if(resumeDTO.isEducationsEdited()){
+                List<Education> educations = new ArrayList<>();
+                for (EducationDTO educationDTO: resumeDTO.getEducations()){
+                    Education education = new Education();
+                    if(educationDTO.getId() != null && educationDTO.isEdit() == true){
+                        Optional<Education> optEducation = educationRepository.findById(educationDTO.getId());
+                        if(!optEducation.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Education Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        education = optEducation.get();
+                        BeanUtils.copyProperties(educationDTO, education);
+                        education = educationRepository.save(education);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(educationDTO, education);
+                        education.setResume(resume);
+                        educations.add(education);
+                    }
+
+                }
+                resume.setEducations(educations);
+            }
+            if(resumeDTO.isCoursesEdited()){
+                List<Course> courses = new ArrayList<>();
+                for (CourseDTO courseDTO: resumeDTO.getCourses()){
+                    Course course = new Course();
+                    if(courseDTO.getId() != null && courseDTO.isEdit() == true){
+                        Optional<Course> optCourse = courseRepository.findById(courseDTO.getId());
+                        if(!optCourse.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Course Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        course = optCourse.get();
+                        BeanUtils.copyProperties(courseDTO, course);
+                        course = courseRepository.save(course);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(courseDTO, course);
+                        course.setResume(resume);
+                        courses.add(course);
+                    }
+
+                }
+                resume.setCourses(courses);
+            }
+
+            if(resumeDTO.isCertificatesEdited()){
+                List<Certificate> certificates = new ArrayList<>();
+                for (CertificateDTO certificateDTO: resumeDTO.getCertificates()){
+                    Certificate certificate = new Certificate();
+                    if(certificateDTO.getId() != null && certificateDTO.isEdit() == true){
+                        Optional<Certificate> optCertificate = certificateRepository.findById(certificateDTO.getId());
+                        if(!optCertificate.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Certificate Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        certificate = optCertificate.get();
+                        BeanUtils.copyProperties(certificateDTO, certificate);
+                        certificate = certificateRepository.save(certificate);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(certificateDTO, certificate);
+                        certificate.setResume(resume);
+                        certificates.add(certificate);
+                    }
+
+                }
+                resume.setCertificates(certificates);
+            }
+
+            if(resumeDTO.isExperiencesEdited()){
+                List<Experience> experiences = new ArrayList<>();
+                for (ExperienceDTO experienceDTO: resumeDTO.getExperiences()){
+                    Experience experience = new Experience();
+                    if(experienceDTO.getId() != null && experienceDTO.isEdit() == true){
+                        Optional<Experience> optExperience = experienceRepository.findById(experienceDTO.getId());
+                        if(!optExperience.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Experience Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        experience = optExperience.get();
+                        BeanUtils.copyProperties(experienceDTO, experience);
+                        experience = experienceRepository.save(experience);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(experienceDTO, experience);
+                        experience.setResume(resume);
+                        experiences.add(experience);
+                    }
+
+                }
+                resume.setExperiences(experiences);
+            }
+            if(resumeDTO.isPrizesEdited()){
+                List<Prize> prizes = new ArrayList<>();
+                for (PrizeDTO prizeDTO: resumeDTO.getPrizes()){
+                    Prize prize = new Prize();
+                    if(prizeDTO.getId() != null && prizeDTO.isEdit() == true){
+                        Optional<Prize> optPrize = prizeRepository.findById(prizeDTO.getId());
+                        if(!optPrize.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Prize Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        prize = optPrize.get();
+                        BeanUtils.copyProperties(prizeDTO, prize);
+                        prize = prizeRepository.save(prize);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(prizeDTO, prize);
+                        prize.setResume(resume);
+                        prizes.add(prize);
+                    }
+
+                }
+                resume.setPrizes(prizes);
+            }
+            if(resumeDTO.isProjectsEdited()){
+                List<Project> projects = new ArrayList<>();
+                for (ProjectDTO projectDTO: resumeDTO.getProjects()){
+                    Project project = new Project();
+                    if(projectDTO.getId() != null && projectDTO.isEdit() == true){
+                        Optional<Project> optProject = projectRepository.findById(projectDTO.getId());
+                        if(!optProject.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Project Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        project = optProject.get();
+                        BeanUtils.copyProperties(projectDTO, project);
+                        project = projectRepository.save(project);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(projectDTO, project);
+                        project.setResume(resume);
+                        projects.add(project);
+                    }
+
+                }
+                resume.setProjects(projects);
+            }
+
+            if(resumeDTO.isSocialActivitiesEdited()){
+                List<SocialActivity> socialActivities = new ArrayList<>();
+                for (SocialActivityDTO socialActivityDTO: resumeDTO.getSocialActivities()){
+                    SocialActivity socialActivity = new SocialActivity();
+                    if(socialActivityDTO.getId() != null && socialActivityDTO.isEdit() == true){
+                        Optional<SocialActivity> optSocialActivity = socialActivityRepository.findById(socialActivityDTO.getId());
+                        if(!optSocialActivity.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Social Activity Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        socialActivity = optSocialActivity.get();
+                        BeanUtils.copyProperties(socialActivityDTO, socialActivity);
+                        socialActivity = socialActivityRepository.save(socialActivity);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(socialActivityDTO, socialActivity);
+                        socialActivity.setResume(resume);
+                        socialActivities.add(socialActivity);
+                    }
+
+                }
+                resume.setSocialActivities(socialActivities);
+            }
+
+            if(resumeDTO.isSocialsEdited()){
+                List<Social> socials = new ArrayList<>();
+                for (SocialDTO socialDTO: resumeDTO.getSocials()){
+                    Social social = new Social();
+                    if(socialDTO.getId() != null && socialDTO.isEdit() == true){
+                        Optional<Social> optSocial = socialRepository.findById(socialDTO.getId());
+                        if(!optSocial.isPresent()){
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Social Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        social = optSocial.get();
+                        BeanUtils.copyProperties(socialDTO, social);
+                        social = socialRepository.save(social);
+                    }
+
+                    else{
+                        BeanUtils.copyProperties(socialDTO, social);
+                        social.setResume(resume);
+                        socials.add(social);
+                    }
+
+                }
+                resume.setSocials(socials);
+            }
+
+
+
+            //Resume resume1 = convertResumeDtoToResume(resumeDTO, resume);
+            //BeanUtils.copyProperties(resume1, resume);
 
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
 
-            student = studentRepository.save(student);
+            //student = studentRepository.save(student);
+            resume = resumeRepository.save(resume);
             return ResponseEntity.status(200).body(GenericResponse.builder()
                     .success(true)
                     .message("Update Resume Successfully!")
-                    .result(student.getResume())
+                    .result(resume)
                     .statusCode(HttpStatus.OK.value())
                     .build());
         } catch (Exception e) {

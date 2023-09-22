@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class PrizeDTO {
+    String id;
     String title;
 
     String location;
@@ -13,4 +14,6 @@ public class PrizeDTO {
     String yearEnd;
 
     String description;
+
+    boolean isEdit;
 }
