@@ -22,7 +22,7 @@ public class ResumeDTO{
     Date updateAt;
     Boolean isActive;
     //List<ResumeUpload> resumeUploads;
-    boolean isEducationsEdited;
+    boolean isEducationsEdited=true;
     boolean isExperiencesEdited;
     boolean isCertificatesEdited;
     boolean isPrizesEdited;

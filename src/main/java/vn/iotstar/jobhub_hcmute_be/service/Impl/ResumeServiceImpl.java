@@ -101,7 +101,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public ResponseEntity<?> uploadResumeFile(MultipartFile resumFile, String userId) throws IOException {
         String url = cloudinaryService.uploadResume(resumFile, userId);
-        if(url == null){
+        if (url == null) {
             return ResponseEntity.status(500).body(GenericResponse.builder()
                     .success(false)
                     .message("Internal Server Error")
@@ -109,7 +109,7 @@ public class ResumeServiceImpl implements ResumeService {
                     .build());
         }
         Optional<Student> opt = studentRepository.findById(userId);
-        if(!opt.isPresent()){
+        if (!opt.isPresent()) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("User Not Found")
@@ -117,7 +117,7 @@ public class ResumeServiceImpl implements ResumeService {
                     .build());
         }
         Student student = opt.get();
-        if (student.getResume() == null){
+        if (student.getResume() == null) {
             Resume resume = new Resume();
             //resume.setStudent(student);
             resume.setCreateAt(new Date());
@@ -132,7 +132,7 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setUpdateAt(new Date());
         List<ResumeUpload> resumeUploads;
         resumeUploads = student.getResume().getResumeUploads();
-        if(resumeUploads == null)
+        if (resumeUploads == null)
             resumeUploads = new ArrayList<>();
         resumeUploads.add(resume);
         student.getResume().setResumeUploads(resumeUploads);
@@ -140,65 +140,65 @@ public class ResumeServiceImpl implements ResumeService {
         return ResponseEntity.status(200).body(GenericResponse.builder()
                 .success(true)
                 .message("Upload Resume Successfully!")
-                .result(student.getResume().getResumeUploads().get(student.getResume().getResumeUploads().size()-1))
+                .result(student.getResume().getResumeUploads().get(student.getResume().getResumeUploads().size() - 1))
                 .statusCode(HttpStatus.OK.value())
                 .build());
     }
 
-    public Resume convertResumeDtoToResume(ResumeDTO resumeDTO, Resume resume1){
+    public Resume convertResumeDtoToResume(ResumeDTO resumeDTO, Resume resume1) {
         Resume resume = new Resume();
         List<Education> educations = new ArrayList<>();
         //List<Education> educationsUpdate = new ArrayList<>();
-        for(EducationDTO resu : resumeDTO.getEducations()){
+        for (EducationDTO resu : resumeDTO.getEducations()) {
             Education education = new Education();
-            if(resu.getId() != null){
+            if (resu.getId() != null) {
 
             }
         }
         List<Experience> experiences = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getExperiences().size(); i++){
+        for (int i = 0; i < resumeDTO.getExperiences().size(); i++) {
             Experience experience = new Experience();
             BeanUtils.copyProperties(resumeDTO.getExperiences().get(i), experience);
             experience.setResume(resume1);
             experiences.add(experience);
         }
         List<Certificate> certificates = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getCertificates().size(); i++){
+        for (int i = 0; i < resumeDTO.getCertificates().size(); i++) {
             Certificate certificate = new Certificate();
             BeanUtils.copyProperties(resumeDTO.getCertificates().get(i), certificate);
             certificate.setResume(resume1);
             certificates.add(certificate);
         }
         List<Prize> prizes = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getPrizes().size(); i++){
+        for (int i = 0; i < resumeDTO.getPrizes().size(); i++) {
             Prize prize = new Prize();
             BeanUtils.copyProperties(resumeDTO.getPrizes().get(i), prize);
             prize.setResume(resume1);
             prizes.add(prize);
         }
         List<Course> courses = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getCourses().size(); i++){
+        for (int i = 0; i < resumeDTO.getCourses().size(); i++) {
             Course course = new Course();
             BeanUtils.copyProperties(resumeDTO.getCourses().get(i), course);
             course.setResume(resume1);
             courses.add(course);
         }
         List<Project> projects = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getProjects().size(); i++){
+        for (int i = 0; i < resumeDTO.getProjects().size(); i++) {
             Project project = new Project();
             BeanUtils.copyProperties(resumeDTO.getProjects().get(i), project);
             project.setResume(resume1);
             projects.add(project);
         }
         List<SocialActivity> socialActivities = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getSocialActivities().size(); i++){
+        for (int i = 0; i < resumeDTO.getSocialActivities().size(); i++) {
             SocialActivity socialActivity = new SocialActivity();
             BeanUtils.copyProperties(resumeDTO.getSocialActivities().get(i), socialActivity);
             socialActivity.setResume(resume1);
             socialActivities.add(socialActivity);
         }
         List<Social> socials = new ArrayList<>();
-        for (int i = 0; i < resumeDTO.getSocials().size(); i++){
+        for (int i = 0; i < resumeDTO.getSocials().size(); i++) {
             Social social = new Social();
             BeanUtils.copyProperties(resumeDTO.getSocials().get(i), social);
             social.setResume(resume1);
@@ -218,9 +218,9 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ResponseEntity<?> updateResume(ResumeDTO resumeDTO, String studentId){
+    public ResponseEntity<?> updateResume(ResumeDTO resumeDTO, String studentId) {
         Optional<Student> opt = studentRepository.findById(studentId);
-        if(!opt.isPresent()){
+        if (!opt.isPresent()) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("Student Not Found")
@@ -230,20 +230,20 @@ public class ResumeServiceImpl implements ResumeService {
         Student student = opt.get();
         try {
             Resume resume = student.getResume();
-            if(resume == null){
+            if (resume == null) {
                 resume = new Resume();
                 resume.setCreateAt(new Date());
                 resume.setUpdateAt(new Date());
                 student.setResume(resume);
             }
-
-            if(resumeDTO.isEducationsEdited()){
+            System.out.println("resumeDTO: " + resumeDTO.isEducationsEdited());
+            if (resumeDTO.isEducationsEdited() == true) {
                 List<Education> educations = new ArrayList<>();
-                for (EducationDTO educationDTO: resumeDTO.getEducations()){
+                for (EducationDTO educationDTO : resumeDTO.getEducations()) {
                     Education education = new Education();
-                    if(educationDTO.getId() != null && educationDTO.isEdit() == true){
+                    if (educationDTO.getId() != null && educationDTO.isEdit() == true) {
                         Optional<Education> optEducation = educationRepository.findById(educationDTO.getId());
-                        if(!optEducation.isPresent()){
+                        if (!optEducation.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Education Not Found")
@@ -251,26 +251,35 @@ public class ResumeServiceImpl implements ResumeService {
                                     .build());
                         }
                         education = optEducation.get();
-                        BeanUtils.copyProperties(educationDTO, education);
-                        education = educationRepository.save(education);
-                    }
+                        //BeanUtils.copyProperties(educationDTO, education);
+                        education.setTitle(educationDTO.getTitle());
+                        education.setLocation(educationDTO.getLocation());
+                        education.setYearBegin(educationDTO.getYearBegin());
+                        education.setYearEnd(educationDTO.getYearEnd());
+                        education.setDescription(educationDTO.getDescription());
 
-                    else{
+                        education = educationRepository.save(education);
+                        System.out.println("education: " + resume.getEducations().toString());
+                    } else {
                         BeanUtils.copyProperties(educationDTO, education);
                         education.setResume(resume);
                         educations.add(education);
                     }
 
                 }
-                resume.setEducations(educations);
+
+                List<Education> educationsOld = resume.getEducations();
+                educationsOld.addAll(educations);
+                resume.setEducations(educationsOld);
+
             }
-            if(resumeDTO.isCoursesEdited()){
+            if (resumeDTO.isCoursesEdited()) {
                 List<Course> courses = new ArrayList<>();
-                for (CourseDTO courseDTO: resumeDTO.getCourses()){
+                for (CourseDTO courseDTO : resumeDTO.getCourses()) {
                     Course course = new Course();
-                    if(courseDTO.getId() != null && courseDTO.isEdit() == true){
+                    if (courseDTO.getId() != null && courseDTO.isEdit() == true) {
                         Optional<Course> optCourse = courseRepository.findById(courseDTO.getId());
-                        if(!optCourse.isPresent()){
+                        if (!optCourse.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Course Not Found")
@@ -280,25 +289,25 @@ public class ResumeServiceImpl implements ResumeService {
                         course = optCourse.get();
                         BeanUtils.copyProperties(courseDTO, course);
                         course = courseRepository.save(course);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(courseDTO, course);
                         course.setResume(resume);
                         courses.add(course);
                     }
 
                 }
-                resume.setCourses(courses);
+                List<Course> coursesOld = resume.getCourses();
+                coursesOld.addAll(courses);
+                resume.setCourses(coursesOld);
             }
 
-            if(resumeDTO.isCertificatesEdited()){
+            if (resumeDTO.isCertificatesEdited()) {
                 List<Certificate> certificates = new ArrayList<>();
-                for (CertificateDTO certificateDTO: resumeDTO.getCertificates()){
+                for (CertificateDTO certificateDTO : resumeDTO.getCertificates()) {
                     Certificate certificate = new Certificate();
-                    if(certificateDTO.getId() != null && certificateDTO.isEdit() == true){
+                    if (certificateDTO.getId() != null && certificateDTO.isEdit() == true) {
                         Optional<Certificate> optCertificate = certificateRepository.findById(certificateDTO.getId());
-                        if(!optCertificate.isPresent()){
+                        if (!optCertificate.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Certificate Not Found")
@@ -308,25 +317,25 @@ public class ResumeServiceImpl implements ResumeService {
                         certificate = optCertificate.get();
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate = certificateRepository.save(certificate);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate.setResume(resume);
                         certificates.add(certificate);
                     }
 
                 }
-                resume.setCertificates(certificates);
+                List<Certificate> certificatesOld = resume.getCertificates();
+                certificatesOld.addAll(certificates);
+                resume.setCertificates(certificatesOld);
             }
 
-            if(resumeDTO.isExperiencesEdited()){
+            if (resumeDTO.isExperiencesEdited()) {
                 List<Experience> experiences = new ArrayList<>();
-                for (ExperienceDTO experienceDTO: resumeDTO.getExperiences()){
+                for (ExperienceDTO experienceDTO : resumeDTO.getExperiences()) {
                     Experience experience = new Experience();
-                    if(experienceDTO.getId() != null && experienceDTO.isEdit() == true){
+                    if (experienceDTO.getId() != null && experienceDTO.isEdit() == true) {
                         Optional<Experience> optExperience = experienceRepository.findById(experienceDTO.getId());
-                        if(!optExperience.isPresent()){
+                        if (!optExperience.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Experience Not Found")
@@ -336,24 +345,24 @@ public class ResumeServiceImpl implements ResumeService {
                         experience = optExperience.get();
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience = experienceRepository.save(experience);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience.setResume(resume);
                         experiences.add(experience);
                     }
 
                 }
-                resume.setExperiences(experiences);
+                List<Experience> experiencesOld = resume.getExperiences();
+                experiencesOld.addAll(experiences);
+                resume.setExperiences(experiencesOld);
             }
-            if(resumeDTO.isPrizesEdited()){
+            if (resumeDTO.isPrizesEdited()) {
                 List<Prize> prizes = new ArrayList<>();
-                for (PrizeDTO prizeDTO: resumeDTO.getPrizes()){
+                for (PrizeDTO prizeDTO : resumeDTO.getPrizes()) {
                     Prize prize = new Prize();
-                    if(prizeDTO.getId() != null && prizeDTO.isEdit() == true){
+                    if (prizeDTO.getId() != null && prizeDTO.isEdit() == true) {
                         Optional<Prize> optPrize = prizeRepository.findById(prizeDTO.getId());
-                        if(!optPrize.isPresent()){
+                        if (!optPrize.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Prize Not Found")
@@ -363,24 +372,24 @@ public class ResumeServiceImpl implements ResumeService {
                         prize = optPrize.get();
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize = prizeRepository.save(prize);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize.setResume(resume);
                         prizes.add(prize);
                     }
 
                 }
-                resume.setPrizes(prizes);
+                List<Prize> prizesOld = resume.getPrizes();
+                prizesOld.addAll(prizes);
+                resume.setPrizes(prizesOld);
             }
-            if(resumeDTO.isProjectsEdited()){
+            if (resumeDTO.isProjectsEdited()) {
                 List<Project> projects = new ArrayList<>();
-                for (ProjectDTO projectDTO: resumeDTO.getProjects()){
+                for (ProjectDTO projectDTO : resumeDTO.getProjects()) {
                     Project project = new Project();
-                    if(projectDTO.getId() != null && projectDTO.isEdit() == true){
+                    if (projectDTO.getId() != null && projectDTO.isEdit() == true) {
                         Optional<Project> optProject = projectRepository.findById(projectDTO.getId());
-                        if(!optProject.isPresent()){
+                        if (!optProject.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Project Not Found")
@@ -390,25 +399,25 @@ public class ResumeServiceImpl implements ResumeService {
                         project = optProject.get();
                         BeanUtils.copyProperties(projectDTO, project);
                         project = projectRepository.save(project);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(projectDTO, project);
                         project.setResume(resume);
                         projects.add(project);
                     }
 
                 }
-                resume.setProjects(projects);
+                List<Project> projectsOld = resume.getProjects();
+                projectsOld.addAll(projects);
+                resume.setProjects(projectsOld);
             }
 
-            if(resumeDTO.isSocialActivitiesEdited()){
+            if (resumeDTO.isSocialActivitiesEdited()) {
                 List<SocialActivity> socialActivities = new ArrayList<>();
-                for (SocialActivityDTO socialActivityDTO: resumeDTO.getSocialActivities()){
+                for (SocialActivityDTO socialActivityDTO : resumeDTO.getSocialActivities()) {
                     SocialActivity socialActivity = new SocialActivity();
-                    if(socialActivityDTO.getId() != null && socialActivityDTO.isEdit() == true){
+                    if (socialActivityDTO.getId() != null && socialActivityDTO.isEdit() == true) {
                         Optional<SocialActivity> optSocialActivity = socialActivityRepository.findById(socialActivityDTO.getId());
-                        if(!optSocialActivity.isPresent()){
+                        if (!optSocialActivity.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Social Activity Not Found")
@@ -418,25 +427,25 @@ public class ResumeServiceImpl implements ResumeService {
                         socialActivity = optSocialActivity.get();
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity = socialActivityRepository.save(socialActivity);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity.setResume(resume);
                         socialActivities.add(socialActivity);
                     }
 
                 }
-                resume.setSocialActivities(socialActivities);
+                List<SocialActivity> socialActivitiesOld = resume.getSocialActivities();
+                socialActivitiesOld.addAll(socialActivities);
+                resume.setSocialActivities(socialActivitiesOld);
             }
 
-            if(resumeDTO.isSocialsEdited()){
+            if (resumeDTO.isSocialsEdited()) {
                 List<Social> socials = new ArrayList<>();
-                for (SocialDTO socialDTO: resumeDTO.getSocials()){
+                for (SocialDTO socialDTO : resumeDTO.getSocials()) {
                     Social social = new Social();
-                    if(socialDTO.getId() != null && socialDTO.isEdit() == true){
+                    if (socialDTO.getId() != null && socialDTO.isEdit() == true) {
                         Optional<Social> optSocial = socialRepository.findById(socialDTO.getId());
-                        if(!optSocial.isPresent()){
+                        if (!optSocial.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
                                     .success(false)
                                     .message("Social Not Found")
@@ -446,18 +455,16 @@ public class ResumeServiceImpl implements ResumeService {
                         social = optSocial.get();
                         BeanUtils.copyProperties(socialDTO, social);
                         social = socialRepository.save(social);
-                    }
-
-                    else{
+                    } else {
                         BeanUtils.copyProperties(socialDTO, social);
                         social.setResume(resume);
                         socials.add(social);
                     }
-
                 }
-                resume.setSocials(socials);
+                List<Social> socialsOld = resume.getSocials();
+                socialsOld.addAll(socials);
+                resume.setSocials(socialsOld);
             }
-
 
 
             //Resume resume1 = convertResumeDtoToResume(resumeDTO, resume);
@@ -486,7 +493,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ResponseEntity<?> getDetailResume(String studentId){
+    public ResponseEntity<?> getDetailResume(String studentId) {
         Optional<Student> opt = studentRepository.findById(studentId);
 
         Student student = opt.get();
@@ -503,7 +510,7 @@ public class ResumeServiceImpl implements ResumeService {
     public ResponseEntity<?> deleteResume(String resumeId, String userId) throws IOException {
 
         Optional<Student> opt = studentRepository.findById(userId);
-        if(!opt.isPresent()){
+        if (!opt.isPresent()) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("User Not Found")
@@ -512,7 +519,7 @@ public class ResumeServiceImpl implements ResumeService {
         }
         Student student = opt.get();
         Resume resume = student.getResume();
-        if(resume == null){
+        if (resume == null) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("Resume Not Found")
@@ -521,7 +528,7 @@ public class ResumeServiceImpl implements ResumeService {
         }
 
         List<ResumeUpload> resumeUploads = resume.getResumeUploads();
-        if(resumeUploads == null){
+        if (resumeUploads == null) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("Resume Not Found")

@@ -389,7 +389,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {
         Optional<User> user = findById(userId);
-        String phone = "";
+        String phone =  request.getPhone();
         if (user.isEmpty())
             throw new Exception("User doesn't exist");
 
@@ -400,8 +400,8 @@ public class UserServiceImpl implements UserService {
 //        if (!request.getPhone().matches("^(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})$"))
 //            throw new Exception("Invalid phone number");
         //Chỉ 1 định dạng duy nhất là 84 không có số 0 -> nhập 0 -> 84
-       if (request.getPhone().startsWith("0"))
-            phone = "84" + request.getPhone().substring(1);
+//       if (request.getPhone().startsWith("0"))
+//            phone = "84" + request.getPhone().substring(1);
         if(!phone.isEmpty()){
             Optional<User> optional = userRepository.findByPhoneAndIsActiveIsTrue(phone);
             if(optional.isPresent() && !optional.get().getUserId().equals(userId))
