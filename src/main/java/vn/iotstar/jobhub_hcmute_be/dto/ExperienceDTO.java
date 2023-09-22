@@ -17,5 +17,5 @@ public class ExperienceDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

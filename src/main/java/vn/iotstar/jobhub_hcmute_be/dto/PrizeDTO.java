@@ -15,5 +15,5 @@ public class PrizeDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

@@ -7,5 +7,5 @@ public class SocialDTO {
     private String id;
     private String name;
     private String socialUrl;
-    boolean isEdit;
+    Boolean isEdit = false;
 }

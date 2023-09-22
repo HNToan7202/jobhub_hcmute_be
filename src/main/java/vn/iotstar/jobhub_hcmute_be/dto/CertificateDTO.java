@@ -17,5 +17,5 @@ public class CertificateDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

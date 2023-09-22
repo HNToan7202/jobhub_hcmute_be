@@ -16,5 +16,5 @@ public class EducationDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

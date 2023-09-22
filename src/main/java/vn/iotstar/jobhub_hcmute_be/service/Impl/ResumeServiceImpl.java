@@ -236,12 +236,12 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setUpdateAt(new Date());
                 student.setResume(resume);
             }
-            System.out.println("resumeDTO: " + resumeDTO.isEducationsEdited());
-            if (resumeDTO.isEducationsEdited() == true) {
+            System.out.println("resumeDTO: " + resumeDTO.getIsEducationsEdited());
+            if (resumeDTO.getIsEducationsEdited() == true) {
                 List<Education> educations = new ArrayList<>();
                 for (EducationDTO educationDTO : resumeDTO.getEducations()) {
                     Education education = new Education();
-                    if (educationDTO.getId() != null && educationDTO.isEdit() == true) {
+                    if (educationDTO.getId() != null && educationDTO.getIsEdit() == true) {
                         Optional<Education> optEducation = educationRepository.findById(educationDTO.getId());
                         if (!optEducation.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -260,12 +260,11 @@ public class ResumeServiceImpl implements ResumeService {
 
                         education = educationRepository.save(education);
                         System.out.println("education: " + resume.getEducations().toString());
-                    } else {
+                    } else if(educationDTO.getId() == null && educationDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(educationDTO, education);
                         education.setResume(resume);
                         educations.add(education);
                     }
-
                 }
 
                 List<Education> educationsOld = resume.getEducations();
@@ -273,11 +272,11 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setEducations(educationsOld);
 
             }
-            if (resumeDTO.isCoursesEdited()) {
+            if (resumeDTO.getIsCoursesEdited()) {
                 List<Course> courses = new ArrayList<>();
                 for (CourseDTO courseDTO : resumeDTO.getCourses()) {
                     Course course = new Course();
-                    if (courseDTO.getId() != null && courseDTO.isEdit() == true) {
+                    if (courseDTO.getId() != null && courseDTO.getIsEdit() == true) {
                         Optional<Course> optCourse = courseRepository.findById(courseDTO.getId());
                         if (!optCourse.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -289,7 +288,7 @@ public class ResumeServiceImpl implements ResumeService {
                         course = optCourse.get();
                         BeanUtils.copyProperties(courseDTO, course);
                         course = courseRepository.save(course);
-                    } else {
+                    } else if (courseDTO.getId() == null && courseDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(courseDTO, course);
                         course.setResume(resume);
                         courses.add(course);
@@ -301,11 +300,11 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setCourses(coursesOld);
             }
 
-            if (resumeDTO.isCertificatesEdited()) {
+            if (resumeDTO.getIsCertificatesEdited()) {
                 List<Certificate> certificates = new ArrayList<>();
                 for (CertificateDTO certificateDTO : resumeDTO.getCertificates()) {
                     Certificate certificate = new Certificate();
-                    if (certificateDTO.getId() != null && certificateDTO.isEdit() == true) {
+                    if (certificateDTO.getId() != null && certificateDTO.getIsEdit() == true) {
                         Optional<Certificate> optCertificate = certificateRepository.findById(certificateDTO.getId());
                         if (!optCertificate.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -317,7 +316,7 @@ public class ResumeServiceImpl implements ResumeService {
                         certificate = optCertificate.get();
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate = certificateRepository.save(certificate);
-                    } else {
+                    } else if (certificateDTO.getId() == null && certificateDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate.setResume(resume);
                         certificates.add(certificate);
@@ -329,11 +328,11 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setCertificates(certificatesOld);
             }
 
-            if (resumeDTO.isExperiencesEdited()) {
+            if (resumeDTO.getIsExperiencesEdited()) {
                 List<Experience> experiences = new ArrayList<>();
                 for (ExperienceDTO experienceDTO : resumeDTO.getExperiences()) {
                     Experience experience = new Experience();
-                    if (experienceDTO.getId() != null && experienceDTO.isEdit() == true) {
+                    if (experienceDTO.getId() != null && experienceDTO.getIsEdit() == true) {
                         Optional<Experience> optExperience = experienceRepository.findById(experienceDTO.getId());
                         if (!optExperience.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -345,7 +344,7 @@ public class ResumeServiceImpl implements ResumeService {
                         experience = optExperience.get();
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience = experienceRepository.save(experience);
-                    } else {
+                    } else if (experienceDTO.getId() == null && experienceDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience.setResume(resume);
                         experiences.add(experience);
@@ -356,11 +355,11 @@ public class ResumeServiceImpl implements ResumeService {
                 experiencesOld.addAll(experiences);
                 resume.setExperiences(experiencesOld);
             }
-            if (resumeDTO.isPrizesEdited()) {
+            if (resumeDTO.getIsPrizesEdited()) {
                 List<Prize> prizes = new ArrayList<>();
                 for (PrizeDTO prizeDTO : resumeDTO.getPrizes()) {
                     Prize prize = new Prize();
-                    if (prizeDTO.getId() != null && prizeDTO.isEdit() == true) {
+                    if (prizeDTO.getId() != null && prizeDTO.getIsEdit() == true) {
                         Optional<Prize> optPrize = prizeRepository.findById(prizeDTO.getId());
                         if (!optPrize.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -372,7 +371,7 @@ public class ResumeServiceImpl implements ResumeService {
                         prize = optPrize.get();
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize = prizeRepository.save(prize);
-                    } else {
+                    } else if (prizeDTO.getId() == null && prizeDTO.getIsEdit() == false) {
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize.setResume(resume);
                         prizes.add(prize);
@@ -383,11 +382,11 @@ public class ResumeServiceImpl implements ResumeService {
                 prizesOld.addAll(prizes);
                 resume.setPrizes(prizesOld);
             }
-            if (resumeDTO.isProjectsEdited()) {
+            if (resumeDTO.getIsProjectsEdited()) {
                 List<Project> projects = new ArrayList<>();
                 for (ProjectDTO projectDTO : resumeDTO.getProjects()) {
                     Project project = new Project();
-                    if (projectDTO.getId() != null && projectDTO.isEdit() == true) {
+                    if (projectDTO.getId() != null && projectDTO.getIsEdit() == true) {
                         Optional<Project> optProject = projectRepository.findById(projectDTO.getId());
                         if (!optProject.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -399,7 +398,7 @@ public class ResumeServiceImpl implements ResumeService {
                         project = optProject.get();
                         BeanUtils.copyProperties(projectDTO, project);
                         project = projectRepository.save(project);
-                    } else {
+                    } else if (projectDTO.getId() == null && projectDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(projectDTO, project);
                         project.setResume(resume);
                         projects.add(project);
@@ -411,11 +410,11 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setProjects(projectsOld);
             }
 
-            if (resumeDTO.isSocialActivitiesEdited()) {
+            if (resumeDTO.getIsSocialActivitiesEdited()) {
                 List<SocialActivity> socialActivities = new ArrayList<>();
                 for (SocialActivityDTO socialActivityDTO : resumeDTO.getSocialActivities()) {
                     SocialActivity socialActivity = new SocialActivity();
-                    if (socialActivityDTO.getId() != null && socialActivityDTO.isEdit() == true) {
+                    if (socialActivityDTO.getId() != null && socialActivityDTO.getIsEdit() == true) {
                         Optional<SocialActivity> optSocialActivity = socialActivityRepository.findById(socialActivityDTO.getId());
                         if (!optSocialActivity.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -427,7 +426,7 @@ public class ResumeServiceImpl implements ResumeService {
                         socialActivity = optSocialActivity.get();
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity = socialActivityRepository.save(socialActivity);
-                    } else {
+                    } else if (socialActivityDTO.getId() == null && socialActivityDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity.setResume(resume);
                         socialActivities.add(socialActivity);
@@ -439,11 +438,11 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setSocialActivities(socialActivitiesOld);
             }
 
-            if (resumeDTO.isSocialsEdited()) {
+            if (resumeDTO.getIsSocialsEdited()) {
                 List<Social> socials = new ArrayList<>();
                 for (SocialDTO socialDTO : resumeDTO.getSocials()) {
                     Social social = new Social();
-                    if (socialDTO.getId() != null && socialDTO.isEdit() == true) {
+                    if (socialDTO.getId() != null && socialDTO.getIsEdit() == true) {
                         Optional<Social> optSocial = socialRepository.findById(socialDTO.getId());
                         if (!optSocial.isPresent()) {
                             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -455,7 +454,7 @@ public class ResumeServiceImpl implements ResumeService {
                         social = optSocial.get();
                         BeanUtils.copyProperties(socialDTO, social);
                         social = socialRepository.save(social);
-                    } else {
+                    } else if (socialDTO.getId() == null && socialDTO.getIsEdit() == false) {
                         BeanUtils.copyProperties(socialDTO, social);
                         social.setResume(resume);
                         socials.add(social);

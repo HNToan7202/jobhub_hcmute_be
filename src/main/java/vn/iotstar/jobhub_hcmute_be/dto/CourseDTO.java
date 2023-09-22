@@ -17,5 +17,5 @@ public class CourseDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

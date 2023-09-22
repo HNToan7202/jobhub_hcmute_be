@@ -17,5 +17,5 @@ public class SocialActivityDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }

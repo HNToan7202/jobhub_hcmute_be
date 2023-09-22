@@ -15,5 +15,5 @@ public class ProjectDTO {
 
     String description;
 
-    boolean isEdit;
+    Boolean isEdit = false;
 }
