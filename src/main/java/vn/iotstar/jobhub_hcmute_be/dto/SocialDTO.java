@@ -8,4 +8,6 @@ public class SocialDTO {
     private String name;
     private String socialUrl;
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
 }

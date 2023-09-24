@@ -18,4 +18,6 @@ public class CourseDTO {
     String description;
 
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
 }

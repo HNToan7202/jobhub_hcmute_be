@@ -18,4 +18,6 @@ public class CertificateDTO {
     String description;
 
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
 }

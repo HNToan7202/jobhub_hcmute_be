@@ -18,4 +18,6 @@ public class SocialActivityDTO {
     String description;
 
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
 }

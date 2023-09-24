@@ -265,6 +265,13 @@ public class ResumeServiceImpl implements ResumeService {
                         education.setResume(resume);
                         educations.add(education);
                     }
+                    else if(educationDTO.getId()!= null && educationDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(educationDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Education not found");
+                    }
                 }
 
                 List<Education> educationsOld = resume.getEducations();
@@ -292,6 +299,13 @@ public class ResumeServiceImpl implements ResumeService {
                         BeanUtils.copyProperties(courseDTO, course);
                         course.setResume(resume);
                         courses.add(course);
+                    }
+                    if(courseDTO.getId()!= null && courseDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(courseDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Education not found");
                     }
 
                 }
@@ -321,6 +335,13 @@ public class ResumeServiceImpl implements ResumeService {
                         certificate.setResume(resume);
                         certificates.add(certificate);
                     }
+                     if(certificateDTO.getId()!= null && certificateDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(certificate.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Education not found");
+                    }
 
                 }
                 List<Certificate> certificatesOld = resume.getCertificates();
@@ -349,6 +370,13 @@ public class ResumeServiceImpl implements ResumeService {
                         experience.setResume(resume);
                         experiences.add(experience);
                     }
+                    if(experience.getId()!= null && experienceDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(experienceDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Experience not found");
+                    }
 
                 }
                 List<Experience> experiencesOld = resume.getExperiences();
@@ -376,6 +404,13 @@ public class ResumeServiceImpl implements ResumeService {
                         prize.setResume(resume);
                         prizes.add(prize);
                     }
+                    if(prizeDTO.getId()!= null && prizeDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(prizeDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Prize not found");
+                    }
 
                 }
                 List<Prize> prizesOld = resume.getPrizes();
@@ -402,6 +437,13 @@ public class ResumeServiceImpl implements ResumeService {
                         BeanUtils.copyProperties(projectDTO, project);
                         project.setResume(resume);
                         projects.add(project);
+                    }
+                    if(projectDTO.getId()!= null && projectDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(projectDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Project not found");
                     }
 
                 }
@@ -431,6 +473,13 @@ public class ResumeServiceImpl implements ResumeService {
                         socialActivity.setResume(resume);
                         socialActivities.add(socialActivity);
                     }
+                    if(socialActivityDTO.getId()!= null && socialActivityDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(socialActivityDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Education not found");
+                    }
 
                 }
                 List<SocialActivity> socialActivitiesOld = resume.getSocialActivities();
@@ -458,6 +507,13 @@ public class ResumeServiceImpl implements ResumeService {
                         BeanUtils.copyProperties(socialDTO, social);
                         social.setResume(resume);
                         socials.add(social);
+                    }
+                    if(socialDTO.getId()!= null && socialDTO.getIsDelete() == true){
+                        Optional<Education> optionalEducation = educationRepository.findById(socialDTO.getId());
+                        if(optionalEducation.isPresent()){
+                            educationRepository.deleteById(optionalEducation.get().getId());
+                        }
+                        else throw new RuntimeException("Education not found");
                     }
                 }
                 List<Social> socialsOld = resume.getSocials();

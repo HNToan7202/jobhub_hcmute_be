@@ -26,4 +26,5 @@ public class ResumeDTO{
     Boolean isProjectsEdited=false;
     Boolean isSocialActivitiesEdited=false;
     Boolean isSocialsEdited=false;
+    
 }

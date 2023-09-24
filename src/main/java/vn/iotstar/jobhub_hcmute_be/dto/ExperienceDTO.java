@@ -18,4 +18,6 @@ public class ExperienceDTO {
     String description;
 
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
 }

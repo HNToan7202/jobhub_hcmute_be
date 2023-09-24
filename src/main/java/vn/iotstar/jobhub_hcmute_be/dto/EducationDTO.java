@@ -17,4 +17,7 @@ public class EducationDTO {
     String description;
 
     Boolean isEdit = false;
+
+    Boolean isDelete = false;
+
 }
