@@ -6,7 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
+import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -14,7 +17,20 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Student extends User{
+public class Student extends User {
+
+    @Nationalized
+    private String fullName;
+
+    private String avatar;
+
+    private Date dateOfBirth;
+
+    private String address;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
     @OneToOne(mappedBy = "student", fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude

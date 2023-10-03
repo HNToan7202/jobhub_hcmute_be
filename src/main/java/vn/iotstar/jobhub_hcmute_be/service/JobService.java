@@ -41,5 +41,5 @@ public interface JobService {
 
     ResponseEntity<GenericResponse> getAllJobs(Pageable pageable);
 
-    ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId, String avatarUrl);
+    ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId);
 }

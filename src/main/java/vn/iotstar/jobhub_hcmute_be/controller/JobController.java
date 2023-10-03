@@ -42,7 +42,7 @@ public class JobController {
         return jobService.findAllByEmployer(id, PageRequest.of(index,size));
     }
 
-    @GetMapping("/get-detail")
+    @GetMapping("/detail-job")
     public ResponseEntity<?> getDetail(@RequestParam("jobId") String id){
         return jobService.getDetail(id);
     }

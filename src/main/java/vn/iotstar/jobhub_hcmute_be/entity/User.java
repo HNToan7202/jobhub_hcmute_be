@@ -24,8 +24,8 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
 
-    @Nationalized
-    private String fullName;
+//    @Nationalized
+//    private String fullName;
 
     //Ẩn đi khi hiển thị json
     @JsonBackReference
@@ -36,18 +36,11 @@ public class User implements Serializable {
     @Email
     private String email;
 
-    private String avatar;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
-
     @Column(nullable = true)
     private boolean isVerified = false;
 
-    @Nationalized
-    private String address;
-
-    private Date dateOfBirth;
+//    @Nationalized
+//    private String address;
 
     @Nationalized
     private String about;

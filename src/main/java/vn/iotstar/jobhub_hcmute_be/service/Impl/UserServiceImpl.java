@@ -1,6 +1,5 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -12,10 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
-import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
@@ -32,7 +29,6 @@ import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -184,6 +180,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request) {
+        String oldPass = user.getPassword();
+        String oldPassDTO = passwordEncoder.encode(request.getOldPassword());
+        if(oldPassDTO.equals(oldPassDTO)){
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            user = save(user);
+            return ResponseEntity.ok().body(GenericResponse.builder()
+                    .success(true)
+                    .message("Change Password successfully!")
+                    //.result(user)
+                    .statusCode(HttpStatus.OK.value())
+                    .build());
+        }
+        return ResponseEntity.status(400)
+                .body(
+                        GenericResponse.builder()
+                                .success(true)
+                                .message("Old Password don't match")
+                                .result(null)
+                                .statusCode(HttpStatus.CONFLICT.value())
+                                .build()
+                );
+
+    }
+
+
+    @Override
     public ResponseEntity<?> employerRegister(EmployerRegisterDTO employerRegisterDTO){
         if (employerRegisterDTO.getPassword().length() < 8 || employerRegisterDTO.getPassword().length() > 32)
             throw new RuntimeException("Password must be between 8 and 32 characters long");
@@ -212,7 +235,7 @@ public class UserServiceImpl implements UserService {
                     );
 
         Employer user = new Employer();
-        user.setFullName(employerRegisterDTO.getFullName());
+        user.setCompanyName(employerRegisterDTO.getFullName());
         user.setEmail(employerRegisterDTO.getEmail());
         user.setUserId(UUID.randomUUID().toString().split("-")[0]);
         user.setPassword(passwordEncoder.encode(employerRegisterDTO.getPassword()));
@@ -363,68 +386,9 @@ public class UserServiceImpl implements UserService {
                         .build());
     }
 
-    @Override
-    public ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException {
+//
+//
 
-        User user = findById(userId).get();
-        String avatarOld = user.getAvatar();
-
-        //upload new avatar
-        user.setAvatar(cloudinaryService.uploadImage(imageFile));
-        save(user);
-
-        //delete old avatar
-        if (avatarOld != null) {
-            cloudinaryService.deleteImage(avatarOld);
-        }
-        return ResponseEntity.ok(GenericResponse.builder()
-                .success(true)
-                .message("Upload successfully")
-                .result(user.getAvatar())
-                .statusCode(HttpStatus.OK.value())
-                .build());
-    }
-
-
-    @Override
-    public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {
-        Optional<User> user = findById(userId);
-        String phone =  request.getPhone();
-        if (user.isEmpty())
-            throw new Exception("User doesn't exist");
-
-//        if (request.getDateOfBirth().after(new Date()))
-//            throw new Exception("Invalid date of birth");
-
-        //Kiểm tra format của số điện thoại đúng định dạng của việt nam
-//        if (!request.getPhone().matches("^(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})$"))
-//            throw new Exception("Invalid phone number");
-        //Chỉ 1 định dạng duy nhất là 84 không có số 0 -> nhập 0 -> 84
-//       if (request.getPhone().startsWith("0"))
-//            phone = "84" + request.getPhone().substring(1);
-        if(!phone.isEmpty()){
-            Optional<User> optional = userRepository.findByPhoneAndIsActiveIsTrue(phone);
-            if(optional.isPresent() && !optional.get().getUserId().equals(userId))
-                throw new Exception("Phone number already in use");
-        }
-
-        user.get().setGender(Gender.valueOf(String.valueOf(request.getGender())));
-        user.get().setPhone(phone);
-        user.get().setFullName(request.getFullName());
-        user.get().setDateOfBirth(request.getDateOfBirth());
-        user.get().setAddress(request.getAddress());
-        user.get().setAbout(request.getAbout());
-        save(user.get());
-
-        return ResponseEntity.ok(
-                GenericResponse.builder()
-                        .success(true)
-                        .message("Update successful")
-                        .result(user.get())
-                        .statusCode(200)
-                        .build()
-        );
-    }
 
 }
 

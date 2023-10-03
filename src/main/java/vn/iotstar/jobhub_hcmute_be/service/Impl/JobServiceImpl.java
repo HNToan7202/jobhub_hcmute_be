@@ -16,6 +16,7 @@ import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
+import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
@@ -210,8 +211,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId, String avatarUrl) {
+    public ResponseEntity<?> postJob(PostJobRequest jobRequest, String employerId) {
         try {
+
             Job job = new Job();
             job.setName(jobRequest.getName());
             job.setJobType(JobType.valueOf(jobRequest.getJobType()));
@@ -258,12 +260,10 @@ public class JobServiceImpl implements JobService {
             }
             job.setSkills(skills);
             job.setIsActive(true);
-            if(avatarUrl != null){
-                job.setLogo(avatarUrl);
-            }
-            Optional<Employer> optionalRecruiter = employerRepository.findById(recruiterId);
-            if (optionalRecruiter.isPresent()) {
-                job.setEmployer(optionalRecruiter.get());
+            Optional<Employer> optional = employerRepository.findById(employerId);
+            if (optional.isPresent()) {
+                job.setEmployer(optional.get());
+                job.setLogo(optional.get().getLogo());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(GenericResponse.builder()

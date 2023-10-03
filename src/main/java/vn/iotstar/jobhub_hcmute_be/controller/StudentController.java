@@ -16,11 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.ApplyJobRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.ResumeDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
+import vn.iotstar.jobhub_hcmute_be.service.StudentService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 import java.io.IOException;
@@ -43,6 +45,9 @@ public class StudentController {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private StudentService studentService;
 
     @Procedure("application/json")
     @ResponseBody
@@ -142,5 +147,31 @@ public class StudentController {
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
         return resumeService.getDetailResume(user.getUserId());
     }
+    @PutMapping("/change-avatar")
+    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile,
+                                                        @RequestHeader("Authorization") String token)
+            throws IOException {
 
+        String jwt = token.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        return studentService.changeAvatar(userId, imageFile);
+    }
+
+    @PreAuthorize("hasRole('STUDENT')")
+    @PutMapping("/update-profile")
+    public ResponseEntity<GenericResponse> update(
+            @RequestBody UserUpdateRequest request,
+            @RequestHeader("Authorization") String authorizationHeader,
+            BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()) {
+            throw new Exception(Objects.requireNonNull(bindingResult
+                            .getFieldError())
+                    .getDefaultMessage()
+            );
+        }
+
+        String token = authorizationHeader.substring(7);
+        String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+        return studentService.updateProfile(userIdFromToken, request);
+    }
 }

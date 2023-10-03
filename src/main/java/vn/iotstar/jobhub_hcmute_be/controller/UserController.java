@@ -24,6 +24,7 @@ import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
+import vn.iotstar.jobhub_hcmute_be.service.StudentService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 
@@ -50,6 +51,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    StudentService studentService;
 
     @GetMapping("/profile")
     @Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
@@ -111,33 +115,29 @@ public class UserController {
         }
     }
 
-    @PutMapping("/change-avatar")
-    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile,
-                                          @RequestHeader("Authorization") String token)
-            throws IOException {
 
-        String jwt = token.substring(7);
-        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-        return userService.changeAvatar(userId, imageFile);
-    }
 
-    @PreAuthorize("hasRole('STUDENT')")
-    @PutMapping("/update-profile")
-    public ResponseEntity<GenericResponse> update(
-            @RequestBody @Valid UserUpdateRequest request,
-            @RequestHeader("Authorization") String authorizationHeader,
-            BindingResult bindingResult) throws Exception {
+    @PostMapping("/reset-password")
+    public ResponseEntity<GenericResponse> resetPassword(
+            @RequestHeader("Authorization") String authorizationHeader,@Valid @RequestBody PasswordResetRequest passwordResetRequest,BindingResult bindingResult) throws Exception{
         if (bindingResult.hasErrors()) {
             throw new Exception(Objects.requireNonNull(bindingResult
                             .getFieldError())
                     .getDefaultMessage()
             );
         }
-
-        String token = authorizationHeader.substring(7);
-        String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
-        return userService.updateProfile(userIdFromToken, request);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            GenericResponse.builder()
+                                    .success(false)
+                                    .message("Unauthorized: Empty or invalid token")
+                                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                                    .build()
+                    );
+        }
+        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
+        return userService.changeUserPassord(userDetail.getUser(),passwordResetRequest);
     }
-
-
 }

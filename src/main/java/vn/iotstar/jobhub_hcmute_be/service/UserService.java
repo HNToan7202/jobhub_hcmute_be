@@ -10,6 +10,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 
@@ -43,6 +44,10 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO);
 
+    ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request);
+
+    //ResponseEntity<?> employerRegister(EmployerRegisterDTO employerRegisterDTO);
+
     ResponseEntity<?> employerRegister(EmployerRegisterDTO employerRegisterDTO);
 
     ResponseEntity<GenericResponse> userRegisterEmail(RegisterRequest RegisterRequest);
@@ -53,8 +58,8 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> validateVerificationAccount(String token);
 
-    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
-
-    ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;
+//    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
+//
+//    ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;
 
 }
