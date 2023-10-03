@@ -111,13 +111,17 @@ public class JobServiceImpl implements JobService {
     @Override
     public ResponseEntity<?> getDetail(String jobId){
         try {
-            Optional<Job> job = jobRepository.findById(jobId);
-            if (job.isPresent()) {
+            Optional<Job> optional = jobRepository.findById(jobId);
+
+            if (optional.isPresent()) {
+                JobDTO jobDTO = new JobDTO();
+                BeanUtils.copyProperties(optional.get(), jobDTO);
+                jobDTO.setCompanyName(optional.get().getEmployer().getCompanyName());
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
                                 .success(true)
                                 .message("Get job detail successfully!")
-                                .result(job.get())
+                                .result(jobDTO)
                                 .statusCode(HttpStatus.OK.value())
                                 .build());
             } else {
