@@ -172,6 +172,7 @@ public class JobServiceImpl implements JobService {
         for(Job job : jobs){
             JobDTO jobDTO = new JobDTO();
             BeanUtils.copyProperties(job, jobDTO);
+            jobDTO.setCompanyName(job.getEmployer().getCompanyName());
             jobDTOs.add(jobDTO);
         }
         return jobDTOs;

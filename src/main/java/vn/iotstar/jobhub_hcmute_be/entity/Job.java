@@ -42,6 +42,8 @@ public class Job implements Serializable {
 
     private String logo;
 
+    private Integer experience;
+
     private Integer quantity;
 
     @Column(columnDefinition = "Nvarchar(max)")

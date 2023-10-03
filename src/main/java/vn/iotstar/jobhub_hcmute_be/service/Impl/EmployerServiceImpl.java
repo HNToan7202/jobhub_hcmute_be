@@ -89,7 +89,7 @@ public class EmployerServiceImpl implements EmployerService {
         if (employerOptional.isEmpty()) throw new Exception("User doesn't exist");
 
         if(!phone.isEmpty()){
-            Optional<Student> optional = employerRepository.findByPhoneAndIsActiveIsTrue(request.getPhone());
+            Optional<Employer> optional = employerRepository.findByPhoneAndIsActiveIsTrue(request.getPhone());
             if(optional.isPresent() && !optional.get().getUserId().equals(userId))
                 throw new Exception("Phone number already in use");
         }

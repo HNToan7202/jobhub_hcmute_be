@@ -12,5 +12,5 @@ import java.util.Optional;
 @Repository
 public interface EmployerRepository extends JpaRepository<Employer, String> {
 
-    Optional<Student> findByPhoneAndIsActiveIsTrue(String phone);
+    Optional<Employer> findByPhoneAndIsActiveIsTrue(String phone);
 }
