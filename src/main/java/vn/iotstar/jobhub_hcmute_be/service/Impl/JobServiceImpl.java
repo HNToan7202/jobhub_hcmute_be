@@ -51,24 +51,6 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getAlls(){
-
-        List<Job> jobs = jobRepository.findAll();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("jobs", jobs);
-        response.put("total", jobs.size());
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(GenericResponse.builder()
-                        .success(true)
-                        .message("Get jobs successfully!")
-                        .result(response)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
-
-    }
-    @Override
     public <S extends Job> S save(S entity) {
         return jobRepository.save(entity);
     }
@@ -183,6 +165,27 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public ResponseEntity<GenericResponse> getAlls(){
+
+        List<Job> jobs = jobRepository.findAll();
+
+        List<JobDTO> jobDTOs = convertJobToJobDTO(jobs);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("jobs", jobDTOs);
+        response.put("total", jobDTOs.size());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(GenericResponse.builder()
+                        .success(true)
+                        .message("Get jobs successfully!")
+                        .result(response)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+
+    }
+
+    @Override
     public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable){
         try {
 
@@ -245,7 +248,7 @@ public class JobServiceImpl implements JobService {
             } else {
                 Position newPosition = new Position();
                 newPosition.setName(jobRequest.getPositionName());
-                //newPosition = positionRepository.save(newPosition);
+                newPosition = positionRepository.save(newPosition);
                 job.setPosition(newPosition);
             }
             List<Skill> skills = new ArrayList<>();
@@ -259,7 +262,7 @@ public class JobServiceImpl implements JobService {
                 } else {
                     Skill newSkill = new Skill();
                     newSkill.setName(skillName);
-                    //newSkill = skillRepository.save(newSkill);
+                    newSkill = skillRepository.save(newSkill);
                     skills.add(newSkill);
                 }
             }
