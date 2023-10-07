@@ -16,7 +16,7 @@ public interface JobService {
 
     List<Job> findAll();
 
-    ResponseEntity<GenericResponse> getAlls();
+    ResponseEntity<GenericResponse> getAlls(Boolean isActive);
 
     <S extends Job> S save(S entity);
 
@@ -39,7 +39,11 @@ public interface JobService {
 
     ResponseEntity<?> findAllByEmployer(String id, Pageable pageable);
 
-    ResponseEntity<GenericResponse> getAllJobs(Pageable pageable);
+    Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable);
+
+    List<Job> findAllByIsActive(Boolean isActive);
+
+    ResponseEntity<GenericResponse> getAllJobs(Pageable pageable, Boolean isActive);
 
     ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId);
 }

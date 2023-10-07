@@ -26,13 +26,13 @@ public class JobController {
     }
 
     @GetMapping("/get-all-jobs")
-    public ResponseEntity<GenericResponse> getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
-        return jobService.getAllJobs(PageRequest.of(index, size));
+    public ResponseEntity<GenericResponse> getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,  @RequestParam(defaultValue = "true") Boolean isActive) {
+        return jobService.getAllJobs(PageRequest.of(index, size), isActive);
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<GenericResponse> getAllJob() {
-        return jobService.getAlls();
+    public ResponseEntity<GenericResponse> getAllJob(@RequestParam(defaultValue = "true") Boolean isActive) {
+        return jobService.getAlls(isActive);
     }
 
     @GetMapping("{employerId}/get-list-jobs")

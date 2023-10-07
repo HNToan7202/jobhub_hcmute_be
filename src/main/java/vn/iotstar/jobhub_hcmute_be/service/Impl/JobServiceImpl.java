@@ -16,7 +16,6 @@ import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
-import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
@@ -165,9 +164,20 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getAlls(){
+    public Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable){
+        return jobRepository.findByIsActiveOrderByCreatedAtDesc(isActive,pageable);
+    }
 
-        List<Job> jobs = jobRepository.findAll();
+    @Override
+    public List<Job> findAllByIsActive(Boolean isActive){
+        return jobRepository.findJobsByIsActive(isActive);
+    }
+    @Override
+    public ResponseEntity<GenericResponse> getAlls(Boolean isActive) {
+
+
+
+        List<Job> jobs = findAllByIsActive(isActive);
 
         List<JobDTO> jobDTOs = convertJobToJobDTO(jobs);
 
@@ -186,10 +196,10 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable){
+    public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable, Boolean isActive){
         try {
 
-            Page<Job> jobs = jobRepository.findAll(pageable);
+            Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
 
             List<Job> jobList = jobs.getContent();
 
