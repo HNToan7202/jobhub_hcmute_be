@@ -94,6 +94,23 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public ResponseEntity<GenericResponse> getProfile(String userId){
+        Optional<Student> optional = findById(userId);
+        if (optional.isEmpty())
+            throw new RuntimeException("User not found");
+        Student student = optional.get();
+
+        return ResponseEntity.ok(
+                GenericResponse.builder()
+                        .success(true)
+                        .message("Retrieving student profile successfully")
+                        .result(student)
+                        .statusCode(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    @Override
     public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {
         Optional<Student> user = findById(userId);
         String phone =  request.getPhone();

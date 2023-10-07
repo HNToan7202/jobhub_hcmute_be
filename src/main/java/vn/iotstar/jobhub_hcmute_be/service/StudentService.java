@@ -31,5 +31,7 @@ public interface StudentService {
 
     ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 
+    ResponseEntity<GenericResponse> getProfile(String userId);
+
     ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;
 }

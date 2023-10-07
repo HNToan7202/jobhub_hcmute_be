@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 
@@ -38,6 +39,7 @@ public class Employer extends User{
     @Enumerated(EnumType.STRING)
     private EmployState employState;
 
+    @Nationalized
     private String companyName;
 
     @ElementCollection
@@ -49,10 +51,9 @@ public class Employer extends User{
     private String logo;
 
     private String website;
+
     private String foundedYear;
 
     private String teamSize;
-
-
     
 }

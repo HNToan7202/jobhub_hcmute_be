@@ -28,6 +28,12 @@ public interface EmployerService {
 
     <S extends Employer, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction);
 
+    Optional<Employer> findByPhoneAndIsActiveIsTrue(String phone);
+
+    Optional<Employer> findByUserIdAndIsActiveIsTrue(String userId);
+
+    ResponseEntity<GenericResponse> getProfile(String userId);
+
     ResponseEntity<GenericResponse> changeLogo(String userId, MultipartFile imageFile) throws IOException;
 
     ResponseEntity<GenericResponse> updateCompanyProfile(String userId, EmployerUpdateDTO request) throws Exception;

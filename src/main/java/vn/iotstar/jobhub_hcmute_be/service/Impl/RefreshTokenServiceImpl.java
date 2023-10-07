@@ -53,7 +53,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                                 .build());
             }
             Optional<User> optionalUser = userRepository.findById(userId);
-            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
+            if (optionalUser.isPresent() && optionalUser.get().getIsActive()) {
                 Optional<RefreshToken> token = refreshTokenRepository.findByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
                 if (token.isPresent() && jwtTokenProvider.validateToken(token.get().getToken())) {
                     UserDetail userDetail = (UserDetail) userDetailService.loadUserByUserId(jwtTokenProvider.getUserIdFromRefreshToken(token.get().getToken()));
@@ -93,7 +93,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void revokeRefreshToken(String userId) {
         try {
             Optional<User> optionalUser = userRepository.findById(userId);
-            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
+            if (optionalUser.isPresent() && optionalUser.get().getIsActive()) {
                 List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser_UserIdAndExpiredIsFalseAndRevokedIsFalse(userId);
                 if (refreshTokens.isEmpty()) {
                     return;
@@ -113,7 +113,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public ResponseEntity<?> logout(String userId) {
         try {
             Optional<User> optionalUser = userRepository.findById(userId);
-            if (optionalUser.isPresent() && optionalUser.get().isActive()) {
+            if (optionalUser.isPresent() && optionalUser.get().getIsActive()) {
                 Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByUserAndExpiredIsFalseAndRevokedIsFalse(optionalUser.get());
                 if (optionalRefreshToken.isPresent()) {
                     optionalRefreshToken.get().setRevoked(true);

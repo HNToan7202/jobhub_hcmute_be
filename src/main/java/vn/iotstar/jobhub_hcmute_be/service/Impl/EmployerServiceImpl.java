@@ -8,12 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
@@ -61,9 +58,40 @@ public class EmployerServiceImpl implements EmployerService {
         employerRepository.delete(entity);
     }
 
+
+
     @Override
     public <S extends Employer, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return employerRepository.findBy(example, queryFunction);
+    }
+
+    @Override
+    public Optional<Employer> findByPhoneAndIsActiveIsTrue(String phone) {
+        return employerRepository.findByPhoneAndIsActiveIsTrue(phone);
+    }
+
+    @Override
+    public Optional<Employer> findByUserIdAndIsActiveIsTrue(String userId) {
+        return employerRepository.findByUserIdAndIsActiveIsTrue(userId);
+    }
+
+
+    @Override
+    public ResponseEntity<GenericResponse> getProfile(String userId) {
+        Optional<Employer> optional = findByUserIdAndIsActiveIsTrue(userId);
+        if (optional.isEmpty())
+            throw new RuntimeException("User not found");
+
+        Employer user = optional.get();
+
+        return ResponseEntity.ok(
+                GenericResponse.builder()
+                        .success(true)
+                        .message("Retrieving user profile successfully")
+                        .result(user)
+                        .statusCode(HttpStatus.OK.value())
+                        .build()
+        );
     }
 
     @Override

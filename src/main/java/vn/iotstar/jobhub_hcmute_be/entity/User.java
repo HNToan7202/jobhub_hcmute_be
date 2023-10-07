@@ -45,7 +45,7 @@ public class User implements Serializable {
     @Nationalized
     private String about;
 
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     private Date createdAt;
 

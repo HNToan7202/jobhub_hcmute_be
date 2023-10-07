@@ -20,7 +20,7 @@ public class UserProfileResponse {
     private Date dateOfBirth;
     private String about;
     private Gender gender;
-    private boolean isActive;
+    private Boolean isActive;
     private Date createdAt;
     private Date updatedAt;
     private String role;
@@ -32,7 +32,7 @@ public class UserProfileResponse {
         this.phone = user.getPhone();
         this.email = user.getEmail();
         this.about = user.getAbout();
-        this.isActive = user.isActive();
+        this.isActive = user.getIsActive();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
         this.role = user.getRole().getName();
