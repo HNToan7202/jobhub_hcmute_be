@@ -20,7 +20,7 @@ public class JobDTO {
     private String link;
     private String logo;
     private Integer experience;
-    private Employer company;
+    private CompanyDTO company;
     private Integer quantity;
     private String benefit;
     private String salaryRange;

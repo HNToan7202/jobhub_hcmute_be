@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
+import vn.iotstar.jobhub_hcmute_be.dto.CompanyDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.JobDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
@@ -115,7 +116,9 @@ public class JobServiceImpl implements JobService {
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
-                jobDTO.setCompany(optional.get().getEmployer());
+                CompanyDTO companyDTO = new CompanyDTO();
+                BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
+                jobDTO.setCompany(companyDTO);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
                                 .success(true)
@@ -155,7 +158,9 @@ public class JobServiceImpl implements JobService {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 jobDTO.setIsApplied(isApplied);
-                jobDTO.setCompany(optional.get().getEmployer());
+                CompanyDTO companyDTO = new CompanyDTO();
+                BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
+                jobDTO.setCompany(companyDTO);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
                                 .success(true)
@@ -215,7 +220,9 @@ public class JobServiceImpl implements JobService {
         for(Job job : jobs){
             JobDTO jobDTO = new JobDTO();
             BeanUtils.copyProperties(job, jobDTO);
-            jobDTO.setCompany(job.getEmployer());
+            CompanyDTO companyDTO = new CompanyDTO();
+            BeanUtils.copyProperties(job.getEmployer(), companyDTO);
+            jobDTO.setCompany(companyDTO);
             jobDTOs.add(jobDTO);
         }
         return jobDTOs;
@@ -255,35 +262,23 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable, Boolean isActive){
-        try {
 
             Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
-
             List<Job> jobList = jobs.getContent();
-
             List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
-
             Map<String, Object> response = new HashMap<>();
             response.put("jobs", jobDTOs);
             response.put("currentPage", jobs.getNumber());
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(200)
                     .body(GenericResponse.builder()
                             .success(true)
                             .message("Get all jobs successfully!")
                             .result(response)
-                            .statusCode(HttpStatus.OK.value())
+                            .statusCode(200)
                             .build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(GenericResponse.builder()
-                            .success(false)
-                            .message(e.getMessage())
-                            .result("Failed to get all jobs")
-                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .build());
-        }
+
     }
 
     @Override

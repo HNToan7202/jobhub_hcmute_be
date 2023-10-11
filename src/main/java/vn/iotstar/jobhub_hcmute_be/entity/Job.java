@@ -74,7 +74,7 @@ public class Job implements Serializable {
     @ToString.Exclude
     private Position position;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
     private Employer employer;

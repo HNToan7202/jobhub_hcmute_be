@@ -8,6 +8,7 @@ import org.hibernate.annotations.Nationalized;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Employer extends User{
+public class Employer extends User implements Serializable {
 
     @OneToMany(mappedBy = "employer")
     @JsonBackReference
