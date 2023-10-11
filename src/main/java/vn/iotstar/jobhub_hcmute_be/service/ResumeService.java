@@ -30,6 +30,8 @@ public interface ResumeService {
 
     ResponseEntity<?> uploadResumeFile(MultipartFile resumFile, String userId) throws IOException;
 
+    ResponseEntity<?> getResumeUpload(String userId);
+
     ResponseEntity<?> updateResume(ResumeDTO resumeDTO, String studentId);
 
     ResponseEntity<?> getDetailResume(String studentId);

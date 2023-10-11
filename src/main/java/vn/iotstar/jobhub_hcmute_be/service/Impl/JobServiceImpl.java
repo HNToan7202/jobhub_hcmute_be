@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
@@ -25,6 +27,7 @@ import vn.iotstar.jobhub_hcmute_be.service.JobService;
 import java.util.*;
 
 @Service
+@Transactional
 public class JobServiceImpl implements JobService {
     @Autowired
     JobRepository jobRepository;
@@ -37,6 +40,21 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     SkillRepository skillRepository;
+
+    @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
+    public void checkJobDeadlines() {
+        // Lấy danh sách tất cả công việc từ cơ sở dữ liệu
+        Iterable<Job> jobs = jobRepository.findAll();
+
+        // Lặp qua từng công việc và kiểm tra thời hạn
+        for (Job job : jobs) {
+            if (job.getDeadline() != null && job.getDeadline().before(new Date())) {
+                // Nếu thời hạn đã qua, cập nhật trạng thái isActive thành false
+                job.setIsActive(false);
+                jobRepository.save(job); // Lưu công việc đã cập nhật
+            }
+        }
+    }
 
 
     @Override
@@ -97,6 +115,46 @@ public class JobServiceImpl implements JobService {
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
+                jobDTO.setCompanyName(optional.get().getEmployer().getCompanyName());
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(GenericResponse.builder()
+                                .success(true)
+                                .message("Get job detail successfully!")
+                                .result(jobDTO)
+                                .statusCode(HttpStatus.OK.value())
+                                .build());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(GenericResponse.builder()
+                                .success(false)
+                                .message("Job not found")
+                                .result("Job not found")
+                                .statusCode(HttpStatus.NOT_FOUND.value())
+                                .build());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .result("Failed to get job detail")
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .build());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getDetail(String jobId, String userId){
+        try {
+            Optional<Job> optional = jobRepository.findById(jobId);
+
+            if (optional.isPresent()) {
+                Job job = optional.get();
+                // kiểm tra xem userId đã apply vao job hay chưa
+                boolean isApplied = job.getJobApplies().stream().anyMatch(jobApply -> jobApply.getStudent().getUserId().equals(userId));
+                JobDTO jobDTO = new JobDTO();
+                BeanUtils.copyProperties(optional.get(), jobDTO);
+                jobDTO.setIsApplied(isApplied);
                 jobDTO.setCompanyName(optional.get().getEmployer().getCompanyName());
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
@@ -258,7 +316,7 @@ public class JobServiceImpl implements JobService {
             } else {
                 Position newPosition = new Position();
                 newPosition.setName(jobRequest.getPositionName());
-                newPosition = positionRepository.save(newPosition);
+                //newPosition = positionRepository.save(newPosition);
                 job.setPosition(newPosition);
             }
             List<Skill> skills = new ArrayList<>();
@@ -272,7 +330,7 @@ public class JobServiceImpl implements JobService {
                 } else {
                     Skill newSkill = new Skill();
                     newSkill.setName(skillName);
-                    newSkill = skillRepository.save(newSkill);
+                    //newSkill = skillRepository.save(newSkill);
                     skills.add(newSkill);
                 }
             }

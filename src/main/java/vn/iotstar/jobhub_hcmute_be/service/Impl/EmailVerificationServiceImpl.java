@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Async;
 import vn.iotstar.jobhub_hcmute_be.entity.EmailVerification;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
@@ -24,6 +25,7 @@ import java.util.Random;
 
 @Service
 @EnableScheduling
+@Transactional
 public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final int OTP_LENGTH = 6;
 

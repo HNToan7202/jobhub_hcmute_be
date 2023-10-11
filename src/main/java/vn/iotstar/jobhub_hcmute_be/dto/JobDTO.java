@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
@@ -31,4 +32,7 @@ public class JobDTO {
     private Date deadline;
     private Position position;
     private List<Skill> skills;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isApplied;
 }

@@ -52,7 +52,7 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> userRegisterEmail(RegisterRequest RegisterRequest);
 
-    ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception;
+    ResponseEntity<GenericResponse> getAccounts(int size, int page);
 
     ResponseEntity<GenericResponse> getAccounts(String role,int size, int page) throws Exception;
 

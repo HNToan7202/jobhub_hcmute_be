@@ -17,6 +17,7 @@ import java.util.Date;
 @Component
 @Log4j2
 public class JwtTokenProvider {
+
     @Autowired
     UserRepository userRepository;
 
@@ -54,7 +55,6 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject((userDetail.getUser().getUserId()))
-                //.claim("userId", userDetail.getUser().getUserId())
                 .setIssuer(issuer)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)

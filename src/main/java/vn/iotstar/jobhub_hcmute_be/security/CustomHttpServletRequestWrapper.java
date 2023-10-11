@@ -4,6 +4,7 @@ import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.owasp.encoder.Encode;
 
 import java.io.BufferedReader;
@@ -81,7 +82,7 @@ public class CustomHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return new CachedServletInputStream(byteArrayInputStream);
     }
 
-    public class CachedServletInputStream extends ServletInputStream {
+    public static class CachedServletInputStream extends ServletInputStream {
 
         private final ByteArrayInputStream inputStream;
 
@@ -110,12 +111,12 @@ public class CustomHttpServletRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(byte @NotNull [] b) throws IOException {
             return inputStream.read(b);
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte @NotNull [] b, int off, int len) throws IOException {
             return inputStream.read(b, off, len);
         }
     }

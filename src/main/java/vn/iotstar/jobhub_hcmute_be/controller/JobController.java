@@ -41,8 +41,15 @@ public class JobController {
     }
 
     @GetMapping("/detail-job")
-    public ResponseEntity<?> getDetail(@RequestParam("jobId") String id) {
-        return jobService.getDetail(id);
+    public ResponseEntity<?> getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        if(authorizationHeader != null){
+            String jwt = authorizationHeader.substring(7);
+            if(!jwt.isBlank()){
+                String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+                return jobService.getDetail(jobId, userId);
+            }
+        }
+        return jobService.getDetail(jobId);
     }
 
 }

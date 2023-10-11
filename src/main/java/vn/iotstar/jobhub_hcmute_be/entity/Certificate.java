@@ -2,12 +2,13 @@ package vn.iotstar.jobhub_hcmute_be.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
-import org.hibernate.annotations.Nationalized;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Certificate {
 
     @Id

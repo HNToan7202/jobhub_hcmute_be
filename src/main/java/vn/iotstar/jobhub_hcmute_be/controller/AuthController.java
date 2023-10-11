@@ -2,7 +2,6 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,7 +20,7 @@ import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
-import java.util.*;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -29,26 +28,35 @@ import java.util.*;
 @Tag(name="Authentication", description="Auth API")
 public class AuthController {
 
-    @Autowired
+    final
     UserService userService;
 
-    @Autowired
+    final
     AuthenticationManager authenticationManager;
 
-    @Autowired
+    final
     JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
+    final
     RefreshTokenService refreshTokenService;
 
-    @Autowired
+    final
     PasswordEncoder passwordEncoder;
 
-    @Autowired
+    final
     RoleRepository roleRepository;
 
-    @Autowired
-    private EmailVerificationService emailVerificationService;
+    private final EmailVerificationService emailVerificationService;
+
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder, RoleRepository roleRepository, EmailVerificationService emailVerificationService) {
+        this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.refreshTokenService = refreshTokenService;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+        this.emailVerificationService = emailVerificationService;
+    }
 
     @PostMapping("/login")
     @Transactional
@@ -56,12 +64,6 @@ public class AuthController {
         //Xử lý login ở đây
         return userService.userLogin(loginDTO);
     }
-
-//    @PostMapping("/refresh-access-token")
-//    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Authorization") String refreshToken) {
-//        String refresh_Token = refreshToken.substring(7);
-//        return refreshTokenService.refreshAccessToken(refresh_Token);
-//    }
 
     @PostMapping("/refresh-access-token")
     public ResponseEntity<?> refreshAccessToken(@RequestBody TokenRequest tokenRequest) {

@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 public class Course {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -30,5 +31,4 @@ public class Course {
     @JsonBackReference
     @ToString.Exclude
     private Resume resume;
-
 }

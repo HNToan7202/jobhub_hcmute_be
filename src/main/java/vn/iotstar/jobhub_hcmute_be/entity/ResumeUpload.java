@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalTime;
 import java.util.Date;
@@ -17,6 +18,7 @@ public class ResumeUpload {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String resumeId;
 
+    @Nationalized
     private String name;
 
     private String linkUpload;
@@ -26,7 +28,7 @@ public class ResumeUpload {
     @ToString.Exclude
     private Resume resume;
 
-    private boolean isMain;
+    private Boolean isMain;
 
     @JsonBackReference
     private Boolean isActive;

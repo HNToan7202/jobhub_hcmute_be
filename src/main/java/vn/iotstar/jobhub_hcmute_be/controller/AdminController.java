@@ -1,7 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,26 +15,31 @@ import vn.iotstar.jobhub_hcmute_be.service.UserService;
 import java.util.Objects;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
+@PostAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/admin")
 @Tag(name="Admin", description="Admin API")
 public class AdminController {
 
-    @Autowired
+    final
     UserService userService;
 
-    @Autowired
+    final
     AdminService adminService;
+
+    public AdminController(UserService userService, AdminService adminService) {
+        this.userService = userService;
+        this.adminService = adminService;
+    }
 
     //@PostAuthorize("hasRole('ADMIN')")
     @GetMapping("/hello")
-    public ResponseEntity hello(){
+    public ResponseEntity<?> hello(){
         return ResponseEntity.ok("hello");
     }
 
     @GetMapping("/user/get-list")
-    public ResponseEntity getListUser(@RequestParam(name = "size", required = false, defaultValue = "10") int size,
-                                      @RequestParam(name = "page", required = false, defaultValue = "0") int page) throws Exception {
+    public ResponseEntity<?> getListUser(@RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                      @RequestParam(name = "page", required = false, defaultValue = "0") int page) {
         return userService.getAccounts(size, page);
     }
 

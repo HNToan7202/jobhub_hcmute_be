@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class AdminServiceImpl implements AdminService {
    @Autowired
    private AdminRepository adminRepository;

@@ -69,7 +69,7 @@ public class Job implements Serializable {
 
     private Date deadline;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     //@JsonBackReference
     @ToString.Exclude
     private Position position;
@@ -84,7 +84,7 @@ public class Job implements Serializable {
     @ToString.Exclude
     private List<JobApply> jobApplies;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(name = "job_skill", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     @JsonManagedReference
     private List<Skill> skills;

@@ -81,7 +81,6 @@ public class WebSecurityConfig {
                         httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()
                         )
                 );
-//                .rememberMe(Customizer.withDefaults());
         return http.build();
     }
 

@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -32,6 +33,7 @@ import vn.iotstar.jobhub_hcmute_be.service.UserService;
 import java.util.*;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
@@ -305,7 +307,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getAccounts(int size, int page) throws Exception {
+    public ResponseEntity<GenericResponse> getAccounts(int size, int page) {
         if (page < 0) {
             return ResponseEntity.ok(GenericResponse.builder()
                     .message("Page index must not be less than 0")

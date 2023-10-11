@@ -1,10 +1,11 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -13,10 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import vn.iotstar.jobhub_hcmute_be.dto.ApplyJobRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.ResumeDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
@@ -30,61 +28,57 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/student")
-@Tag(name="Student", description="Student API")
+@Tag(name = "Student", description = "Student API")
 @PreAuthorize("hasRole('STUDENT')")
 public class StudentController {
 
-    @Autowired
-    ResumeService resumeService;
+    final ResumeService resumeService;
 
-    @Autowired
-    UserService userService;
+    final UserService userService;
 
-    @Autowired
-    JobApplyService jobApplyService;
+    final JobApplyService jobApplyService;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
+
+    public StudentController(ResumeService resumeService, UserService userService, JobApplyService jobApplyService, JwtTokenProvider jwtTokenProvider, StudentService studentService) {
+        this.resumeService = resumeService;
+        this.userService = userService;
+        this.jobApplyService = jobApplyService;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.studentService = studentService;
+    }
+
+    @GetMapping("/profile")
+    //@Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
+    public ResponseEntity<GenericResponse> getProfile(@RequestHeader("Authorization") String authorizationHeader) {
+        String jwt = authorizationHeader.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        return studentService.getProfile(userId);
+    }
 
     @Procedure("application/json")
     @ResponseBody
     @PostMapping("{studentId}/update-resume")
-    public ResponseEntity<?> updateResume(@RequestBody ResumeDTO resumeDTO,
-                                          @RequestHeader("Authorization") String authorizationHeader,
-                                          @PathVariable("studentId") String studentId, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<?> updateResume(@RequestBody ResumeDTO resumeDTO, @RequestHeader("Authorization") String authorizationHeader, @PathVariable("studentId") String studentId, BindingResult bindingResult) throws Exception {
         String jwt = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-        if(!userId.equals(studentId)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            GenericResponse.builder()
-                                    .success(false)
-                                    .message("Unauthorized: Empty or invalid token")
-                                    .statusCode(HttpStatus.UNAUTHORIZED.value())
-                                    .build()
-                    );
+        if (!userId.equals(studentId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(GenericResponse.builder().success(false).message("Unauthorized: Empty or invalid token").statusCode(HttpStatus.UNAUTHORIZED.value()).build());
         }
         // Kiểm tra xem các trường bắt buộc có được điền hay không
         if (bindingResult.hasErrors()) {
-            throw new Exception(Objects.requireNonNull(bindingResult
-                            .getFieldError())
-                    .getDefaultMessage()
-            );
+            throw new Exception(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
-        return resumeService.updateResume(resumeDTO,user.getUserId());
+        return resumeService.updateResume(resumeDTO, user.getUserId());
     }
 
 
-
     @PostMapping("/{jobId}/apply-job")
-    public ResponseEntity<?> applyForJob(
-            @PathVariable("jobId") String jobId,
-            @RequestBody ApplyJobRequest request) {
-       UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<?> applyForJob(@PathVariable("jobId") String jobId, @RequestBody ApplyJobRequest request) {
+        UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // Xử lý ứng tuyển vào công việc
         return jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
     }
@@ -94,45 +88,26 @@ public class StudentController {
 
         // Kiểm tra kích thước tệp
         if (resumeFile.getSize() > 5 * 1024 * 1024) { // 5MB
-            return ResponseEntity.badRequest()
-                    .body(
-                            GenericResponse.builder()
-                                    .success(false)
-                                    .message("File size exceeds the maximum limit of 5MB.")
-                                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                                    .build()
-                    );
+            return ResponseEntity.badRequest().body(GenericResponse.builder().success(false).message("File size exceeds the maximum limit of 5MB.").statusCode(HttpStatus.BAD_REQUEST.value()).build());
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            GenericResponse.builder()
-                                    .success(false)
-                                    .message("Unauthorized: Empty or invalid token")
-                                    .statusCode(HttpStatus.UNAUTHORIZED.value())
-                                    .build()
-                    );
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(GenericResponse.builder().success(false).message("Unauthorized: Empty or invalid token").statusCode(HttpStatus.UNAUTHORIZED.value()).build());
         }
         UserDetail user = (UserDetail) authentication.getPrincipal();
         String originalFileName = resumeFile.getOriginalFilename();
+        assert originalFileName != null;
         String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1).toLowerCase();
 
         // Kiểm tra xem tệp có đúng định dạng (chỉ cho phép .doc, .docx hoặc .pdf)
         if (!fileExtension.equals("doc") && !fileExtension.equals("docx") && !fileExtension.equals("pdf")) {
-            return ResponseEntity.badRequest()
-                    .body(
-                            GenericResponse.builder()
-                                    .success(false)
-                                    .message("Invalid file format. Only .doc, .docx, and .pdf are allowed.")
-                                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                                    .build()
-                    );
+            return ResponseEntity.badRequest().body(GenericResponse.builder().success(false).message("Invalid file format. Only .doc, .docx, and .pdf are allowed.").statusCode(HttpStatus.BAD_REQUEST.value()).build());
         }
         // Nếu tệp hợp lệ, gọi dịch vụ để xử lý tệp CV
         return resumeService.uploadResumeFile(resumeFile, user.getUserId());
     }
+
     @DeleteMapping("/cv/{resumeUploadID}")
     public ResponseEntity<?> deleteCV(@RequestHeader("Authorization") String token, @PathVariable String resumeUploadID) throws IOException {
         String jwt = token.substring(7);
@@ -141,16 +116,23 @@ public class StudentController {
     }
 
     @GetMapping("/detail-resume")
-    public ResponseEntity<?> getDetailResume(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseEntity<?> getDetailResume(@RequestHeader("Authorization") String authorizationHeader) {
         String jwt = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
         return resumeService.getDetailResume(user.getUserId());
     }
+
+    @GetMapping("/resume-upload")
+    public ResponseEntity<?> getResume(@RequestHeader("Authorization") String authorizationHeader) {
+        String jwt = authorizationHeader.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        return resumeService.getResumeUpload(user.getUserId());
+    }
+
     @PutMapping("/change-avatar")
-    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile,
-                                                        @RequestHeader("Authorization") String token)
-            throws IOException {
+    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile, @RequestHeader("Authorization") String token) throws IOException {
 
         String jwt = token.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
@@ -159,15 +141,9 @@ public class StudentController {
 
     @PreAuthorize("hasRole('STUDENT')")
     @PutMapping("/update-profile")
-    public ResponseEntity<GenericResponse> update(
-            @RequestBody UserUpdateRequest request,
-            @RequestHeader("Authorization") String authorizationHeader,
-            BindingResult bindingResult) throws Exception {
+    public ResponseEntity<GenericResponse> update(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
         if (bindingResult.hasErrors()) {
-            throw new Exception(Objects.requireNonNull(bindingResult
-                            .getFieldError())
-                    .getDefaultMessage()
-            );
+            throw new Exception(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
 
         String token = authorizationHeader.substring(7);

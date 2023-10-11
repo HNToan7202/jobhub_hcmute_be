@@ -37,6 +37,8 @@ public interface JobService {
 
     ResponseEntity<?> getDetail(String jobId);
 
+    ResponseEntity<?> getDetail(String jobId, String userId);
+
     ResponseEntity<?> findAllByEmployer(String id, Pageable pageable);
 
     Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable);

@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Service
+@Transactional
 public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
