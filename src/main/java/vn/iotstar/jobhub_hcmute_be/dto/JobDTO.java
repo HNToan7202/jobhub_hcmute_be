@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
+import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
@@ -19,7 +20,7 @@ public class JobDTO {
     private String link;
     private String logo;
     private Integer experience;
-    private String companyName;
+    private Employer company;
     private Integer quantity;
     private String benefit;
     private String salaryRange;

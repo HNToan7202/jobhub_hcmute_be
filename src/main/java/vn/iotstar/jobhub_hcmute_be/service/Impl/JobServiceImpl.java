@@ -115,7 +115,7 @@ public class JobServiceImpl implements JobService {
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
-                jobDTO.setCompanyName(optional.get().getEmployer().getCompanyName());
+                jobDTO.setCompany(optional.get().getEmployer());
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
                                 .success(true)
@@ -155,7 +155,7 @@ public class JobServiceImpl implements JobService {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 jobDTO.setIsApplied(isApplied);
-                jobDTO.setCompanyName(optional.get().getEmployer().getCompanyName());
+                jobDTO.setCompany(optional.get().getEmployer());
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(GenericResponse.builder()
                                 .success(true)
@@ -215,7 +215,7 @@ public class JobServiceImpl implements JobService {
         for(Job job : jobs){
             JobDTO jobDTO = new JobDTO();
             BeanUtils.copyProperties(job, jobDTO);
-            jobDTO.setCompanyName(job.getEmployer().getCompanyName());
+            jobDTO.setCompany(job.getEmployer());
             jobDTOs.add(jobDTO);
         }
         return jobDTOs;
