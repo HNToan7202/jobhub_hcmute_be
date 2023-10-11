@@ -1,6 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
+import jakarta.validation.constraints.Email;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CompanyDTO {
@@ -19,4 +22,9 @@ public class CompanyDTO {
     private String phone;
 
     private String about;
+
+    @Email
+    private String email;
+
+    private List<String> address;
 }
