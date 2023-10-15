@@ -17,7 +17,17 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>3.1.0</version> <!-- Đảm bảo phiên bản tương thích -->
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -98,10 +108,10 @@
         </dependency>
 
         <!-- webclient-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -145,11 +155,11 @@
             <version>2.0.4</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-boot-starter</artifactId>-->
-<!--            <version>3.0.0</version> &lt;!&ndash; Use the appropriate version &ndash;&gt;-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.springfox</groupId>-->
+        <!--            <artifactId>springfox-boot-starter</artifactId>-->
+        <!--            <version>3.0.0</version> &lt;!&ndash; Use the appropriate version &ndash;&gt;-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -221,11 +231,11 @@
         </dependency>
 
 
-<!--        <dependency>-->
-<!--            <groupId>com.microsoft.graph</groupId>-->
-<!--            <artifactId>microsoft-graph</artifactId>-->
-<!--            <version>[5.0,)</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.microsoft.graph</groupId>-->
+        <!--            <artifactId>microsoft-graph</artifactId>-->
+        <!--            <version>[5.0,)</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -236,7 +246,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version> <!-- Sử dụng phiên bản mới nhất có sẵn -->
+            <version>20210307</version>
         </dependency>
 
         <dependency>

@@ -2,6 +2,8 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +16,7 @@ import vn.iotstar.jobhub_hcmute_be.service.JobService;
 @RequestMapping("/api/v1/job")
 @Validated
 @Tag(name = "Job", description = "Job API")
+@EnableCaching
 public class JobController {
 
     final JwtTokenProvider jwtTokenProvider;
@@ -26,6 +29,7 @@ public class JobController {
     }
 
     @GetMapping("/get-all-jobs")
+
     public ResponseEntity<GenericResponse> getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,  @RequestParam(defaultValue = "true") Boolean isActive) {
         return jobService.getAllJobs(PageRequest.of(index, size), isActive);
     }
@@ -41,6 +45,7 @@ public class JobController {
     }
 
     @GetMapping("/detail-job")
+    @Cacheable(value = "job", key = "#jobId")
     public ResponseEntity<?> getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         if(authorizationHeader != null){
             String jwt = authorizationHeader.substring(7);

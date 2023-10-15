@@ -110,7 +110,9 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ResponseEntity<?> getDetail(String jobId){
+        System.out.println("called find job by id form DB");
         try {
+
             Optional<Job> optional = jobRepository.findById(jobId);
 
             if (optional.isPresent()) {

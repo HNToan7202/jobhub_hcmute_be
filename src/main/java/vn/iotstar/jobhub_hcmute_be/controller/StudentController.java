@@ -83,8 +83,9 @@ public class StudentController {
         return jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
     }
 
+
     @PutMapping("/post-cv")
-    public ResponseEntity<?> uploadResume(@ModelAttribute MultipartFile resumeFile) throws IOException {
+    public ResponseEntity<?> uploadResume(@ModelAttribute MultipartFile resumeFile,@RequestParam(defaultValue = "false") Boolean isMain) throws IOException {
 
         // Kiểm tra kích thước tệp
         if (resumeFile.getSize() > 5 * 1024 * 1024) { // 5MB
@@ -105,7 +106,7 @@ public class StudentController {
             return ResponseEntity.badRequest().body(GenericResponse.builder().success(false).message("Invalid file format. Only .doc, .docx, and .pdf are allowed.").statusCode(HttpStatus.BAD_REQUEST.value()).build());
         }
         // Nếu tệp hợp lệ, gọi dịch vụ để xử lý tệp CV
-        return resumeService.uploadResumeFile(resumeFile, user.getUserId());
+        return resumeService.uploadResumeFile(resumeFile, user.getUserId(), isMain);
     }
 
     @DeleteMapping("/cv/{resumeUploadID}")

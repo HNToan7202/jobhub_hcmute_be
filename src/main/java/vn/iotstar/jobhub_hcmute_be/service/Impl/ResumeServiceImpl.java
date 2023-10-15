@@ -59,6 +59,9 @@ public class ResumeServiceImpl implements ResumeService {
     @Autowired
     ProjectRepository projectRepository;
 
+    @Autowired
+    ResumeUploadRepository resumeUploadRepository;
+
     @Override
     public <S extends Resume> List<S> saveAll(Iterable<S> entities) {
         return resumeRepository.saveAll(entities);
@@ -101,7 +104,7 @@ public class ResumeServiceImpl implements ResumeService {
 
 
     @Override
-    public ResponseEntity<?> uploadResumeFile(MultipartFile resumeFile, String userId) throws IOException {
+    public ResponseEntity<?> uploadResumeFile(MultipartFile resumeFile, String userId, Boolean isMain) throws IOException {
         String url = cloudinaryService.uploadResume(resumeFile, userId);
         if (url == null) {
             return ResponseEntity.status(500).body(GenericResponse.builder()
@@ -124,10 +127,12 @@ public class ResumeServiceImpl implements ResumeService {
             //resume.setStudent(student);
             resume.setCreateAt(new Date());
             resume.setUpdateAt(new Date());
+
             student.setResume(resume);
         }
         ResumeUpload resume = new ResumeUpload();
         resume.setLinkUpload(url);
+        resume.setIsMain(isMain);
         //resume.setCandidate(candidate);
         resume.setName(resumeFile.getOriginalFilename());
         resume.setCreateAt(new Date());
@@ -535,33 +540,61 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public ResponseEntity<?> deleteResume(String resumeId, String userId) throws IOException {
 
-        Optional<Student> opt = studentRepository.findById(userId);
-        if (opt.isEmpty()) {
-            return ResponseEntity.status(404).body(GenericResponse.builder()
-                    .success(false)
-                    .message("User Not Found")
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build());
-        }
-        Student student = opt.get();
-        Resume resume = student.getResume();
-        if (resume == null) {
-            return ResponseEntity.status(404).body(GenericResponse.builder()
-                    .success(false)
-                    .message("Resume Not Found")
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build());
-        }
+//        Optional<Student> opt = studentRepository.findById(userId);
+//        if (opt.isEmpty()) {
+//            return ResponseEntity.status(404).body(GenericResponse.builder()
+//                    .success(false)
+//                    .message("User Not Found")
+//                    .statusCode(HttpStatus.NOT_FOUND.value())
+//                    .build());
+//        }
+//        Student student = opt.get();
+//        Resume resume = student.getResume();
+//        if (resume == null) {
+//            return ResponseEntity.status(404).body(GenericResponse.builder()
+//                    .success(false)
+//                    .message("Resume Not Found")
+//                    .statusCode(HttpStatus.NOT_FOUND.value())
+//                    .build());
+//        }
+//
+//        List<ResumeUpload> resumeUploads = resume.getResumeUploads();
+//        if (resumeUploads == null) {
+//            return ResponseEntity.status(404).body(GenericResponse.builder()
+//                    .success(false)
+//                    .message("Resume Not Found")
+//                    .statusCode(HttpStatus.NOT_FOUND.value())
+//                    .build());
+//        }
+//        //tìm và xoá resumeUpload
+//        ResumeUpload cv = null;
+//        for (ResumeUpload resumeUpload : resumeUploads) {
+//            if (resumeUpload.getResumeId().equals(resumeId)) {
+//                cv = resumeUpload;
+//                break;
+//            }
+//        }
+//        if (cv == null) {
+//            return ResponseEntity.status(404).body(GenericResponse.builder()
+//                    .success(false)
+//                    .message("Resume Not Found")
+//                    .statusCode(HttpStatus.NOT_FOUND.value())
+//                    .build());
+//        }
+//        resumeUploads.remove(cv);
+//        resume.setResumeUploads(resumeUploads);
+//        student.setResume(resume);
+//        studentRepository.save(student);
 
-        List<ResumeUpload> resumeUploads = resume.getResumeUploads();
-        if (resumeUploads == null) {
+        Optional<ResumeUpload> optResumeUpload = resumeUploadRepository.findById(resumeId);
+        if (optResumeUpload.isEmpty()) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
                     .message("Resume Not Found")
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .build());
         }
-        //delete(cv);
+        resumeRepository.deleteById(resumeId);
         return ResponseEntity.status(200)
                 .body(
                         GenericResponse.builder()
