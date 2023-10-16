@@ -19,6 +19,8 @@ import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
@@ -41,6 +43,8 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     SkillRepository skillRepository;
+
+    ActionResult actionResult = null;
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
     public void checkJobDeadlines() {
@@ -281,6 +285,21 @@ public class JobServiceImpl implements JobService {
                             .statusCode(200)
                             .build());
 
+    }
+    @Override
+    public ActionResult getAllJob(Pageable pageable, Boolean isActive){
+        actionResult = new ActionResult();
+        Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
+        List<Job> jobList = jobs.getContent();
+        List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
+        Map<String, Object> response = new HashMap<>();
+        response.put("jobs", jobDTOs);
+        response.put("currentPage", jobs.getNumber());
+        response.put("totalItems", jobs.getTotalElements());
+        response.put("totalPages", jobs.getTotalPages());
+        actionResult.setErrorCode(ErrorCodeEnum.OK);
+        actionResult.setData(response);
+        return actionResult;
     }
 
     @Override

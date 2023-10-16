@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,8 @@ public interface JobService {
     List<Job> findAllByIsActive(Boolean isActive);
 
     ResponseEntity<GenericResponse> getAllJobs(Pageable pageable, Boolean isActive);
+
+    ActionResult getAllJob(Pageable pageable, Boolean isActive);
 
     ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId);
 }
