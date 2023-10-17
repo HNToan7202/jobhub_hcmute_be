@@ -4,23 +4,15 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
-import vn.iotstar.jobhub_hcmute_be.dto.CompanyDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.JobDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
@@ -81,6 +73,11 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> findAll() throws InterruptedException {
         return jobRepository.findAll();
+    }
+
+    @Override
+    public Job updateJob(Job job) {
+        return jobRepository.save(job);
     }
 
     @Override
@@ -430,4 +427,78 @@ public class JobServiceImpl implements JobService {
                             .build());
         }
     }
+
+
+    @Override
+    public ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Job> optionalJob = findById(jobId);
+            if (optionalJob.isPresent()) {
+                Job job = optionalJob.get();
+                if (employerId.equals(optionalJob.get().getEmployer().getUserId())) {
+                    job.setName(jobUpdateRequest.getName());
+                    job.setJobType(JobType.valueOf(jobUpdateRequest.getJobType()));
+                    job.setTime(jobUpdateRequest.getTime());
+                    job.setLink(jobUpdateRequest.getLink());
+                    job.setLogo(jobUpdateRequest.getLogo());
+                    job.setQuantity(jobUpdateRequest.getQuantity());
+                    job.setBenefit(jobUpdateRequest.getBenefit());
+                    job.setSalaryRange(jobUpdateRequest.getSalaryRange());
+                    job.setRequirement(jobUpdateRequest.getRequirement());
+                    job.setLocation(jobUpdateRequest.getLocation());
+                    job.setDescription(jobUpdateRequest.getDescription());
+                    job.setDeadline(jobUpdateRequest.getDeadline());
+
+                    // Check if position is existed
+                    Optional<Position> position = positionRepository.findByName(jobUpdateRequest.getPositionName());
+                    if (position.isPresent()) {
+                        job.setPosition(position.get());
+                    } else {
+                        Position newPosition = new Position();
+                        newPosition.setName(jobUpdateRequest.getPositionName());
+                        newPosition = positionRepository.save(newPosition);
+                        job.setPosition(newPosition);
+                    }
+                    List<Skill> skills = new ArrayList<>();
+                    for (String skillName : jobUpdateRequest.getSkillsRequired()) {
+                        Optional<Skill> skillOptional = skillRepository.findSkillBySkillName(skillName);
+                        if (skillOptional.isPresent()) {
+                            Skill skill;
+                            skill = skillOptional.get();
+                            skills.add(skill);
+                        } else {
+                            Skill newSkill = new Skill();
+                            newSkill.setName(skillName);
+                            newSkill = skillRepository.save(newSkill);
+                            skills.add(newSkill);
+                        }
+                    }
+                    job.setSkills(skills);
+
+                    Job updatedJob = updateJob(job);
+                    JobDTO jobResponse = new JobDTO();
+                    BeanUtils.copyProperties(updatedJob, jobResponse);
+                    if (updatedJob != null) {
+                        actionResult.setErrorCode(ErrorCodeEnum.UPDATE_JOB_SUCCESS);
+                        actionResult.setData(jobResponse);
+                    }
+
+                } else {
+                    actionResult.setErrorCode(ErrorCodeEnum.UPDATE_JOB_FAILED);
+
+                }
+            } else {
+                actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+            }
+
+        } catch (IllegalArgumentException e) {
+
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return actionResult;
+    }
+
 }

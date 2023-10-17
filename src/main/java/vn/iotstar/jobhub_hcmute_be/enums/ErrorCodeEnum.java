@@ -22,6 +22,14 @@ public enum ErrorCodeEnum {
 
     GET_SKILL_SUCCESS(200, 200, "Get skill success"),
 
+    DUPPLICATE_SKILL(409, 409, "Duplicate skill"),
+
+    NOT_FOUND_SKILL(404, 404, "Not found skill"),
+
+    UPDATE_JOB_SUCCESS(200, 200, "Update job success"),
+
+    UPDATE_JOB_FAILED(400, 400, "Update job failed"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

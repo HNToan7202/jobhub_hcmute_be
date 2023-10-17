@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.JobDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.JobUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
@@ -22,6 +23,8 @@ public interface JobService {
 
     List<Job> findAll() throws InterruptedException;
 
+
+    Job updateJob(Job job);
 
     <S extends Job> S save(S entity);
 
@@ -56,4 +59,6 @@ public interface JobService {
     ActionResult getAlls(Boolean isActive);
 
     ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId);
+
+    ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId);
 }

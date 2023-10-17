@@ -7,7 +7,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import java.time.Duration;
 
 @SpringBootApplication
-@EnableCaching
 public class JobHubHcmuteBeApplication {
 
     public static void main(String[] args) {
