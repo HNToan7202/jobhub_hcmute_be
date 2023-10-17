@@ -30,6 +30,8 @@ public enum ErrorCodeEnum {
 
     UPDATE_JOB_FAILED(400, 400, "Update job failed"),
 
+    GET_POSITION_SUCCESS(200, 200, "Get position success"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 
