@@ -10,8 +10,22 @@ public enum ErrorCodeEnum {
     NO_CONTENT(204, 204, "Not have data"),
     BAD_REQUEST(400, 400, "Bad request"),
     NOT_FOUND(404, 404, "Not found"),
-    UNAUTHORIZED(401, 401, "Unauthorized");
-    private static Map<Integer, ErrorCodeEnum> map = new HashMap<>();
+    UNAUTHORIZED(401, 401, "Unauthorized"),
+
+    INTERNAL_SERVER_ERROR(500, 500, "Internal server error"),
+
+    GET_ALL_JOB_SUCCESS(200, 200, "Get all job success"),
+
+    GET_JOB_BY_EMPLOYER_SUCCESS(200, 200, "Get job by employer success"),
+
+    GET_JOB_DETAIL_SUCCESS(200, 200, "Get job detail success"),
+
+    GET_SKILL_SUCCESS(200, 200, "Get skill success"),
+
+    POST_JOB_SUCCESS(200, 200, "Post job success");
+
+
+    private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();
     static {
         for (ErrorCodeEnum returnCode : ErrorCodeEnum.values()) {
             map.put(returnCode.code, returnCode);

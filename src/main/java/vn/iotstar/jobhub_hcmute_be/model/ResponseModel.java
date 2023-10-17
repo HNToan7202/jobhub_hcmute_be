@@ -16,7 +16,6 @@ public class ResponseModel implements Serializable {
     private String message;
     private final long time = System.currentTimeMillis();
     private Object result;
-    private long totalItems;
 
     public ResponseModel() {
         this(ErrorCodeEnum.OK);

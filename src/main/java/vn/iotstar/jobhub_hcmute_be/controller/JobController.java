@@ -2,13 +2,10 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -26,6 +23,7 @@ public class JobController {
     final JwtTokenProvider jwtTokenProvider;
 
     final JobService jobService;
+
     @Autowired
     ResponseBuild responseBuild;
 
@@ -34,42 +32,54 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    //    @GetMapping("/get-all-jobs")
-//
-//    public ResponseEntity<GenericResponse> getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,  @RequestParam(defaultValue = "true") Boolean isActive) {
-//        return jobService.getAllJobs(PageRequest.of(index, size), isActive);
-//    }
     @GetMapping("/get-all-jobs")
-        public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,  @RequestParam(defaultValue = "true") Boolean isActive) {
-        ActionResult actionResult = null;
+    public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true") Boolean isActive) {
+        ActionResult actionResult = new ActionResult();
         try {
-            actionResult = jobService.getAllJob(PageRequest.of(index, size), isActive);
+            actionResult = jobService.getAllJobs(PageRequest.of(index, size), isActive);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
     }
 
+
     @GetMapping("/get-all")
-    public ResponseEntity<GenericResponse> getAllJob(@RequestParam(defaultValue = "true") Boolean isActive) {
-        return jobService.getAlls(isActive);
+    public ResponseModel getAllJob(@RequestParam(defaultValue = "true") Boolean isActive) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = jobService.getAlls(isActive);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
     @GetMapping("{employerId}/get-list-jobs")
-    public ResponseEntity<?> getJobsByEmployer(@PathVariable("employerId") String id, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
-        return jobService.findAllByEmployer(id, PageRequest.of(index, size));
+    public ResponseModel getJobsByEmployer(@PathVariable("employerId") String id, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = jobService.findAllByEmployer(id, PageRequest.of(index, size));
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
+
     @GetMapping("/detail-job")
-    public ResponseEntity<?> getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    public ResponseModel getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
         if (authorizationHeader != null) {
             String jwt = authorizationHeader.substring(7);
             if (!jwt.isBlank()) {
                 String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-                return jobService.getDetail(jobId, userId);
+                actionResult = jobService.getDetail(jobId, userId);
+                return responseBuild.build(actionResult);
             }
         }
-        return jobService.getDetail(jobId);
+        actionResult = jobService.getDetail(jobId);
+        return responseBuild.build(actionResult);
     }
 
 }

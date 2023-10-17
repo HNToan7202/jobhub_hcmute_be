@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.SkillRepository;
 import vn.iotstar.jobhub_hcmute_be.service.SkillService;
 
@@ -58,23 +60,19 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getAllSkill(){
+    public ActionResult getAllSkill(){
+        ActionResult actionResult = new ActionResult();
         List<Skill> skillList = findAll();
         if(skillList == null)
         {
             skillList = new ArrayList<>();
-            return ResponseEntity.ok(GenericResponse.builder()
-                    .success(true)
-                    .message("Upload successfully")
-                    .result(skillList)
-                    .statusCode(HttpStatus.OK.value())
-                    .build());
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+            return actionResult;
         }
-        return ResponseEntity.ok(GenericResponse.builder()
-                .success(true)
-                .message("Upload successfully")
-                .result(skillList)
-                .statusCode(HttpStatus.OK.value())
-                .build());
+
+        actionResult.setErrorCode(ErrorCodeEnum.GET_SKILL_SUCCESS);
+        actionResult.setData(skillList);
+        return actionResult;
+
     }
 }

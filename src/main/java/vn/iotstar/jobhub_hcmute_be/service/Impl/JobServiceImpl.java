@@ -1,15 +1,21 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.CompanyDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
@@ -31,6 +37,7 @@ import java.util.*;
 
 @Service
 @Transactional
+@Slf4j
 public class JobServiceImpl implements JobService {
     @Autowired
     JobRepository jobRepository;
@@ -44,7 +51,10 @@ public class JobServiceImpl implements JobService {
     @Autowired
     SkillRepository skillRepository;
 
-    ActionResult actionResult = null;
+    ActionResult actionResult;
+
+    Map<String, Object> response;
+
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
     public void checkJobDeadlines() {
@@ -67,8 +77,9 @@ public class JobServiceImpl implements JobService {
         return jobRepository.saveAll(entities);
     }
 
+
     @Override
-    public List<Job> findAll() {
+    public List<Job> findAll() throws InterruptedException {
         return jobRepository.findAll();
     }
 
@@ -78,8 +89,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Optional<Job> findById(String s) {
-        return jobRepository.findById(s);
+    public Optional<Job> findById(String id) {
+        return jobRepository.findById(id);
     }
 
     @Override
@@ -112,12 +123,16 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findAll(pageable);
     }
 
+    public Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable) {
+        return jobRepository.findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(employerId, pageable);
+    }
+
     @Override
-    public ResponseEntity<?> getDetail(String jobId){
-        System.out.println("called find job by id form DB");
+    public ActionResult getDetail(String jobId) {
+        ActionResult actionResult = new ActionResult();
         try {
 
-            Optional<Job> optional = jobRepository.findById(jobId);
+            Optional<Job> optional = findById(jobId);
 
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
@@ -125,37 +140,26 @@ public class JobServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(GenericResponse.builder()
-                                .success(true)
-                                .message("Get job detail successfully!")
-                                .result(jobDTO)
-                                .statusCode(HttpStatus.OK.value())
-                                .build());
+
+                actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
+                actionResult.setData(jobDTO);
+                return actionResult;
+
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(GenericResponse.builder()
-                                .success(false)
-                                .message("Job not found")
-                                .result("Job not found")
-                                .statusCode(HttpStatus.NOT_FOUND.value())
-                                .build());
+                actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+                return actionResult;
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(GenericResponse.builder()
-                            .success(false)
-                            .message(e.getMessage())
-                            .result("Failed to get job detail")
-                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .build());
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
         }
     }
 
     @Override
-    public ResponseEntity<?> getDetail(String jobId, String userId){
+    public ActionResult getDetail(String jobId, String userId) {
+        ActionResult actionResult = new ActionResult();
         try {
-            Optional<Job> optional = jobRepository.findById(jobId);
+            Optional<Job> optional = findById(jobId);
 
             if (optional.isPresent()) {
                 Job job = optional.get();
@@ -167,63 +171,49 @@ public class JobServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(GenericResponse.builder()
-                                .success(true)
-                                .message("Get job detail successfully!")
-                                .result(jobDTO)
-                                .statusCode(HttpStatus.OK.value())
-                                .build());
+
+                actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
+                actionResult.setData(jobDTO);
+                return actionResult;
+
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(GenericResponse.builder()
-                                .success(false)
-                                .message("Job not found")
-                                .result("Job not found")
-                                .statusCode(HttpStatus.NOT_FOUND.value())
-                                .build());
+                actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+                return actionResult;
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(GenericResponse.builder()
-                            .success(false)
-                            .message(e.getMessage())
-                            .result("Failed to get job detail")
-                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .build());
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
         }
     }
 
-    @Override
-    public ResponseEntity<?> findAllByEmployer(String id, Pageable pageable) {
 
+
+    @Override
+    public ActionResult findAllByEmployer(String id, Pageable pageable) {
+        actionResult = new ActionResult();
         try {
-            Page<Job> jobs =  jobRepository.findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable);
-            Map<String, Object> response = new HashMap<>();
+            //Page<Job> jobs = findAll(pageable);
+
+            Page<Job> jobs = findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable);
+            response = new HashMap<>();
             response.put("jobs", jobs.getContent());
             response.put("currentPage", jobs.getNumber());
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(GenericResponse.builder()
-                            .success(true)
-                            .message("Get jobs by employer successfully!")
-                            .result(response)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
+
+            actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_EMPLOYER_SUCCESS);
+            actionResult.setData(jobs.getContent());
+            return actionResult;
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(GenericResponse.builder()
-                            .success(false)
-                            .message(e.getMessage())
-                            .result("Failed to get jobs")
-                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .build());
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
         }
     }
-    public List<JobDTO> convertJobToJobDTO(List<Job> jobs){
+
+
+    public List<JobDTO> convertJobToJobDTO(List<Job> jobs) {
         List<JobDTO> jobDTOs = new ArrayList<>();
-        for(Job job : jobs){
+        for (Job job : jobs) {
             JobDTO jobDTO = new JobDTO();
             BeanUtils.copyProperties(job, jobDTO);
             CompanyDTO companyDTO = new CompanyDTO();
@@ -235,72 +225,127 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable){
-        return jobRepository.findByIsActiveOrderByCreatedAtDesc(isActive,pageable);
+    public Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable) {
+        return jobRepository.findByIsActiveOrderByCreatedAtDesc(isActive, pageable);
     }
 
     @Override
-    public List<Job> findAllByIsActive(Boolean isActive){
+    public List<Job> findAllByIsActive(Boolean isActive) {
         return jobRepository.findJobsByIsActive(isActive);
     }
+
+
     @Override
-    public ResponseEntity<GenericResponse> getAlls(Boolean isActive) {
+    public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
+        actionResult = new ActionResult();
+        try {
+            Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
+            response = new HashMap<>();
+            response.put("jobs", jobs.getContent());
+            response.put("currentPage", jobs.getNumber());
+            response.put("totalItems", jobs.getTotalElements());
+            response.put("totalPages", jobs.getTotalPages());
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+            actionResult.setData(response);
+            return actionResult;
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
+        }
+    }
 
 
+
+    @Override
+    public ActionResult getAlls(Boolean isActive){
+        actionResult = new ActionResult();
 
         List<Job> jobs = findAllByIsActive(isActive);
 
         List<JobDTO> jobDTOs = convertJobToJobDTO(jobs);
 
-        Map<String, Object> response = new HashMap<>();
+        response = new HashMap<>();
         response.put("jobs", jobDTOs);
         response.put("total", jobDTOs.size());
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(GenericResponse.builder()
-                        .success(true)
-                        .message("Get jobs successfully!")
-                        .result(response)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
-
-    }
-
-    @Override
-    public ResponseEntity<GenericResponse> getAllJobs(Pageable pageable, Boolean isActive){
-
-            Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
-            List<Job> jobList = jobs.getContent();
-            List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
-            Map<String, Object> response = new HashMap<>();
-            response.put("jobs", jobDTOs);
-            response.put("currentPage", jobs.getNumber());
-            response.put("totalItems", jobs.getTotalElements());
-            response.put("totalPages", jobs.getTotalPages());
-            return ResponseEntity.status(200)
-                    .body(GenericResponse.builder()
-                            .success(true)
-                            .message("Get all jobs successfully!")
-                            .result(response)
-                            .statusCode(200)
-                            .build());
-
-    }
-    @Override
-    public ActionResult getAllJob(Pageable pageable, Boolean isActive){
-        actionResult = new ActionResult();
-        Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
-        List<Job> jobList = jobs.getContent();
-        List<JobDTO> jobDTOs = convertJobToJobDTO(jobList);
-        Map<String, Object> response = new HashMap<>();
-        response.put("jobs", jobDTOs);
-        response.put("currentPage", jobs.getNumber());
-        response.put("totalItems", jobs.getTotalElements());
-        response.put("totalPages", jobs.getTotalPages());
-        actionResult.setErrorCode(ErrorCodeEnum.OK);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_JOB_SUCCESS);
         actionResult.setData(response);
         return actionResult;
+
     }
+
+
+    public ActionResult post_job(PostJobRequest jobRequest, String employerId) {
+        actionResult = new ActionResult();
+        try {
+
+            Job job = new Job();
+            job.setName(jobRequest.getName());
+            job.setJobType(JobType.valueOf(jobRequest.getJobType()));
+            job.setQuantity(jobRequest.getQuantity());
+            //job.setJobTitle(jobRequest.getJobTitle());
+            job.setBenefit(jobRequest.getBenefit());
+            job.setSalaryRange(jobRequest.getSalaryRange());
+            job.setRequirement(jobRequest.getRequirement());
+            job.setLocation(jobRequest.getLocation());
+            job.setDescription(jobRequest.getDescription());
+            job.setDeadline(jobRequest.getDeadline());
+            job.setTime(jobRequest.getTime());
+            job.setLink(jobRequest.getLink());
+
+
+            // Check if position is existed
+            Optional<Position> position = positionRepository.findByName(jobRequest.getPositionName());
+            if (position.isPresent()) {
+                job.setPosition(position.get());
+            } else {
+                Position newPosition = new Position();
+                newPosition.setName(jobRequest.getPositionName());
+                //newPosition = positionRepository.save(newPosition);
+                job.setPosition(newPosition);
+            }
+            List<Skill> skills = new ArrayList<>();
+
+            for (String skillName : jobRequest.getSkillsRequired()) {
+                Optional<Skill> skillOptional = skillRepository.findSkillBySkillName(skillName);
+                if (skillOptional.isPresent()) {
+                    Skill skill;
+                    skill = skillOptional.get();
+                    skills.add(skill);
+                } else {
+                    Skill newSkill = new Skill();
+                    newSkill.setName(skillName);
+                    //newSkill = skillRepository.save(newSkill);
+                    skills.add(newSkill);
+                }
+            }
+            job.setSkills(skills);
+            job.setIsActive(true);
+            Optional<Employer> optional = employerRepository.findById(employerId);
+            if (optional.isPresent()) {
+                job.setEmployer(optional.get());
+                job.setLogo(optional.get().getLogo());
+            } else {
+                actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+                return actionResult;
+            }
+            job = jobRepository.save(job);
+
+            JobDTO jobResponse = new JobDTO();
+            BeanUtils.copyProperties(job, jobResponse);
+
+            actionResult.setErrorCode(ErrorCodeEnum.POST_JOB_SUCCESS);
+            actionResult.setData(jobResponse);
+            return actionResult;
+
+        } catch (Exception e) {
+
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
+
+        }
+    }
+
 
     @Override
     public ResponseEntity<?> postJob(PostJobRequest jobRequest, String employerId) {

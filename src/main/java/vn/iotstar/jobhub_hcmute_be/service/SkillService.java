@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.ResponseEntity;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,5 +26,5 @@ public interface SkillService {
 
     Page<Skill> findAll(Pageable pageable);
 
-    ResponseEntity<GenericResponse> getAllSkill();
+    ActionResult getAllSkill();
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 @Service
 @Transactional
 public class AdminServiceImpl implements AdminService {
+
    @Autowired
    private AdminRepository adminRepository;
 
@@ -63,9 +64,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ResponseEntity<?> acceptEmployer(String employerId){
-        Optional<Employer> optionalUserser = employerRepository.findById(employerId);
-        if(optionalUserser.isPresent()){
-            if(optionalUserser.get().getEmployState() == EmployState.ACTIVE){
+        Optional<Employer> optionalUsers = employerRepository.findById(employerId);
+        if(optionalUsers.isPresent()){
+            if(optionalUsers.get().getEmployState() == EmployState.ACTIVE){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(GenericResponse.builder()
                                 .success(false)
@@ -73,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
                                 .statusCode(HttpStatus.BAD_REQUEST.value())
                                 .build());
             }
-            Employer employer = optionalUserser.get();
+            Employer employer = optionalUsers.get();
             employer.setEmployState(EmployState.ACTIVE);
             employerRepository.save(employer);
             return ResponseEntity.status(HttpStatus.OK)

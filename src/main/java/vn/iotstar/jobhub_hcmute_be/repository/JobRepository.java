@@ -13,7 +13,11 @@ import java.util.List;
 @Hidden
 @Repository
 public interface JobRepository extends JpaRepository<Job, String> {
-    Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String id, Pageable pageable);
+    Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable);
+
+    Page<Job> findAllByEmployer_UserId(String employerId, Pageable pageable);
+
+    List<Job> findAllByEmployer_UserId(String employerId);
 
     Page<Job> findByIsActiveOrderByCreatedAtDesc(boolean isActive, Pageable pageable);
     @Query("SELECT j FROM Job j WHERE j.isActive = :isActive")

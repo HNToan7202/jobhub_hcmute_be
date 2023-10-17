@@ -16,8 +16,12 @@ import java.util.UUID;
 @Transactional
 public class CloudinaryServiceImpl implements CloudinaryService {
 
-    @Autowired
+    final
     Cloudinary cloudinary;
+
+    public CloudinaryServiceImpl(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
 
     @Override
     public String uploadImage(MultipartFile imageFile) throws IOException {
@@ -30,7 +34,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         Map<String, String> params= ObjectUtils.asMap(
                 "folder", "Recruiment Assets/User",
                 "resource_type", "image");
-        Map uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);
+        var uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);
 //        return cloudinary.url().format().generate(uploadResult.get("public_id").toString());
         return (String) uploadResult.get("secure_url");
     }
@@ -40,15 +44,14 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         Map<String, String> params= ObjectUtils.asMap(
                 "folder", "Recruiment Assets/User",
                 "resource_type", "image");
-        Map result = cloudinary.uploader().destroy(getPublicIdImage(imageUrl), params);
+        var result = cloudinary.uploader().destroy(getPublicIdImage(imageUrl), params);
         System.out.println(result.get("result").toString());
 
     }
 
     public String getPublicIdImage(String imageUrl)  {
         String imageName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
-        String publicId = "Recruiment Assets/User/" + imageName;
-        return publicId;
+        return "Recruiment Assets/User/" + imageName;
     }
 
     @Override
@@ -56,12 +59,12 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
         String id = UUID.randomUUID().toString().split("-")[0];
         String nameCV= "cv_"+userId+"_"+id;
-        Map<String, String> params= ObjectUtils.asMap(
+        var params= ObjectUtils.asMap(
                 "folder", "Recruiment Assets/CV",
                 "public_id",imageFile.getOriginalFilename(),
                 "resource_type", "auto",
                 "format","pdf");
-        Map uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);
+        var uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);
 //        return cloudinary.url().format().generate(uploadResult.get("public_id").toString());
         System.out.println(uploadResult.get("public_id").toString());
         return (String) uploadResult.get("secure_url");

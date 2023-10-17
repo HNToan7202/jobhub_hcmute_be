@@ -8,11 +8,12 @@ import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Data
-public class JobDTO {
+public class JobDTO implements Serializable {
     private String jobId;
     private String name;
     private JobType jobType;
