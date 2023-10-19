@@ -30,7 +30,21 @@ public enum ErrorCodeEnum {
 
     UPDATE_JOB_FAILED(400, 400, "Update job failed"),
 
+    JOB_EXISTED(409, 409, "Job existed"),
+
     GET_POSITION_SUCCESS(200, 200, "Get position success"),
+
+    APPLICATION_SUCCESSFULLY(200, 200, "Application successfully"),
+
+    CV_NOT_FOUND(404, 404, "CV not found"),
+
+    ALREADY_APPLY(409, 409, "Already apply"),
+
+    JOB_NOT_FOUND(404, 404, "Job not found"),
+
+    CANDIDATE_NOT_FOUND(404, 404, "Candidate not found"),
+
+    JOB_EXPIRED(400, 400, "Job expired"),
 
     POST_JOB_SUCCESS(200, 200, "Post job success");
 

@@ -23,12 +23,13 @@ public class PositionController {
     final
     PositionService positionService;
 
-    @Autowired
+    final
     ResponseBuild responseBuild;
 
 
-    public PositionController(PositionService positionService) {
+    public PositionController(PositionService positionService, ResponseBuild responseBuild) {
         this.positionService = positionService;
+        this.responseBuild = responseBuild;
     }
 
     @GetMapping("")

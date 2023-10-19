@@ -1,20 +1,14 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.SkillRepository;
 import vn.iotstar.jobhub_hcmute_be.service.SkillService;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,11 +59,9 @@ public class SkillServiceImpl implements SkillService {
         List<Skill> skillList = findAll();
         if(skillList == null)
         {
-            skillList = new ArrayList<>();
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             return actionResult;
         }
-
         actionResult.setErrorCode(ErrorCodeEnum.GET_SKILL_SUCCESS);
         actionResult.setData(skillList);
         return actionResult;

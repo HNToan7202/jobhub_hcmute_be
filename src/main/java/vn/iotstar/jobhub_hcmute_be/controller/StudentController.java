@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
@@ -41,6 +45,10 @@ public class StudentController {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final StudentService studentService;
+
+    @Autowired
+    ResponseBuild responseBuild;
+
 
     public StudentController(ResumeService resumeService, UserService userService, JobApplyService jobApplyService, JwtTokenProvider jwtTokenProvider, StudentService studentService) {
         this.resumeService = resumeService;
@@ -77,10 +85,16 @@ public class StudentController {
 
 
     @PostMapping("/{jobId}/apply-job")
-    public ResponseEntity<?> applyForJob(@PathVariable("jobId") String jobId, @RequestBody ApplyJobRequest request) {
+    public ResponseModel applyForJob(@PathVariable("jobId") String jobId, @RequestBody ApplyJobRequest request) {
+        ActionResult actionResult = new ActionResult();
         UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        // Xử lý ứng tuyển vào công việc
-        return jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
+        try {
+            actionResult = jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
+        }
+        catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
     }
 
 
@@ -140,7 +154,6 @@ public class StudentController {
         return studentService.changeAvatar(userId, imageFile);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @PutMapping("/update-profile")
     public ResponseEntity<GenericResponse> update(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
         if (bindingResult.hasErrors()) {

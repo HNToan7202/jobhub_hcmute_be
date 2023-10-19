@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.ResponseEntity;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,5 +48,5 @@ public interface JobApplyService {
 
     <S extends JobApply, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction);
 
-    ResponseEntity<?> applyForJob(String userId, String jobId, String resumeLink);
+    ActionResult applyForJob(String userId, String jobId, String resumeLink);
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 
 import java.util.List;
+import java.util.Optional;
 
 @Hidden
 @Repository
@@ -18,6 +19,8 @@ public interface JobRepository extends JpaRepository<Job, String> {
     Page<Job> findAllByEmployer_UserId(String employerId, Pageable pageable);
 
     List<Job> findAllByEmployer_UserId(String employerId);
+
+    Optional<Job> findJobByNameAndIsActiveIsTrue(String name);
 
     Page<Job> findByIsActiveOrderByCreatedAtDesc(boolean isActive, Pageable pageable);
     @Query("SELECT j FROM Job j WHERE j.isActive = :isActive")

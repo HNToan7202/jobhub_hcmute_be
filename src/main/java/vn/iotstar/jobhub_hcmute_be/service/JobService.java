@@ -58,7 +58,7 @@ public interface JobService {
 
     ActionResult getAlls(Boolean isActive);
 
-    ResponseEntity<?> postJob(PostJobRequest jobRequest, String recruiterId);
+    ActionResult postJob(PostJobRequest jobRequest, String recruiterId);
 
     ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId);
 }

@@ -18,6 +18,8 @@ import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.ResumeUpload;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
@@ -127,77 +129,79 @@ public class JobApplyServiceImpl implements JobApplyService {
     }
 
     @Override
-    public ResponseEntity<?> applyForJob(String userId, String jobId, String resumeLink) {
+    public ActionResult applyForJob(String userId, String jobId, String resumeUploadId) {
+        ActionResult actionResult = new ActionResult();
 
+        // Kiểm tra xem công việc có tồn tại hay không
         Optional<Job> optionalJob = jobRepository.findById(jobId);
-        if (!optionalJob.isPresent()) {
-            throw new NotFoundException("Job not found");
+        if (optionalJob.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.JOB_NOT_FOUND);
+            return actionResult;
         }
         Job job = optionalJob.get();
+
         // Kiểm tra xem công việc còn hạn apply hay không
         Date expirationDate = job.getDeadline();
         Date currentDate = new Date();
-        if (job.getIsActive() && expirationDate.before(currentDate)) {
+        boolean isJobActive = job.getIsActive();
+
+        if ((isJobActive && expirationDate.before(currentDate)) || !isJobActive) {
             // Nếu công việc đang active nhưng đã hết hạn apply, set trạng thái isActive thành false
             job.setIsActive(false);
             jobRepository.save(job);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Job application has expired");
-        } else if (!job.getIsActive()) {
-            // Nếu công việc đã không còn active, trả về thông báo hết hạn với status code 410 (Gone)
-            return ResponseEntity.status(HttpStatus.GONE).body("Job application has expired");
+            actionResult.setErrorCode(ErrorCodeEnum.JOB_EXPIRED);
+            return actionResult;
         }
 
         // Tìm ứng viên trong cơ sở dữ liệu
         Optional<Student> optionalCandidate = studentRepository.findById(userId);
-        if (!optionalCandidate.isPresent()) {
-            throw new NotFoundException("Candidate not found");
+        if (optionalCandidate.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
+            return actionResult;
         }
-        //Check xem ứng viên đã apply vào job hay chưa
         Student candidate = optionalCandidate.get();
-        if(jobApplyRepository.findByStudentAndJob(candidate,job) != null){
-            return ResponseEntity.status(409)
-                    .body(GenericResponse.builder()
-                            .success(false)
-                            .message("Candidate has already applied to this job.")
-                            .statusCode(409)
-                            .build());
+
+        // Kiểm tra xem ứng viên đã apply vào công việc này chưa
+        if (jobApplyRepository.findByStudentAndJob(candidate, job) != null) {
+            actionResult.setErrorCode(ErrorCodeEnum.ALREADY_APPLY);
+            return actionResult;
         }
 
-        List<ResumeUpload> resumeUploadList = optionalCandidate.get().getResume().getResumeUploads();
-        for (ResumeUpload resumeUpload : resumeUploadList) {
-            if(resumeUpload.getLinkUpload().equals(resumeLink)){
-                return ResponseEntity.status(409)
-                        .body(GenericResponse.builder()
-                                .success(false)
-                                .message("Cannot Found CV Link.")
-                                .statusCode(409)
-                                .build());
+        // Kiểm tra xem CV của ứng viên tồn tại
+        boolean isResumeFound = candidate.getResume().getResumeUploads()
+                .stream()
+                .anyMatch(upload -> upload.getResumeId().equals(resumeUploadId));
+        String resumeLink = "";
+        if (isResumeFound) {
+            Optional<ResumeUpload> optionalResumeUpload = candidate.getResume().getResumeUploads()
+                    .stream()
+                    .filter(upload -> upload.getResumeId().equals(resumeUploadId))
+                    .findFirst();
+            if (optionalResumeUpload.isPresent()) {
+                resumeLink = optionalResumeUpload.get().getLinkUpload();
             }
         }
+        if (!isResumeFound) {
+            actionResult.setErrorCode(ErrorCodeEnum.CV_NOT_FOUND);
+            return actionResult;
+        }
 
-//        // Kiểm tra xem CV có tồn tại trong database không
-//        Optional<ResumeUpload> optionalResume = resumeRepository.findById(resumeId);
-//        if (!optionalResume.isPresent()) {
-//            throw new NotFoundException("Resume not found");
-//        }
-//
-//        Resume resume = optionalResume.get();
-//        // Tạo đơn ứng tuyển
+        // Tạo đơn ứng tuyển
         JobApply application = new JobApply();
         application.setJob(job);
         application.setState(State.NOT_RECEIVED);
         application.setStudent(candidate);
+        application.setResume(candidate.getResume());
         application.setResumeUpoad(resumeLink);
-        //Ánh xạ những thứ còn lại của candidate qua cho JobApply
+        // Ánh xạ những thứ còn lại của candidate qua cho JobApply
         BeanUtils.copyProperties(candidate, application);
+
         // Lưu đơn ứng tuyển vào database
         JobApply jobApply = jobApplyRepository.save(application);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(GenericResponse.builder()
-                        .success(true)
-                        .message("Apply Successful!")
-                        .result(jobApply)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
+        actionResult.setData(jobApply);
+        actionResult.setErrorCode(ErrorCodeEnum.APPLICATION_SUCCESSFULLY);
+
+        return actionResult;
     }
+
 }

@@ -1,7 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
@@ -24,12 +23,13 @@ public class JobController {
 
     final JobService jobService;
 
-    @Autowired
+    final
     ResponseBuild responseBuild;
 
-    public JobController(JwtTokenProvider jwtTokenProvider, JobService jobService) {
+    public JobController(JwtTokenProvider jwtTokenProvider, JobService jobService, ResponseBuild responseBuild) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.jobService = jobService;
+        this.responseBuild = responseBuild;
     }
 
     @GetMapping("/get-all-jobs")
@@ -69,7 +69,7 @@ public class JobController {
 
     @GetMapping("/detail-job")
     public ResponseModel getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        ActionResult actionResult = new ActionResult();
+        ActionResult actionResult;
         if (authorizationHeader != null) {
             String jwt = authorizationHeader.substring(7);
             if (!jwt.isBlank()) {

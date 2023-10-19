@@ -17,8 +17,12 @@ import java.util.Optional;
 @Transactional
 public class PositionServiceImpl implements PositionService {
 
-    @Autowired
+    final
     PositionRepository positionRepository;
+
+    public PositionServiceImpl(PositionRepository positionRepository) {
+        this.positionRepository = positionRepository;
+    }
 
     public List<Position> findAll() {
         return positionRepository.findAll();

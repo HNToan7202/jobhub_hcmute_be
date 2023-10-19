@@ -59,15 +59,21 @@ public class EmployerController {
     @Transactional
     //post 1 job
     @PostMapping("/post-job")
-    public ResponseEntity<?> addJob(@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody PostJobRequest jobRequest, BindingResult bindingResult) throws Exception {
-
+    public ResponseModel addJob(@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody PostJobRequest jobRequest, BindingResult bindingResult) throws Exception {
+        ActionResult actionResult = new ActionResult();
         String jwt = authorizationHeader.substring(7);
         String employerId = jwtTokenProvider.getUserIdFromJwt(jwt);
         // Kiểm tra xem các trường bắt buộc có được điền hay không
         if (bindingResult.hasErrors()) {
             throw new Exception(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
-        return jobService.postJob(jobRequest, employerId);
+        try {
+            actionResult = jobService.postJob(jobRequest, employerId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+
+        return responseBuild.build(actionResult);
     }
 
     @PutMapping("/update-job/{jobId}")
