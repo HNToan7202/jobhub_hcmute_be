@@ -49,4 +49,6 @@ public interface JobApplyService {
     <S extends JobApply, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction);
 
     ActionResult applyForJob(String userId, String jobId, String resumeLink);
+
+    ActionResult findJobAppliesByCandidate(String studentId, Pageable pageable);
 }

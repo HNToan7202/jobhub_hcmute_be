@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -72,7 +70,6 @@ public class EmployerController {
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
-
         return responseBuild.build(actionResult);
     }
 

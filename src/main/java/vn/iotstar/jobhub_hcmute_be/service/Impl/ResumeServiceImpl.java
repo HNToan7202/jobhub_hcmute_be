@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
@@ -138,6 +140,7 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setCreateAt(new Date());
         resume.setUpdateAt(new Date());
         resume.setResume(student.getResume());
+        resume.setIsActive(true);
         List<ResumeUpload> resumeUploads;
         resumeUploads = student.getResume().getResumeUploads();
         if (resumeUploads == null)
@@ -173,17 +176,18 @@ public class ResumeServiceImpl implements ResumeService {
                     .build());
         }
         List<ResumeUpload> resumeUploads = student.getResume().getResumeUploads();
-        if (resumeUploads == null || resumeUploads.isEmpty()) {
-            return ResponseEntity.status(404).body(GenericResponse.builder()
-                    .success(false)
-                    .message("Resume Not Found")
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build());
+        List<ResumeUpload> list2 = new ArrayList<>();
+        for (ResumeUpload resume: resumeUploads
+             ) {
+            if(resume.getIsActive() == true){
+                list2.add(resume);
+            }
         }
+        //chỉ lấy những resume isActive = true
         return ResponseEntity.status(200).body(GenericResponse.builder()
                 .success(true)
                 .message("Get Resume Successfully!")
-                .result(resumeUploads)
+                .result(list2)
                 .statusCode(HttpStatus.OK.value())
                 .build());
     }
@@ -538,71 +542,25 @@ public class ResumeServiceImpl implements ResumeService {
 
 
     @Override
-    public ResponseEntity<?> deleteResume(String resumeId, String userId) throws IOException {
-
-//        Optional<Student> opt = studentRepository.findById(userId);
-//        if (opt.isEmpty()) {
-//            return ResponseEntity.status(404).body(GenericResponse.builder()
-//                    .success(false)
-//                    .message("User Not Found")
-//                    .statusCode(HttpStatus.NOT_FOUND.value())
-//                    .build());
-//        }
-//        Student student = opt.get();
-//        Resume resume = student.getResume();
-//        if (resume == null) {
-//            return ResponseEntity.status(404).body(GenericResponse.builder()
-//                    .success(false)
-//                    .message("Resume Not Found")
-//                    .statusCode(HttpStatus.NOT_FOUND.value())
-//                    .build());
-//        }
-//
-//        List<ResumeUpload> resumeUploads = resume.getResumeUploads();
-//        if (resumeUploads == null) {
-//            return ResponseEntity.status(404).body(GenericResponse.builder()
-//                    .success(false)
-//                    .message("Resume Not Found")
-//                    .statusCode(HttpStatus.NOT_FOUND.value())
-//                    .build());
-//        }
-//        //tìm và xoá resumeUpload
-//        ResumeUpload cv = null;
-//        for (ResumeUpload resumeUpload : resumeUploads) {
-//            if (resumeUpload.getResumeId().equals(resumeId)) {
-//                cv = resumeUpload;
-//                break;
-//            }
-//        }
-//        if (cv == null) {
-//            return ResponseEntity.status(404).body(GenericResponse.builder()
-//                    .success(false)
-//                    .message("Resume Not Found")
-//                    .statusCode(HttpStatus.NOT_FOUND.value())
-//                    .build());
-//        }
-//        resumeUploads.remove(cv);
-//        resume.setResumeUploads(resumeUploads);
-//        student.setResume(resume);
-//        studentRepository.save(student);
-
-        Optional<ResumeUpload> optResumeUpload = resumeUploadRepository.findById(resumeId);
-        if (optResumeUpload.isEmpty()) {
-            return ResponseEntity.status(404).body(GenericResponse.builder()
-                    .success(false)
-                    .message("Resume Not Found")
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build());
+    public ActionResult deleteResume(String resumeId, String userId){
+        ActionResult actionResult = new ActionResult();
+        Optional<ResumeUpload> opt = resumeUploadRepository.findById(resumeId);
+        if (opt.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.CV_NOT_FOUND);
+            return actionResult;
         }
-        resumeRepository.deleteById(resumeId);
-        return ResponseEntity.status(200)
-                .body(
-                        GenericResponse.builder()
-                                .success(true)
-                                .message("Delete Resume Success")
-                                .statusCode(200)
-                                .build()
-                );
-
+        else {
+            System.out.println("CV:"+opt.get().getResumeId());
+            ResumeUpload resumeUpload = opt.get();
+            resumeUpload.setIsActive(false);
+            resumeUploadRepository.save(resumeUpload);
+            actionResult.setData(resumeUpload);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+            Optional<ResumeUpload> opt2 = resumeUploadRepository.findById(resumeId);
+            if (opt2.isPresent()){
+                System.out.println("Delete CV failed");
+            }
+        }
+        return actionResult;
     }
 }

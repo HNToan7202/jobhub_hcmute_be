@@ -1,9 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
+import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
@@ -29,6 +30,7 @@ import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/student")
@@ -90,8 +92,7 @@ public class StudentController {
         UserDetail userDetail = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
             actionResult = jobApplyService.applyForJob(userDetail.getUserId(), jobId, request.getResumeLink());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
@@ -99,7 +100,7 @@ public class StudentController {
 
 
     @PutMapping("/post-cv")
-    public ResponseEntity<?> uploadResume(@ModelAttribute MultipartFile resumeFile,@RequestParam(defaultValue = "false") Boolean isMain) throws IOException {
+    public ResponseEntity<?> uploadResume(@ModelAttribute MultipartFile resumeFile, @RequestParam(defaultValue = "false") Boolean isMain) throws IOException {
 
         // Kiểm tra kích thước tệp
         if (resumeFile.getSize() > 5 * 1024 * 1024) { // 5MB
@@ -124,10 +125,16 @@ public class StudentController {
     }
 
     @DeleteMapping("/cv/{resumeUploadID}")
-    public ResponseEntity<?> deleteCV(@RequestHeader("Authorization") String token, @PathVariable String resumeUploadID) throws IOException {
+    public ResponseModel deleteCV(@RequestHeader("Authorization") String token, @PathVariable String resumeUploadID) {
+        ActionResult actionResult = new ActionResult();
         String jwt = token.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-        return resumeService.deleteResume(resumeUploadID, userId);
+        try {
+            actionResult = resumeService.deleteResume(resumeUploadID, userId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
     @GetMapping("/detail-resume")
@@ -163,5 +170,19 @@ public class StudentController {
         String token = authorizationHeader.substring(7);
         String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
         return studentService.updateProfile(userIdFromToken, request);
+    }
+
+    @GetMapping("/jobs/applicants")
+    public ResponseModel getAppliedJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            Pageable pageable = PageRequest.of(index, size);
+            actionResult = jobApplyService.findJobAppliesByCandidate(userIdFromToken, pageable);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
     }
 }

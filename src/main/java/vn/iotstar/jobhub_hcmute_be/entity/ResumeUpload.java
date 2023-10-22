@@ -30,7 +30,6 @@ public class ResumeUpload {
 
     private Boolean isMain;
 
-    @JsonBackReference
     private Boolean isActive;
 
     private Date createAt;

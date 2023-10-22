@@ -32,6 +32,8 @@ public enum ErrorCodeEnum {
 
     JOB_EXISTED(409, 409, "Job existed"),
 
+    GET_JOB_APPLY_SUCCESSFULLY(200, 200, "Get job apply successfully"),
+
     GET_POSITION_SUCCESS(200, 200, "Get position success"),
 
     APPLICATION_SUCCESSFULLY(200, 200, "Application successfully"),
