@@ -2,6 +2,7 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -95,6 +96,8 @@ public class StudentServiceImpl implements StudentService {
                 .build());
     }
 
+
+    @Cacheable(value = "student", key = "#userId")
     @Override
     public ResponseEntity<GenericResponse> getProfile(String userId){
         Optional<Student> optional = findById(userId);
@@ -111,6 +114,7 @@ public class StudentServiceImpl implements StudentService {
                         .build()
         );
     }
+
 
     @Override
     public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {

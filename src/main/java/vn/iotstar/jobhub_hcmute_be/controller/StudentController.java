@@ -2,6 +2,8 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -15,7 +17,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
@@ -30,7 +31,6 @@ import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/student")
@@ -50,6 +50,9 @@ public class StudentController {
 
     @Autowired
     ResponseBuild responseBuild;
+
+    @Autowired
+    private CacheManager cacheManager;
 
 
     public StudentController(ResumeService resumeService, UserService userService, JobApplyService jobApplyService, JwtTokenProvider jwtTokenProvider, StudentService studentService) {
@@ -172,17 +175,19 @@ public class StudentController {
         return studentService.updateProfile(userIdFromToken, request);
     }
 
+    @Cacheable("applicants")
     @GetMapping("/jobs/applicants")
     public ResponseModel getAppliedJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
-            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            String studentId = jwtTokenProvider.getUserIdFromJwt(token);
             Pageable pageable = PageRequest.of(index, size);
-            actionResult = jobApplyService.findJobAppliesByCandidate(userIdFromToken, pageable);
+            actionResult = jobApplyService.findJobAppliesByCandidate(studentId, pageable);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
+
 }

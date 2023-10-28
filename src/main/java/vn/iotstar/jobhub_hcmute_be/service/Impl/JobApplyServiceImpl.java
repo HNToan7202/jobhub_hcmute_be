@@ -3,10 +3,12 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
+import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.ResumeUpload;
@@ -33,6 +35,10 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    public Page<JobApply> findAllByStudent_UserIdOrderByCreatedAtDesc(Pageable pageable, String userId) {
+        return jobApplyRepository.findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, userId);
+    }
 
     @Override
     public <S extends JobApply> List<S> saveAll(Iterable<S> entities) {
@@ -195,18 +201,27 @@ public class JobApplyServiceImpl implements JobApplyService {
         return actionResult;
     }
 
+
     @Override
     public ActionResult findJobAppliesByCandidate(String studentId, Pageable pageable) {
+
         ActionResult actionResult = new ActionResult();
-        Page<JobApply> jobApplyPage = jobApplyRepository.findAllByStudent_UserIdOrderByCreatedAtDesc(pageable,studentId);
+        Page<JobApply> jobApplyPage = findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, studentId);
+        List<JobApplyDto> jobApplyDtos = new ArrayList<>();
+        for(JobApply jobApply : jobApplyPage.getContent()) {
+            JobApplyDto jobApplyDto = new JobApplyDto();
+            BeanUtils.copyProperties(jobApply, jobApplyDto);
+            jobApplyDtos.add(jobApplyDto);
+        }
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("content", jobApplyPage.getContent());
+        map.put("content", jobApplyDtos);
         map.put("pageNumber", jobApplyPage.getPageable().getPageNumber());
         map.put("pageSize", jobApplyPage.getSize());
         map.put("totalPages", jobApplyPage.getTotalPages());
         map.put("totalElements", jobApplyPage.getTotalElements());
         actionResult.setData(map);
         actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_APPLY_SUCCESSFULLY);
+
         return actionResult;
 
     }

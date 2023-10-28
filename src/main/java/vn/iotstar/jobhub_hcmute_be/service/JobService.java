@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,9 @@ public interface JobService {
 
     Page<Job> findAll(Pageable pageable);
 
+
+    @CacheEvict(value = "applicationCache", allEntries = true)
+    void clearAllCache();
 
     ActionResult getDetail(String jobId);
 

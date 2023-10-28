@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -306,6 +307,7 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @Cacheable("users")
     @Override
     public ResponseEntity<GenericResponse> getAccounts(int size, int page) {
         if (page < 0) {
@@ -338,6 +340,7 @@ public class UserServiceImpl implements UserService {
                         .build());
     }
 
+    @Cacheable(key = "#role", value = "users")
     @Override
     public ResponseEntity<GenericResponse> getAccounts(String role, int size, int page) throws Exception {
         if (page < 0) {

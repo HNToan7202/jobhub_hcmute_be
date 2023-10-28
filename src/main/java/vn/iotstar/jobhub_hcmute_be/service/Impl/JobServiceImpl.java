@@ -4,11 +4,12 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
@@ -125,6 +126,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @CacheEvict(value = "applicationCache", allEntries = true)
+    public void clearAllCache() {
+        System.out.println("Clearing cache...");
+    }
+
+    @Cacheable(value = "applicationCache", key = "#jobId")
+    @Override
     public ActionResult getDetail(String jobId) {
         ActionResult actionResult = new ActionResult();
         try {
@@ -184,7 +192,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-
+    @Cacheable(value = "employer", key = "#id")
     @Override
     public ActionResult findAllByEmployer(String id, Pageable pageable) {
         actionResult = new ActionResult();
@@ -199,7 +207,7 @@ public class JobServiceImpl implements JobService {
             response.put("totalPages", jobs.getTotalPages());
 
             actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_EMPLOYER_SUCCESS);
-            actionResult.setData(jobs.getContent());
+            actionResult.setData(response);
             return actionResult;
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
@@ -232,6 +240,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
+    @Cacheable("jobs")
     @Override
     public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
         actionResult = new ActionResult();
@@ -252,7 +261,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-
+    @Cacheable("jobList")
     @Override
     public ActionResult getAlls(Boolean isActive){
         actionResult = new ActionResult();
@@ -272,6 +281,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
+    @CachePut(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult postJob(PostJobRequest jobRequest, String employerId) {
         actionResult = new ActionResult();
@@ -351,92 +361,8 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-//
-//    @Override
-//    public ResponseEntity<?> postJob(PostJobRequest jobRequest, String employerId) {
-//        try {
-//
-//            Job job = new Job();
-//            job.setName(jobRequest.getName());
-//            job.setJobType(JobType.valueOf(jobRequest.getJobType()));
-//            job.setQuantity(jobRequest.getQuantity());
-//            //job.setJobTitle(jobRequest.getJobTitle());
-//            job.setBenefit(jobRequest.getBenefit());
-//            job.setSalaryRange(jobRequest.getSalaryRange());
-//            job.setRequirement(jobRequest.getRequirement());
-//            job.setLocation(jobRequest.getLocation());
-//            job.setDescription(jobRequest.getDescription());
-//            job.setDeadline(jobRequest.getDeadline());
-//            job.setTime(jobRequest.getTime());
-//            job.setLink(jobRequest.getLink());
-//
-//            //Check trước dùng beanutils để ánh xạ
-////            Position position = new Position();
-////            position.setName(jobRequest.getPositionName());
-////            job.setPosition(position);
-//
-//            // Check if position is existed
-//            Optional<Position> position = positionRepository.findByName(jobRequest.getPositionName());
-//            if (position.isPresent()) {
-//                job.setPosition(position.get());
-//            } else {
-//                Position newPosition = new Position();
-//                newPosition.setName(jobRequest.getPositionName());
-//                //newPosition = positionRepository.save(newPosition);
-//                job.setPosition(newPosition);
-//            }
-//            List<Skill> skills = new ArrayList<>();
-//
-//            for (String skillName : jobRequest.getSkillsRequired()) {
-//                Optional<Skill> skillOptional = skillRepository.findSkillBySkillName(skillName);
-//                if (skillOptional.isPresent()) {
-//                    Skill skill;
-//                    skill = skillOptional.get();
-//                    skills.add(skill);
-//                } else {
-//                    Skill newSkill = new Skill();
-//                    newSkill.setName(skillName);
-//                    //newSkill = skillRepository.save(newSkill);
-//                    skills.add(newSkill);
-//                }
-//            }
-//            job.setSkills(skills);
-//            job.setIsActive(true);
-//            Optional<Employer> optional = employerRepository.findById(employerId);
-//            if (optional.isPresent()) {
-//                job.setEmployer(optional.get());
-//                job.setLogo(optional.get().getLogo());
-//            } else {
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-//                        .body(GenericResponse.builder()
-//                                .success(false)
-//                                .message("Unauthorized")
-//                                .result("Invalid token")
-//                                .statusCode(HttpStatus.UNAUTHORIZED.value())
-//                                .build());
-//            }
-//            job = jobRepository.save(job);
-////            JobDTO jobResponse = new JobDTO();
-////            BeanUtils.copyProperties(job, jobResponse);
-//            return ResponseEntity.status(HttpStatus.OK)
-//                    .body(GenericResponse.builder()
-//                            .success(true)
-//                            .message("Post job successfully!")
-//                            .result(job)
-//                            .statusCode(HttpStatus.OK.value())
-//                            .build());
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(GenericResponse.builder()
-//                            .success(false)
-//                            .message(e.getMessage())
-//                            .result("Failed to add job")
-//                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-//                            .build());
-//        }
-//    }
 
-
+    @CachePut(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId) {
         ActionResult actionResult = new ActionResult();

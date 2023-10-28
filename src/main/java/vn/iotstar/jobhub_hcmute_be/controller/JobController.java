@@ -26,6 +26,12 @@ public class JobController {
     final
     ResponseBuild responseBuild;
 
+    @GetMapping("/clear-cache")
+    public String clearCache() {
+        jobService.clearAllCache();
+        return "Cache cleared";
+    }
+
     public JobController(JwtTokenProvider jwtTokenProvider, JobService jobService, ResponseBuild responseBuild) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.jobService = jobService;
@@ -65,7 +71,6 @@ public class JobController {
         }
         return responseBuild.build(actionResult);
     }
-
 
     @GetMapping("/detail-job")
     public ResponseModel getDetail(@RequestParam("jobId") String jobId, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
