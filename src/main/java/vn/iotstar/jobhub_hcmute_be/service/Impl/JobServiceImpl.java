@@ -192,7 +192,6 @@ public class JobServiceImpl implements JobService {
     }
 
 
-    @Cacheable(value = "employer", key = "#id")
     @Override
     public ActionResult findAllByEmployer(String id, Pageable pageable) {
         actionResult = new ActionResult();
