@@ -375,7 +375,6 @@ public class JobServiceImpl implements JobService {
                     job.setJobType(JobType.valueOf(jobUpdateRequest.getJobType()));
                     job.setTime(jobUpdateRequest.getTime());
                     job.setLink(jobUpdateRequest.getLink());
-                    job.setLogo(jobUpdateRequest.getLogo());
                     job.setQuantity(jobUpdateRequest.getQuantity());
                     job.setBenefit(jobUpdateRequest.getBenefit());
                     job.setSalaryRange(jobUpdateRequest.getSalaryRange());

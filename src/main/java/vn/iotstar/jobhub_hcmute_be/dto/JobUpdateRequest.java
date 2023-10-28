@@ -18,7 +18,6 @@ public class JobUpdateRequest {
     String jobType;
     String time;
     String link;
-    String logo;
     @Min(value = 1,message = "Min of quantity is 1")
     Integer quantity;
     String benefit;
