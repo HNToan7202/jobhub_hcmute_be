@@ -12,6 +12,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
+import vn.iotstar.jobhub_hcmute_be.entity.PasswordResetOtp;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 
 import java.io.IOException;
@@ -57,6 +58,14 @@ public interface UserService {
     ResponseEntity<GenericResponse> getAccounts(String role,int size, int page) throws Exception;
 
     ResponseEntity<GenericResponse> validateVerificationAccount(String token);
+
+    void createPasswordResetOtpForUser(User user, String otp);
+
+    String validatePasswordResetOtp(String otp);
+
+    Optional<PasswordResetOtp> getUserByPasswordResetOtp(String otp);
+
+    void changeUserPassword(User user, String newPassword, String confirmPassword);
 
 //    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 //

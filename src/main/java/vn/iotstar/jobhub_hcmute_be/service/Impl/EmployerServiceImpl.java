@@ -4,20 +4,28 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
+import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -29,6 +37,13 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     CloudinaryService cloudinaryService;
+
+    @Autowired
+    JobApplyRepository jobApplyRepository;
+
+    public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
+        return jobApplyRepository.findAllByJob_Employer_UserId(pageable, userId);
+    }
 
     @Override
     public <S extends Employer> S save(S entity) {
@@ -138,6 +153,38 @@ public class EmployerServiceImpl implements EmployerService {
                         .build()
         );
     }
+
+    @Override
+    public ActionResult getApplicants(String employerId, Pageable pageable) {
+        ActionResult actionResult = new ActionResult();
+
+        Page<JobApply> jobApplies = findAllByJob_Employer_UserId(pageable, employerId);
+
+        List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
+
+        for(JobApply jobApply : jobApplies.getContent()) {
+           JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
+            BeanUtils.copyProperties(jobApply, jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getStudent(), jobApplyDto);
+            jobApplyDtos.add(jobApplyDto);
+        }
+
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("content", jobApplyDtos);
+        map.put("pageNumber", jobApplies.getPageable().getPageNumber());
+        map.put("pageSize", jobApplies.getSize());
+        map.put("totalPages", jobApplies.getTotalPages());
+        map.put("totalElements", jobApplies.getTotalElements());
+
+        actionResult.setData(map);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_APPLY_SUCCESSFULLY);
+
+        return actionResult;
+    }
+
+
 
 
 }

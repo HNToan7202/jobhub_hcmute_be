@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -19,6 +20,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
+import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
 import java.io.IOException;
 import java.util.Objects;
@@ -38,6 +40,9 @@ public class EmployerController {
 
     @Autowired
     ResponseBuild responseBuild;
+
+    @Autowired
+    JobApplyService jobApplyService;
 
     public EmployerController(JobService jobService, JwtTokenProvider jwtTokenProvider, EmployerService employerService) {
         this.jobService = jobService;
@@ -108,5 +113,25 @@ public class EmployerController {
         String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
         return employerService.updateCompanyProfile(userIdFromToken, request);
     }
+
+    @GetMapping("/get-applicants")
+    public ResponseModel getAllByUserIdAndDateFilters(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "-1") int day, @RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            if(day < 0){
+                actionResult = employerService.getApplicants(userIdFromToken, PageRequest.of(index, size));
+            }
+            else
+                actionResult = jobApplyService.getAllByUserIdAndDateFilters( PageRequest.of(index, size), userIdFromToken, day);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+
+
 
 }

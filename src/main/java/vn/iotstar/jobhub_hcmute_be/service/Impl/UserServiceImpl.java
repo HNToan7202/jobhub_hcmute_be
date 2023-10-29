@@ -21,6 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
+import vn.iotstar.jobhub_hcmute_be.repository.PasswordResetOtpRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.VerificationTokenRepository;
@@ -65,6 +66,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     CloudinaryService cloudinaryService;
+
+    @Autowired
+    PasswordResetOtpRepository passwordResetOtpRepository;
 
 
     @Override
@@ -390,6 +394,50 @@ public class UserServiceImpl implements UserService {
                         .message("message")
                         .statusCode(HttpStatus.OK.value())
                         .build());
+    }
+
+    @Override
+    public void createPasswordResetOtpForUser(User user, String otp) {
+        PasswordResetOtp myOtp = null;
+
+        Optional<PasswordResetOtp> optionalUser = passwordResetOtpRepository.findByUser(user);
+        if (optionalUser.isPresent()) {
+            myOtp = passwordResetOtpRepository.findByUser(user).get();
+            myOtp.updateOtp(otp);
+        } else {
+
+            myOtp = new PasswordResetOtp(otp, user);
+        }
+        passwordResetOtpRepository.save(myOtp);
+    }
+
+    @Override
+    public String validatePasswordResetOtp(String otp) {
+
+        Optional<PasswordResetOtp> passOtp = passwordResetOtpRepository.findByOtp(otp);
+        Calendar cal = Calendar.getInstance();
+
+        if (passOtp.isEmpty()) {
+            return "Invalid token/link";
+        }
+        if (passOtp.get().getExpiryDate().before(cal.getTime())) {
+            return "Token/link expired";
+        }
+        return null;
+
+    }
+
+    @Override
+    public Optional<PasswordResetOtp> getUserByPasswordResetOtp(String otp) {
+        return passwordResetOtpRepository.findByOtp(otp);
+    }
+
+    @Override
+    public void changeUserPassword(User user, String newPassword, String confirmPassword) {
+        if (!newPassword.equals(confirmPassword))
+            throw new RuntimeException("Password and confirm password do not match");
+        user.setPassword(passwordEncoder.encode(newPassword));
+        save(user);
     }
 
 //

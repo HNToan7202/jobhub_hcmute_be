@@ -1,26 +1,45 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.*;
 import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
+import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+import static vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -47,6 +66,20 @@ public class AuthController {
     RoleRepository roleRepository;
 
     private final EmailVerificationService emailVerificationService;
+
+    @Autowired
+    TemplateEngine templateEngine;
+
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    @Autowired
+    Environment env;
+
+    @Autowired
+    ResponseBuild responseBuild;
+
+
 
     public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder, RoleRepository roleRepository, EmailVerificationService emailVerificationService) {
         this.userService = userService;
@@ -169,6 +202,54 @@ public class AuthController {
                             .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                             .build());
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseModel resetPassword(@RequestParam final String email) throws MessagingException, UnsupportedEncodingException {
+        ActionResult actionResult = new ActionResult();
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if(!optionalUser.isPresent()){
+            actionResult.setErrorCode(USER_NOT_FOUND);
+        }
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+            String otp = UUID.randomUUID().toString();
+            userService.createPasswordResetOtpForUser(user, otp);
+            String url = "http://localhost:3000/forget-password/confirm-password?token="+otp;
+            String subject = "Change Password For JobPost";
+            Context context = new Context();
+            context.setVariable("url",url);
+            String content = templateEngine.process("forgot-password",context);
+
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true);
+            helper.setSubject(subject);
+            helper.setText(content,true);
+            helper.setTo(user.getEmail());
+            helper.setFrom(env.getProperty("spring.mail.username"),"Recruiment Manager");
+
+            javaMailSender.send(message);
+            actionResult.setErrorCode(CHECK_MAIL_TO_RESET_PASSWORD);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseModel resetPassword(@RequestParam("token") String token, @Valid @RequestBody PasswordResetRequest passwordResetRequest){
+        ActionResult actionResult = new ActionResult();
+        String result = userService.validatePasswordResetOtp(token);
+        if(result == null){
+            User user = userService.getUserByPasswordResetOtp(token)
+                    .orElseThrow(()->new UserNotFoundException("User Not Found")).getUser();
+            userService.changeUserPassword(user, passwordResetRequest.getNewPassword()
+                    , passwordResetRequest.getConfirmPassword());
+            actionResult.setErrorCode(RESET_PASSWORD_SUCCESS);
+
+        }else {
+            actionResult.setErrorCode(INTERNAL_SERVER_ERROR);
+
+        }
+        return responseBuild.build(actionResult);
     }
 
 }

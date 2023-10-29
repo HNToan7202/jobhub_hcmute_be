@@ -48,7 +48,15 @@ public enum ErrorCodeEnum {
 
     JOB_EXPIRED(400, 400, "Job expired"),
 
+    RESET_PASSWORD_SUCCESS(200, 2007, "Reset password success"),
+
+    USER_NOT_FOUND(404, 404, "User not found"),
+
+    CHECK_MAIL_TO_RESET_PASSWORD(200, 200021, "Please check your email to reset your password!"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
+
+
 
 
     private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();

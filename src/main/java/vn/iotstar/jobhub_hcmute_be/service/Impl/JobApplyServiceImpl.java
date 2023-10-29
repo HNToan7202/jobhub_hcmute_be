@@ -3,7 +3,6 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,9 @@ import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 import java.util.*;
 import java.util.function.Function;
@@ -211,6 +213,7 @@ public class JobApplyServiceImpl implements JobApplyService {
         for(JobApply jobApply : jobApplyPage.getContent()) {
             JobApplyDto jobApplyDto = new JobApplyDto();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
+
             jobApplyDtos.add(jobApplyDto);
         }
         Map<String, Object> map = new HashMap<String, Object>();
@@ -226,4 +229,34 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     }
 
+    @Override
+    public Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days) {
+        Date endDate = new Date();
+        Date startDate = calculateStartDate(endDate, days);
+        return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetween(pageable, userId, startDate, endDate);
+    }
+
+    @Override
+    public ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days)
+    {
+        ActionResult actionResult = new ActionResult();
+        Page<JobApply> jobApplyPage = findAllByUserIdAndDateFilters(pageable, userId, days);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("content", jobApplyPage.getContent());
+        map.put("pageNumber", jobApplyPage.getPageable().getPageNumber());
+        map.put("pageSize", jobApplyPage.getSize());
+        map.put("totalPages", jobApplyPage.getTotalPages());
+        map.put("totalElements", jobApplyPage.getTotalElements());
+        actionResult.setData(map);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_APPLY_SUCCESSFULLY);
+        return actionResult;
+    }
+
+    private Date calculateStartDate(Date endDate, int days) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(endDate);
+        calendar.add(Calendar.DAY_OF_MONTH, -days);
+        return calendar.getTime();
+    }
 }

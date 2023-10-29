@@ -51,4 +51,8 @@ public interface JobApplyService {
     ActionResult applyForJob(String userId, String jobId, String resumeLink);
 
     ActionResult findJobAppliesByCandidate(String studentId, Pageable pageable);
+
+    Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
+
+    ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
 }

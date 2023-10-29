@@ -199,8 +199,10 @@ public class JobServiceImpl implements JobService {
             //Page<Job> jobs = findAll(pageable);
 
             Page<Job> jobs = findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable);
+            List<JobDTO> jobDTOs = convertJobToJobDTO(jobs.getContent());
+
             response = new HashMap<>();
-            response.put("jobs", jobs.getContent());
+            response.put("jobs", jobDTOs);
             response.put("currentPage", jobs.getNumber());
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
@@ -222,6 +224,7 @@ public class JobServiceImpl implements JobService {
             BeanUtils.copyProperties(job, jobDTO);
             CompanyDTO companyDTO = new CompanyDTO();
             BeanUtils.copyProperties(job.getEmployer(), companyDTO);
+            jobDTO.setTotalApply(job.getJobApplies().size());
             jobDTO.setCompany(companyDTO);
             jobDTOs.add(jobDTO);
         }
