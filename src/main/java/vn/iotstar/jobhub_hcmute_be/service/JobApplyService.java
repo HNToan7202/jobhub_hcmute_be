@@ -55,4 +55,6 @@ public interface JobApplyService {
     Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
 
     ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
+
+    ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId);
 }

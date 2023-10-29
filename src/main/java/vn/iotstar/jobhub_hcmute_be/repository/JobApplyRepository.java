@@ -27,4 +27,7 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
             Date endDate
     );
 
+    Page<JobApply> findAllByJob_JobIdAndJob_Employer_UserId(Pageable pageable, String jobId, String userId);
+
+
 }

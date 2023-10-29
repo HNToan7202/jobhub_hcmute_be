@@ -7,6 +7,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
+import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
@@ -242,8 +243,19 @@ public class JobApplyServiceImpl implements JobApplyService {
         ActionResult actionResult = new ActionResult();
         Page<JobApply> jobApplyPage = findAllByUserIdAndDateFilters(pageable, userId, days);
 
+        List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
+
+        for(JobApply jobApply : jobApplyPage.getContent()) {
+            JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
+            BeanUtils.copyProperties(jobApply, jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getStudent(), jobApplyDto);
+            jobApplyDtos.add(jobApplyDto);
+        }
+
+
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("content", jobApplyPage.getContent());
+        map.put("content", jobApplyDtos);
         map.put("pageNumber", jobApplyPage.getPageable().getPageNumber());
         map.put("pageSize", jobApplyPage.getSize());
         map.put("totalPages", jobApplyPage.getTotalPages());
@@ -258,5 +270,32 @@ public class JobApplyServiceImpl implements JobApplyService {
         calendar.setTime(endDate);
         calendar.add(Calendar.DAY_OF_MONTH, -days);
         return calendar.getTime();
+    }
+
+    @Override
+    public ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId) {
+        ActionResult actionResult = new ActionResult();
+        Page<JobApply> jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserId(pageable, jobId, userId);
+
+
+        List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
+
+        for(JobApply jobApply : jobApplyPage.getContent()) {
+            JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
+            BeanUtils.copyProperties(jobApply, jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
+            BeanUtils.copyProperties(jobApply.getStudent(), jobApplyDto);
+            jobApplyDtos.add(jobApplyDto);
+        }
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("content", jobApplyDtos);
+        map.put("pageNumber", jobApplyPage.getPageable().getPageNumber());
+        map.put("pageSize", jobApplyPage.getSize());
+        map.put("totalPages", jobApplyPage.getTotalPages());
+        map.put("totalElements", jobApplyPage.getTotalElements());
+        actionResult.setData(map);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_APPLY_SUCCESSFULLY);
+        return actionResult;
     }
 }

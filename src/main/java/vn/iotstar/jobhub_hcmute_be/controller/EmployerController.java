@@ -131,6 +131,18 @@ public class EmployerController {
         return responseBuild.build(actionResult);
     }
 
+    @GetMapping("/get-applicants/{jobId}")
+    public ResponseModel getAllJobByJobId(@PathVariable("jobId") String jobId, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = jobApplyService.getAllByJobIdAndEmployerId(PageRequest.of(index, size), jobId, userIdFromToken);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
 
 
 
