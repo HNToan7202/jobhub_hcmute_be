@@ -61,7 +61,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         String nameCV= "cv_"+userId+"_"+id;
         var params= ObjectUtils.asMap(
                 "folder", "Recruiment Assets/CV",
-                "public_id",imageFile.getOriginalFilename(),
+                "public_id",imageFile.getOriginalFilename()+System.currentTimeMillis(),
                 "resource_type", "auto",
                 "format","pdf");
         var uploadResult = cloudinary.uploader().upload(imageFile.getBytes(), params);

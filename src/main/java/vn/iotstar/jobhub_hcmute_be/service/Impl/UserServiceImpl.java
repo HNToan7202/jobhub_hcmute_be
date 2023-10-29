@@ -167,6 +167,7 @@ public class UserServiceImpl implements UserService {
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("accessToken", accessToken);
         tokenMap.put("refreshToken", token);
+        tokenMap.put("role", userDetail.getUser().getRole().getName());
 
         if (optionalUser.isPresent()) {
             optionalUser.get().setLastLoginAt(new Date());
