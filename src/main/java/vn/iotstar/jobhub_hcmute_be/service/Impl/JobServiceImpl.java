@@ -17,7 +17,6 @@ import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
-import vn.iotstar.jobhub_hcmute_be.repository.ElasticsearchRepository.JobElasticsearchRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
@@ -46,8 +45,6 @@ public class JobServiceImpl implements JobService {
 
     Map<String, Object> response;
 
-    @Autowired
-    JobElasticsearchRepository jobElasticsearchRepository;
 
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
@@ -119,39 +116,6 @@ public class JobServiceImpl implements JobService {
 
     public Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable) {
         return jobRepository.findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(employerId, pageable);
-    }
-
-    public Page<JobModel> searchSimilar(JobModel entity, String[] fields, Pageable pageable) {
-        return jobElasticsearchRepository.searchSimilar(entity, fields, pageable);
-    }
-
-    public <S extends JobModel> S save(S entity) {
-        System.out.println("Saving job to Elasticsearch...");
-        return jobElasticsearchRepository.save(entity);
-    }
-
-    public <S extends JobModel> Iterable<S> saveAll(Iterable<S> entities) {
-        return jobElasticsearchRepository.saveAll(entities);
-    }
-
-    public boolean existsById(String s) {
-        return jobElasticsearchRepository.existsById(s);
-    }
-
-    public Iterable<JobModel> findAllById(Iterable<String> strings) {
-        return jobElasticsearchRepository.findAllById(strings);
-    }
-
-    public void delete(JobModel entity) {
-        jobElasticsearchRepository.delete(entity);
-    }
-
-    public void deleteAllById(Iterable<? extends String> strings) {
-        jobElasticsearchRepository.deleteAllById(strings);
-    }
-
-    public void deleteAll(Iterable<? extends JobModel> entities) {
-        jobElasticsearchRepository.deleteAll(entities);
     }
 
     @Override
@@ -372,8 +336,9 @@ public class JobServiceImpl implements JobService {
             }
 
             job = jobRepository.save(job);
-            JobModel jobModel = convertJobToJobModel(job);
-            save(jobModel);
+
+//            JobModel jobModel = convertJobToJobModel(job);
+//            save(jobModel);
 
 
             JobDTO jobResponse = new JobDTO();
@@ -391,13 +356,7 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-    public JobModel convertJobToJobModel(Job job) {
-        JobModel jobModel = new JobModel();
-        BeanUtils.copyProperties(job, jobModel);
-        jobModel.setPosition(job.getPosition().getName());
-        jobModel.setSkills(List.of(job.getSkills().stream().map(Skill::getName).toArray(String[]::new)));
-        return jobModel;
-    }
+
 
 
     @CachePut(value = "applicationCache", key = "#jobId")

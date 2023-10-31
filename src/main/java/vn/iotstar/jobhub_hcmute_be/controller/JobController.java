@@ -11,7 +11,6 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
-import vn.iotstar.jobhub_hcmute_be.service.JobElasticsearchService;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
 
 @RestController
@@ -25,8 +24,6 @@ public class JobController {
 
     final JobService jobService;
 
-    @Autowired
-    JobElasticsearchService jobElasticsearchService;
 
     final
     ResponseBuild responseBuild;
@@ -53,27 +50,27 @@ public class JobController {
         }
         return responseBuild.build(actionResult);
     }
-    @GetMapping("/get-all-job")
-    public ResponseModel getAllJob(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
-        ActionResult actionResult = new ActionResult();
-        try {
-            actionResult = jobElasticsearchService.findAllJobs(PageRequest.of(index, size));
-        } catch (Exception e) {
-            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
-        }
-        return responseBuild.build(actionResult);
-    }
-
-    @GetMapping("/find-job")
-    public ResponseModel findJob(@RequestParam String name, @RequestParam String location, @RequestParam String position, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
-        ActionResult actionResult = new ActionResult();
-        try {
-            actionResult = jobElasticsearchService.searchJobs(name, location, position, PageRequest.of(index, size));
-        } catch (Exception e) {
-            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
-        }
-        return responseBuild.build(actionResult);
-    }
+//    @GetMapping("/get-all-job")
+//    public ResponseModel getAllJob(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
+//        ActionResult actionResult = new ActionResult();
+//        try {
+//            actionResult = jobElasticsearchService.findAllJobs(PageRequest.of(index, size));
+//        } catch (Exception e) {
+//            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+//        }
+//        return responseBuild.build(actionResult);
+//    }
+//
+//    @GetMapping("/find-job")
+//    public ResponseModel findJob(@RequestParam String name, @RequestParam String location, @RequestParam String position, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
+//        ActionResult actionResult = new ActionResult();
+//        try {
+//            actionResult = jobElasticsearchService.searchJobs(name, location, position, PageRequest.of(index, size));
+//        } catch (Exception e) {
+//            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+//        }
+//        return responseBuild.build(actionResult);
+//    }
 
     @GetMapping("/get-all")
     public ResponseModel getAllJob(@RequestParam(defaultValue = "true") Boolean isActive) {
