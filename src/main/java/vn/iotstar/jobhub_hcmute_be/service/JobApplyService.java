@@ -52,9 +52,10 @@ public interface JobApplyService {
 
     ActionResult findJobAppliesByCandidate(String studentId, Pageable pageable);
 
-    Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
+    Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state);
 
-    ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days);
+    ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state);
 
-    ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId);
+    ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId, String state);
+
 }

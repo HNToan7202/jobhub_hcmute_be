@@ -62,6 +62,8 @@ public enum ErrorCodeEnum {
 
     UPDATE_PROFILE_SUCCESS(200, 200, "Update profile success"),
 
+    GET_APPLY_BY_STATE_SUCCESSFULLY(200, 20022, "Get apply by state successfully"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

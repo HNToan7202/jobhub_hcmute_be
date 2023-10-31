@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.dto.Apply;
 
 import lombok.*;
+import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.entity.Skill;
 
 import java.io.Serializable;
@@ -22,4 +23,6 @@ public class JobApplyResponseDTO implements Serializable {
     String fullName;
     String name;
     List<Skill> skills;
+    private State state;
+
 }

@@ -41,7 +41,7 @@ public interface EmployerService {
 
     ResponseEntity<GenericResponse> updateCompanyProfile(String userId, EmployerUpdateDTO request) throws Exception;
 
-    ActionResult getApplicants(String employerId, Pageable pageable);
+    ActionResult getApplicants(String employerId, Pageable pageable, String state);
 
     ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest);
 }

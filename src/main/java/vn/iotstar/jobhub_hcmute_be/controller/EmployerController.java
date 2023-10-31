@@ -113,29 +113,30 @@ public class EmployerController {
     }
 
     @GetMapping("/get-applicants")
-    public ResponseModel getAllByUserIdAndDateFilters(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "-1") int day, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseModel getAllByUserIdAndDateFilters(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "-1") int day, @RequestParam(defaultValue = "ALL") String state, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
             String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
             if(day < 0){
-                actionResult = employerService.getApplicants(userIdFromToken, PageRequest.of(index, size));
+                actionResult = employerService.getApplicants(userIdFromToken, PageRequest.of(index, size), state);
             }
             else
-                actionResult = jobApplyService.getAllByUserIdAndDateFilters( PageRequest.of(index, size), userIdFromToken, day);
+                actionResult = jobApplyService.getAllByUserIdAndDateFilters( PageRequest.of(index, size), userIdFromToken, day, state);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
     }
 
     @GetMapping("/get-applicants/{jobId}")
-    public ResponseModel getAllJobByJobId(@PathVariable("jobId") String jobId, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseModel getAllJobByJobId(@PathVariable("jobId") String jobId, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "ALL") String state, @RequestHeader("Authorization") String authorizationHeader ) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
             String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
-            actionResult = jobApplyService.getAllByJobIdAndEmployerId(PageRequest.of(index, size), jobId, userIdFromToken);
+            actionResult = jobApplyService.getAllByJobIdAndEmployerId(PageRequest.of(index, size), jobId, userIdFromToken, state);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

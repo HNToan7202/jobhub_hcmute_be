@@ -33,4 +33,13 @@ public enum State {
         }
         return null;
     }
+
+    public static State getStatusName(String statusName) {
+        for (State state : State.values()) {
+            if (state.getStatusName().equals(statusName)) {
+                return state;
+            }
+        }
+        return null;
+    }
 }

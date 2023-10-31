@@ -231,17 +231,20 @@ public class JobApplyServiceImpl implements JobApplyService {
     }
 
     @Override
-    public Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days) {
+    public Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state) {
         Date endDate = new Date();
         Date startDate = calculateStartDate(endDate, days);
-        return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetween(pageable, userId, startDate, endDate);
+        if(state.equals("ALL"))
+            return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetween(pageable, userId, startDate, endDate);
+        else
+            return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetweenAndState(pageable, userId, startDate, endDate, State.getStatusName(state));
     }
 
     @Override
-    public ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days)
+    public ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state)
     {
         ActionResult actionResult = new ActionResult();
-        Page<JobApply> jobApplyPage = findAllByUserIdAndDateFilters(pageable, userId, days);
+        Page<JobApply> jobApplyPage = findAllByUserIdAndDateFilters(pageable, userId, days, state);
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
@@ -273,10 +276,13 @@ public class JobApplyServiceImpl implements JobApplyService {
     }
 
     @Override
-    public ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId) {
+    public ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId, String state){
         ActionResult actionResult = new ActionResult();
-        Page<JobApply> jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserId(pageable, jobId, userId);
-
+        Page<JobApply> jobApplyPage;
+        if(state.equals("ALL"))
+            jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserId(pageable, jobId, userId);
+        else
+             jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserIdAndState(pageable, jobId, userId, State.getStatusName(state));
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
@@ -298,4 +304,6 @@ public class JobApplyServiceImpl implements JobApplyService {
         actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_APPLY_SUCCESSFULLY);
         return actionResult;
     }
+
+
 }

@@ -165,11 +165,23 @@ public class EmployerServiceImpl implements EmployerService {
         );
     }
 
+    public Page<JobApply> findAllByJob_Employer_UserIdAndState(Pageable pageable, String userId, State state) {
+        return jobApplyRepository.findAllByJob_Employer_UserIdAndState(pageable, userId, state);
+    }
+
     @Override
-    public ActionResult getApplicants(String employerId, Pageable pageable) {
+    public ActionResult getApplicants(String employerId, Pageable pageable, String state) {
         ActionResult actionResult = new ActionResult();
 
-        Page<JobApply> jobApplies = findAllByJob_Employer_UserId(pageable, employerId);
+        Page<JobApply> jobApplies;
+
+
+        if(state.equals("ALL")){
+            jobApplies = findAllByJob_Employer_UserId(pageable, employerId);
+        } else {
+            State stateEnum = State.getStatusName(state);
+            jobApplies = findAllByJob_Employer_UserIdAndState(pageable, employerId, stateEnum);
+        }
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
@@ -194,6 +206,8 @@ public class EmployerServiceImpl implements EmployerService {
 
         return actionResult;
     }
+
+
 
     @Override
     public ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest) {
