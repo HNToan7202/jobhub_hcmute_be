@@ -1,12 +1,10 @@
 package vn.iotstar.jobhub_hcmute_be.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
-import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 
 import java.io.Serializable;
 import java.util.Date;

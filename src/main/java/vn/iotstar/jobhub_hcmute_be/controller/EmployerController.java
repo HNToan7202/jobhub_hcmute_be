@@ -10,10 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.JobUpdateRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.PostJobRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -73,6 +70,7 @@ public class EmployerController {
         try {
             actionResult = jobService.postJob(jobRequest, employerId);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
@@ -142,6 +140,23 @@ public class EmployerController {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
+    }
+
+    @PutMapping("student/state/{usedId}")
+    public ResponseModel updateCandidateState(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String usedId, @Valid @RequestBody UpdateStateRequest updateStateRequest){
+        ActionResult actionResult = new ActionResult();
+        try
+        {
+            String token = authorizationHeader.substring(7);
+            String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = employerService.updateCandidateState(recruiterId, usedId, updateStateRequest);
+        }
+        catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+
+       // return jobApplyService.updateCandidateState(recruiterId, candidateUpdateStateRequest);
     }
 
 

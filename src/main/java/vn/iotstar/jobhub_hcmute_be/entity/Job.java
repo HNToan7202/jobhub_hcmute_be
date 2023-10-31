@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.data.elasticsearch.annotations.Document;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 
 import java.io.Serializable;
@@ -79,7 +80,7 @@ public class Job implements Serializable {
     @ToString.Exclude
     private Employer employer;
 
-    @OneToMany(mappedBy = "job",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "job")
     @JsonBackReference
     @ToString.Exclude
     private List<JobApply> jobApplies;

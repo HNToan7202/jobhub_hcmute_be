@@ -14,12 +14,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
-import vn.iotstar.jobhub_hcmute_be.entity.Employer;
-import vn.iotstar.jobhub_hcmute_be.entity.Job;
-import vn.iotstar.jobhub_hcmute_be.entity.Position;
-import vn.iotstar.jobhub_hcmute_be.entity.Skill;
+import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.repository.ElasticsearchRepository.JobElasticsearchRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
@@ -48,6 +46,9 @@ public class JobServiceImpl implements JobService {
 
     Map<String, Object> response;
 
+    @Autowired
+    JobElasticsearchRepository jobElasticsearchRepository;
+
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
     public void checkJobDeadlines() {
@@ -64,11 +65,6 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-
-    @Override
-    public <S extends Job> List<S> saveAll(Iterable<S> entities) {
-        return jobRepository.saveAll(entities);
-    }
 
 
     @Override
@@ -123,6 +119,39 @@ public class JobServiceImpl implements JobService {
 
     public Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable) {
         return jobRepository.findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(employerId, pageable);
+    }
+
+    public Page<JobModel> searchSimilar(JobModel entity, String[] fields, Pageable pageable) {
+        return jobElasticsearchRepository.searchSimilar(entity, fields, pageable);
+    }
+
+    public <S extends JobModel> S save(S entity) {
+        System.out.println("Saving job to Elasticsearch...");
+        return jobElasticsearchRepository.save(entity);
+    }
+
+    public <S extends JobModel> Iterable<S> saveAll(Iterable<S> entities) {
+        return jobElasticsearchRepository.saveAll(entities);
+    }
+
+    public boolean existsById(String s) {
+        return jobElasticsearchRepository.existsById(s);
+    }
+
+    public Iterable<JobModel> findAllById(Iterable<String> strings) {
+        return jobElasticsearchRepository.findAllById(strings);
+    }
+
+    public void delete(JobModel entity) {
+        jobElasticsearchRepository.delete(entity);
+    }
+
+    public void deleteAllById(Iterable<? extends String> strings) {
+        jobElasticsearchRepository.deleteAllById(strings);
+    }
+
+    public void deleteAll(Iterable<? extends JobModel> entities) {
+        jobElasticsearchRepository.deleteAll(entities);
     }
 
     @Override
@@ -224,7 +253,7 @@ public class JobServiceImpl implements JobService {
             BeanUtils.copyProperties(job, jobDTO);
             CompanyDTO companyDTO = new CompanyDTO();
             BeanUtils.copyProperties(job.getEmployer(), companyDTO);
-            jobDTO.setTotalApply(job.getJobApplies().size());
+            jobDTO.setTotalApply(job.getJobApplies() == null ? 0 : job.getJobApplies().size());
             jobDTO.setCompany(companyDTO);
             jobDTOs.add(jobDTO);
         }
@@ -267,23 +296,18 @@ public class JobServiceImpl implements JobService {
     @Override
     public ActionResult getAlls(Boolean isActive){
         actionResult = new ActionResult();
-
         List<Job> jobs = findAllByIsActive(isActive);
-
         List<JobDTO> jobDTOs = convertJobToJobDTO(jobs);
-
         response = new HashMap<>();
         response.put("jobs", jobDTOs);
         response.put("total", jobDTOs.size());
-
         actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_JOB_SUCCESS);
         actionResult.setData(response);
         return actionResult;
-
     }
 
 
-    @CachePut(value = "applicationCache", key = "#jobId")
+    @CachePut(value = "applicationCache", key = "#employerId")
     @Override
     public ActionResult postJob(PostJobRequest jobRequest, String employerId) {
         actionResult = new ActionResult();
@@ -346,7 +370,11 @@ public class JobServiceImpl implements JobService {
                 actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
                 return actionResult;
             }
+
             job = jobRepository.save(job);
+            JobModel jobModel = convertJobToJobModel(job);
+            save(jobModel);
+
 
             JobDTO jobResponse = new JobDTO();
             BeanUtils.copyProperties(job, jobResponse);
@@ -361,6 +389,14 @@ public class JobServiceImpl implements JobService {
             return actionResult;
 
         }
+    }
+
+    public JobModel convertJobToJobModel(Job job) {
+        JobModel jobModel = new JobModel();
+        BeanUtils.copyProperties(job, jobModel);
+        jobModel.setPosition(job.getPosition().getName());
+        jobModel.setSkills(List.of(job.getSkills().stream().map(Skill::getName).toArray(String[]::new)));
+        return jobModel;
     }
 
 
@@ -433,6 +469,32 @@ public class JobServiceImpl implements JobService {
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable){
+        ActionResult actionResult = new ActionResult();
+        Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
+
+        List<JobDTO> jobDTOs =  jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
+            JobDTO jobDTO = new JobDTO();
+            BeanUtils.copyProperties(job, jobDTO);
+            CompanyDTO companyDTO = new CompanyDTO();
+            BeanUtils.copyProperties(job.getEmployer(), companyDTO);
+            jobDTO.setCompany(companyDTO);
+            return jobDTO;
+        }).toList();
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("content", jobDTOs);
+        map.put("pageNumber", jobs.getNumber());
+        map.put("pageSize", jobs.getSize());
+        map.put("totalPages", jobs.getTotalPages());
+        map.put("totalElements", jobs.getTotalElements());
+        actionResult.setData(map);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_FILTER_SUCCESS);
+
         return actionResult;
     }
 

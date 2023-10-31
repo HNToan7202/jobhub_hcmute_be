@@ -20,12 +20,14 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface JobService {
-    <S extends Job> List<S> saveAll(Iterable<S> entities);
+
 
     List<Job> findAll() throws InterruptedException;
 
 
     Job updateJob(Job job);
+
+
 
     <S extends Job> S save(S entity);
 
@@ -65,4 +67,6 @@ public interface JobService {
     ActionResult postJob(PostJobRequest jobRequest, String recruiterId);
 
     ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId);
+
+    ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable);
 }

@@ -35,7 +35,7 @@ public class JobDTO implements Serializable {
     private Position position;
     private List<Skill> skills;
 
-    private Integer totalApply;
+    private Integer totalApply = 0;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isApplied;

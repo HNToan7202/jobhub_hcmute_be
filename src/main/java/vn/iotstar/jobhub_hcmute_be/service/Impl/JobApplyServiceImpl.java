@@ -189,7 +189,7 @@ public class JobApplyServiceImpl implements JobApplyService {
         // Tạo đơn ứng tuyển
         JobApply application = new JobApply();
         application.setJob(job);
-        application.setState(State.NOT_RECEIVED);
+        application.setState(State.PENDING);
         application.setStudent(candidate);
         application.setResume(candidate.getResume());
         application.setResumeUpoad(resumeLink);

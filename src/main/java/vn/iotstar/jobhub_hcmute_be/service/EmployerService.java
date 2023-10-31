@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.UpdateStateRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
@@ -41,4 +42,6 @@ public interface EmployerService {
     ResponseEntity<GenericResponse> updateCompanyProfile(String userId, EmployerUpdateDTO request) throws Exception;
 
     ActionResult getApplicants(String employerId, Pageable pageable);
+
+    ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest);
 }

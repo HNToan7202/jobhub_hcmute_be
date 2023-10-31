@@ -10,11 +10,12 @@ import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Hidden
 @Repository
 public interface JobApplyRepository extends JpaRepository<JobApply, String> {
-    JobApply findByStudentAndJob(Student student, Job job);
+    Optional<JobApply> findByStudentAndJob(Student student, Job job);
 
     Page<JobApply> findAllByStudent_UserIdOrderByCreatedAtDesc(Pageable pageable, String userId);
 
@@ -28,6 +29,8 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
     );
 
     Page<JobApply> findAllByJob_JobIdAndJob_Employer_UserId(Pageable pageable, String jobId, String userId);
+
+
 
 
 }

@@ -11,16 +11,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
+import vn.iotstar.jobhub_hcmute_be.dto.UpdateStateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
+import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
+import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
 
@@ -40,6 +45,12 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     JobApplyRepository jobApplyRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    JobRepository jobRepository;
 
     public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByJob_Employer_UserId(pageable, userId);
@@ -183,6 +194,45 @@ public class EmployerServiceImpl implements EmployerService {
 
         return actionResult;
     }
+
+    @Override
+    public ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest) {
+        ActionResult actionResult = new ActionResult();
+        try{
+            Optional<Student> student = studentRepository.findById(userId);
+            if(student.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                return actionResult;
+            }
+            Optional<Job> job = jobRepository.findById(updateStateRequest.getJobId());
+            if(job.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.JOB_NOT_FOUND);
+                return actionResult;
+            }
+            Optional<JobApply> optionalJobApply = jobApplyRepository.findByStudentAndJob(student.get(), job.get());
+
+            if(optionalJobApply.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
+                return actionResult;
+            }
+
+            try {
+                JobApply jobApply = optionalJobApply.get();
+                State newState = State.getStatusName(updateStateRequest.getStatus());
+                jobApply.setState(newState);
+                JobApply updatedJobApply = jobApplyRepository.save(jobApply);
+                actionResult.setData(updatedJobApply);
+                actionResult.setErrorCode(ErrorCodeEnum.UPDATE_STATE_APPLY_SUCCESSFULLY);
+
+            } catch (IllegalArgumentException e) {
+                actionResult.setErrorCode(ErrorCodeEnum.INVALID_STATE_VALUE);
+            }
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
+
 
 
 

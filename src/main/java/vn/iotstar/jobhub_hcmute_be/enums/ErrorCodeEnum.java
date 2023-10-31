@@ -32,6 +32,8 @@ public enum ErrorCodeEnum {
 
     JOB_EXISTED(409, 409, "Job existed"),
 
+    GET_JOB_BY_FILTER_SUCCESS(200, 20021, "Get job by filter success"),
+
     GET_JOB_APPLY_SUCCESSFULLY(200, 200, "Get job apply successfully"),
 
     GET_POSITION_SUCCESS(200, 200, "Get position success"),
@@ -53,6 +55,10 @@ public enum ErrorCodeEnum {
     USER_NOT_FOUND(404, 404, "User not found"),
 
     CHECK_MAIL_TO_RESET_PASSWORD(200, 200021, "Please check your email to reset your password!"),
+
+    UPDATE_STATE_APPLY_SUCCESSFULLY(200, 20022, "Update state apply successfully"),
+
+    INVALID_STATE_VALUE(400, 400, "Invalid state value"),
 
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
