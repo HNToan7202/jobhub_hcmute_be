@@ -60,6 +60,8 @@ public enum ErrorCodeEnum {
 
     INVALID_STATE_VALUE(400, 400, "Invalid state value"),
 
+    UPDATE_PROFILE_SUCCESS(200, 200, "Update profile success"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

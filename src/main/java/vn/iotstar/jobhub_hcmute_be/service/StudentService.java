@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,5 +34,5 @@ public interface StudentService {
 
     ResponseEntity<GenericResponse> getProfile(String userId);
 
-    ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;
+    ActionResult updateProfile(String userId, UserUpdateRequest request) throws Exception;
 }

@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
@@ -165,14 +167,25 @@ public class StudentController {
     }
 
     @PutMapping("/update-profile")
-    public ResponseEntity<GenericResponse> update(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
-        if (bindingResult.hasErrors()) {
-            throw new Exception(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
-        }
+    public ResponseModel update(@Validated @RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
 
-        String token = authorizationHeader.substring(7);
-        String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
-        return studentService.updateProfile(userIdFromToken, request);
+        ActionResult actionResult = new ActionResult();
+        if(bindingResult.hasErrors()) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            ResponseModel responseModel = responseBuild.build(actionResult);
+            responseModel.setMessage(bindingResult.getFieldError().getDefaultMessage());
+            return responseModel;
+        }
+        try
+        {
+            String token = authorizationHeader.substring(7);
+            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = studentService.updateProfile(userIdFromToken, request);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+
     }
 
     @Cacheable("applicants")

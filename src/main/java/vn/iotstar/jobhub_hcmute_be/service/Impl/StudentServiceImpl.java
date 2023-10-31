@@ -11,6 +11,8 @@ import vn.iotstar.jobhub_hcmute_be.constant.Gender;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.StudentService;
@@ -117,7 +119,8 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception {
+    public ActionResult updateProfile(String userId, UserUpdateRequest request) throws Exception {
+        ActionResult actionResult = new ActionResult();
         Optional<Student> user = findById(userId);
         String phone =  request.getPhone();
         if (user.isEmpty())
@@ -146,13 +149,9 @@ public class StudentServiceImpl implements StudentService {
         user.get().setAbout(request.getAbout());
         save(user.get());
 
-        return ResponseEntity.ok(
-                GenericResponse.builder()
-                        .success(true)
-                        .message("Update successful")
-                        .result(user.get())
-                        .statusCode(200)
-                        .build()
-        );
+        actionResult.setData(user.get());
+        actionResult.setErrorCode(ErrorCodeEnum.UPDATE_PROFILE_SUCCESS);
+        return actionResult;
+
     }
 }
