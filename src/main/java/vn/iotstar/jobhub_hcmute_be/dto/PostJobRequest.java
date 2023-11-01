@@ -22,6 +22,7 @@ public class PostJobRequest {
     @Min(value = 1,message = "Min of quantity is 1")
     Integer quantity;
     String benefit;
+    String experience;
     String salaryRange;
     String requirement;
     String location;

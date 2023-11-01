@@ -5,12 +5,14 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
+import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -21,6 +23,7 @@ import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @RestController
@@ -55,11 +58,12 @@ public class EmployerController {
         return employerService.getProfile(userId);
     }
 
-
     @Transactional
     //post 1 job
     @PostMapping("/post-job")
-    public ResponseModel addJob(@RequestHeader("Authorization") String authorizationHeader, @Valid @RequestBody PostJobRequest jobRequest, BindingResult bindingResult) throws Exception {
+    public ResponseModel addJob(@RequestHeader("Authorization") String authorizationHeader,
+                                @Valid @RequestBody PostJobRequest jobRequest,
+                                BindingResult bindingResult) throws Exception {
         ActionResult actionResult = new ActionResult();
         String jwt = authorizationHeader.substring(7);
         String employerId = jwtTokenProvider.getUserIdFromJwt(jwt);
@@ -94,15 +98,17 @@ public class EmployerController {
 
 
     @PutMapping("/change-logo")
-    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile, @RequestHeader("Authorization") String token) throws IOException {
-
+    public ResponseEntity<GenericResponse> uploadAvatar(@RequestParam MultipartFile imageFile,
+                                                        @RequestHeader("Authorization") String token) throws IOException {
         String jwt = token.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
         return employerService.changeLogo(userId, imageFile);
     }
 
     @PutMapping("/update-profile-company")
-    public ResponseEntity<GenericResponse> update(@RequestBody EmployerUpdateDTO request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<GenericResponse> update(@RequestBody EmployerUpdateDTO request,
+                                                  @RequestHeader("Authorization") String authorizationHeader,
+                                                  BindingResult bindingResult) throws Exception {
         if (bindingResult.hasErrors()) {
             throw new Exception(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
@@ -113,7 +119,11 @@ public class EmployerController {
     }
 
     @GetMapping("/get-applicants")
-    public ResponseModel getAllByUserIdAndDateFilters(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "-1") int day, @RequestParam(defaultValue = "ALL") String state, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseModel getAllByUserIdAndDateFilters(@RequestParam(defaultValue = "0") int index,
+                                                      @RequestParam(defaultValue = "10") int size,
+                                                      @RequestParam(defaultValue = "-1") int day,
+                                                      @RequestParam(defaultValue = "ALL") String state,
+                                                      @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
@@ -131,7 +141,11 @@ public class EmployerController {
     }
 
     @GetMapping("/get-applicants/{jobId}")
-    public ResponseModel getAllJobByJobId(@PathVariable("jobId") String jobId, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "ALL") String state, @RequestHeader("Authorization") String authorizationHeader ) {
+    public ResponseModel getAllJobByJobId(@PathVariable("jobId") String jobId,
+                                          @RequestParam(defaultValue = "0") int index,
+                                          @RequestParam(defaultValue = "10") int size,
+                                          @RequestParam(defaultValue = "ALL") String state,
+                                          @RequestHeader("Authorization") String authorizationHeader ) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
@@ -144,7 +158,9 @@ public class EmployerController {
     }
 
     @PutMapping("student/state/{usedId}")
-    public ResponseModel updateCandidateState(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String usedId, @Valid @RequestBody UpdateStateRequest updateStateRequest){
+    public ResponseModel updateCandidateState(@RequestHeader("Authorization") String authorizationHeader,
+                                              @PathVariable String usedId,
+                                              @Valid @RequestBody UpdateStateRequest updateStateRequest){
         ActionResult actionResult = new ActionResult();
         try
         {
@@ -160,6 +176,59 @@ public class EmployerController {
        // return jobApplyService.updateCandidateState(recruiterId, candidateUpdateStateRequest);
     }
 
+    @PostMapping("/reply")
+    public ResponseModel reply( @RequestBody ReplyRequest replyRequest) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = employerService.replyCandidate(replyRequest);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
 
+    @DeleteMapping("/job/{jobId}")
+    public ResponseEntity<GenericResponse> deleteJob(@PathVariable("jobId") String jobId) {
+        try {
+            Optional<Job> job = jobService.findById(jobId);
+            if (job.isPresent()) {
+                jobService.delete(job.get());
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(GenericResponse.builder()
+                                .success(true)
+                                .message("Deleted Job")
+                                .result(null)
+                                .statusCode(HttpStatus.OK.value())
+                                .build());
+            } else {
+
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(GenericResponse.builder()
+                                .success(false)
+                                .message("Job Not Found")
+                                .result(null)
+                                .statusCode(HttpStatus.NOT_FOUND.value())
+                                .build());
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message("Request url error")
+                            .result(null)
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .build());
+        } catch (Exception e) {
+            String mes = "Error: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(GenericResponse.builder()
+                            .success(false)
+                            .message(mes)
+                            .result(null)
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .build());
+        }
+    }
 
 }

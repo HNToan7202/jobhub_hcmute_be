@@ -15,7 +15,9 @@ import java.util.Optional;
 @Hidden
 @Repository
 public interface JobRepository extends JpaRepository<Job, String> {
-    Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable);
+    Page<Job> findAllByEmployer_UserIdAndIsActiveOrderByCreatedAtDesc(String employerId, Pageable pageable, boolean isActive);
+
+    Page<Job> findAllByEmployer_UserIdOrderByCreatedAtDesc(String employerId, Pageable pageable);
 
     Page<Job> findAllByEmployer_UserId(String employerId, Pageable pageable);
 

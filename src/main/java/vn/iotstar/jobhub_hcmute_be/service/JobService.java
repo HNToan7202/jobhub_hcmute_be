@@ -53,7 +53,7 @@ public interface JobService {
 
     ActionResult getDetail(String jobId, String userId);
 
-    ActionResult findAllByEmployer(String id, Pageable pageable);
+    ActionResult findAllByEmployer(String id, Pageable pageable, Boolean isActive);
 
     Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable);
 

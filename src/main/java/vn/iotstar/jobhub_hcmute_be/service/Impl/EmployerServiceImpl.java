@@ -1,20 +1,28 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.ReplyRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UpdateStateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
@@ -30,6 +38,7 @@ import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -51,6 +60,18 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     JobRepository jobRepository;
+
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    @Autowired
+    private Environment env;
+
+    @Autowired
+    TemplateEngine templateEngine;
+
+
+
 
     public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByJob_Employer_UserId(pageable, userId);
@@ -247,8 +268,22 @@ public class EmployerServiceImpl implements EmployerService {
         return actionResult;
     }
 
-
-
-
+    @Override
+    public ActionResult replyCandidate(ReplyRequest request) throws MessagingException, UnsupportedEncodingException {
+        ActionResult actionResult = new ActionResult();
+        Context context = new Context();
+        context.setLocale(new Locale("vi", "VN"));
+        context.setVariable("content", request.getContent());
+        String content = templateEngine.process("mail-template", context);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+        helper.setSubject(request.getSubject());
+        helper.setTo(request.getEmail());
+        helper.setText(request.getContent().toString(), true);
+        helper.setFrom(env.getProperty("spring.mail.username"),"Recruiment Manager");
+        javaMailSender.send(message);
+        actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
+        return actionResult;
+    }
 
 }

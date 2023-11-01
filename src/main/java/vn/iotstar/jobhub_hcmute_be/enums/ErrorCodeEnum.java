@@ -64,6 +64,8 @@ public enum ErrorCodeEnum {
 
     GET_APPLY_BY_STATE_SUCCESSFULLY(200, 20022, "Get apply by state successfully"),
 
+    SEND_MAIL_SUCCESSFULLY(200, 20220, "Send mail successfully"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

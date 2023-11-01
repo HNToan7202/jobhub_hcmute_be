@@ -85,10 +85,10 @@ public class JobController {
     }
 
     @GetMapping("{employerId}/get-list-jobs")
-    public ResponseModel getJobsByEmployer(@PathVariable("employerId") String id, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
+    public ResponseModel getJobsByEmployer(@PathVariable("employerId") String id, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Boolean isActive) {
         ActionResult actionResult = new ActionResult();
         try {
-            actionResult = jobService.findAllByEmployer(id, PageRequest.of(index, size));
+            actionResult = jobService.findAllByEmployer(id, PageRequest.of(index, size), isActive);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

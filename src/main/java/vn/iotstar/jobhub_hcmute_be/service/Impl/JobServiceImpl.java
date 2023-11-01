@@ -114,8 +114,12 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findAll(pageable);
     }
 
-    public Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable) {
-        return jobRepository.findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(employerId, pageable);
+    public Page<Job> findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(String employerId, Pageable pageable, boolean isActive) {
+        return jobRepository.findAllByEmployer_UserIdAndIsActiveOrderByCreatedAtDesc(employerId, pageable, isActive);
+    }
+
+    public Page<Job> findAllByEmployer_UserId(String employerId, Pageable pageable) {
+        return jobRepository.findAllByEmployer_UserId(employerId, pageable);
     }
 
     @Override
@@ -186,12 +190,17 @@ public class JobServiceImpl implements JobService {
 
 
     @Override
-    public ActionResult findAllByEmployer(String id, Pageable pageable) {
+    public ActionResult findAllByEmployer(String id, Pageable pageable, Boolean isActive) {
         actionResult = new ActionResult();
         try {
-            //Page<Job> jobs = findAll(pageable);
+            Page<Job> jobs;
 
-            Page<Job> jobs = findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable);
+            if(isActive == null){
+                jobs = findAllByEmployer_UserId(id, pageable);
+            }
+            else {
+                jobs = findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable, isActive);
+            }
             List<JobDTO> jobDTOs = convertJobToJobDTO(jobs.getContent());
 
             response = new HashMap<>();
