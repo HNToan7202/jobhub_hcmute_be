@@ -298,10 +298,12 @@ public class UserServiceImpl implements UserService {
         Student user = new Student();
         user.setFullName(registerRequest.getFullName());
         user.setEmail(registerRequest.getEmail());
-        //user.setUserId(UUID.randomUUID().toString().split("-")[0]);
+        user.setUserId(UUID.randomUUID().toString().split("-")[0]);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(roleRepository.findByName("STUDENT"));
-        //user.setResume(new Resume());
+        Resume resume = new Resume();
+        resume.setStudent(user);
+        user.setResume(resume);
         user = save(user);
         emailVerificationService.sendOtp(user.getEmail());
 
