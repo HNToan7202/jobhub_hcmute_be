@@ -167,13 +167,13 @@ public class EmployerController {
             String token = authorizationHeader.substring(7);
             String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = employerService.updateCandidateState(recruiterId, usedId, updateStateRequest);
+            if(updateStateRequest.getReplyRequest() != null)
+                employerService.reply(updateStateRequest.getReplyRequest());
         }
         catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
-
-       // return jobApplyService.updateCandidateState(recruiterId, candidateUpdateStateRequest);
     }
 
     @PostMapping("/reply")

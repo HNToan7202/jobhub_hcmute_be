@@ -5,4 +5,5 @@ import lombok.*;
 public class UpdateStateRequest {
     private String jobId;
     private int status;
+    ReplyRequest replyRequest;
 }

@@ -161,8 +161,9 @@ public class JobApplyServiceImpl implements JobApplyService {
         }
         Student candidate = optionalCandidate.get();
 
+        Optional<JobApply> optionalJobApply = jobApplyRepository.findByStudentAndJob(candidate, job);
         // Kiểm tra xem ứng viên đã apply vào công việc này chưa
-        if (jobApplyRepository.findByStudentAndJob(candidate, job) != null) {
+        if (optionalJobApply.isPresent()) {
             actionResult.setErrorCode(ErrorCodeEnum.ALREADY_APPLY);
             return actionResult;
         }

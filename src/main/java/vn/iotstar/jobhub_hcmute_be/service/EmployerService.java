@@ -46,4 +46,6 @@ public interface EmployerService {
     ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest);
 
     ActionResult replyCandidate(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
+
+    String reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
 }

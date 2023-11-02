@@ -8,6 +8,8 @@ import java.io.Serializable;
 @Data
 public class ReplyRequest implements Serializable {
 
+    String companyName;
+
     @StudentEmail(message = "Email không hợp lệ")
     String email;
 

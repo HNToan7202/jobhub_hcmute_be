@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
@@ -42,8 +43,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Function;
-
-import static vn.iotstar.jobhub_hcmute_be.constant.Utils.cleanHTML;
 
 @Service
 @Transactional
@@ -287,5 +286,22 @@ public class EmployerServiceImpl implements EmployerService {
         javaMailSender.send(message);
         actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
+    }
+
+    @Async
+    @Override
+    public String reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException {
+        Context context = new Context();
+        context.setLocale(new Locale("vi", "VN"));
+        context.setVariable("content", request.getContent());
+        String content = templateEngine.process("mail-template", context);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+        helper.setSubject(request.getSubject());
+        helper.setTo(request.getEmail());
+        helper.setText(Utils.cleanHTML(request.getContent()), true);
+        helper.setFrom(env.getProperty("spring.mail.username"), request.getCompanyName());
+        javaMailSender.send(message);
+        return "Email Sent!";
     }
 }
