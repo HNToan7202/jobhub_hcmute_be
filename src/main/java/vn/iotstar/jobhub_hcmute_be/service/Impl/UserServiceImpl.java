@@ -2,6 +2,7 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
@@ -20,11 +21,10 @@ import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
-import vn.iotstar.jobhub_hcmute_be.repository.PasswordResetOtpRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.RoleRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.VerificationTokenRepository;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
@@ -69,6 +69,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     PasswordResetOtpRepository passwordResetOtpRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
 
 
     @Override
@@ -118,19 +121,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<GenericResponse> getProfile(String userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
-            throw new RuntimeException("User not found");
-
-        return ResponseEntity.ok(
-                GenericResponse.builder()
-                        .success(true)
-                        .message("Retrieving user profile successfully")
-                        .result(new UserProfileResponse(user.get()))
-                        .statusCode(HttpStatus.OK.value())
-                        .build()
-        );
+    public ActionResult getProfile(String userId) {
+        ActionResult actionResult = new ActionResult();
+        Optional<Student> student = studentRepository.findById(userId);
+         if(student.isEmpty())
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        else {
+            ProfileDTO profileDTO = new ProfileDTO();
+            BeanUtils.copyProperties(student.get(), profileDTO);
+            //cắt chuỗi mail trước dấu @
+            actionResult.setData(profileDTO);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
+        }
+        return actionResult;
     }
 
     @Override

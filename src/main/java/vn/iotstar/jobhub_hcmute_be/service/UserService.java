@@ -14,6 +14,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.PasswordResetOtp;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +40,7 @@ public interface UserService {
 
     Page<User> findAll(Pageable pageable);
 
-    ResponseEntity<GenericResponse> getProfile(String userId);
+    ActionResult getProfile(String userId);
 
     Optional<User> findByEmail(String email);
 

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
+import vn.iotstar.jobhub_hcmute_be.constant.Utils;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
@@ -41,6 +42,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Function;
+
+import static vn.iotstar.jobhub_hcmute_be.constant.Utils.cleanHTML;
 
 @Service
 @Transactional
@@ -279,11 +282,10 @@ public class EmployerServiceImpl implements EmployerService {
         MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
         helper.setSubject(request.getSubject());
         helper.setTo(request.getEmail());
-        helper.setText(request.getContent().toString(), true);
+        helper.setText(Utils.cleanHTML(request.getContent()), true);
         helper.setFrom(env.getProperty("spring.mail.username"),"Recruiment Manager");
         javaMailSender.send(message);
         actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
     }
-
 }

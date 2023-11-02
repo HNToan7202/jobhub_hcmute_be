@@ -27,6 +27,7 @@ public class Student extends User implements Serializable {
 
     private Date dateOfBirth;
 
+    @Nationalized
     private String address;
 
     @Enumerated(EnumType.STRING)

@@ -66,6 +66,8 @@ public enum ErrorCodeEnum {
 
     SEND_MAIL_SUCCESSFULLY(200, 20220, "Send mail successfully"),
 
+    GET_PROFILE_SUCCESSFULLY(200, 200, "Get profile successfully"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

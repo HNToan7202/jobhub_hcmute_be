@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,7 +23,8 @@ public class Skill implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String skillId;
 
-    private String name;
+    @Nationalized
+    String name;
 
     @ManyToMany(mappedBy = "skills")
     @JsonBackReference

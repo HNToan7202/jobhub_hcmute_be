@@ -24,8 +24,10 @@ public class CustomHttpServletRequestWrapper extends HttpServletRequestWrapper {
         super(request);
     }
 
+    //Encode.forHtml(value);
+
     private String filterXSS(String value){
-        return Encode.forHtml(value);
+        return value;
     }
 
     @Override

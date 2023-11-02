@@ -1,7 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
+import jakarta.websocket.Decoder;
 import lombok.extern.slf4j.Slf4j;
+import org.owasp.encoder.Encode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -228,6 +230,10 @@ public class JobServiceImpl implements JobService {
             BeanUtils.copyProperties(job.getEmployer(), companyDTO);
             jobDTO.setTotalApply(job.getJobApplies() == null ? 0 : job.getJobApplies().size());
             jobDTO.setCompany(companyDTO);
+            String html =  Encode.forHtml(job.getDescription());
+            jobDTO.setDescription(html);
+            //Encode.forHtml(value);
+
             jobDTOs.add(jobDTO);
         }
         return jobDTOs;

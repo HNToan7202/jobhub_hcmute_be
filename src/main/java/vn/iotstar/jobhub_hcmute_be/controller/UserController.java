@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,10 @@ import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.UserProfileResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.VerifyOtpRequest;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
@@ -42,6 +47,9 @@ public class UserController {
 
     final StudentService studentService;
 
+    @Autowired
+    ResponseBuild responseBuild;
+
     public UserController(JwtTokenProvider jwtTokenProvider, UserService userService, CloudinaryService cloudinaryService, EmailVerificationService emailVerificationService, UserRepository userRepository, StudentService studentService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
@@ -49,23 +57,6 @@ public class UserController {
         this.emailVerificationService = emailVerificationService;
         this.userRepository = userRepository;
         this.studentService = studentService;
-    }
-
-    @GetMapping("/profile")
-    @Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
-    public ResponseEntity<GenericResponse> getProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getPrincipal() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(GenericResponse.builder().success(false).message("Unauthorized: Empty or invalid token").statusCode(HttpStatus.UNAUTHORIZED.value()).build());
-        }
-        try {
-            UserDetail userDetail = (UserDetail) authentication.getPrincipal();
-
-            return ResponseEntity.ok(GenericResponse.builder().success(true).message("Retrieving user profile successfully").result(new UserProfileResponse(userDetail.getUser())).statusCode(HttpStatus.OK.value()).build());
-        } catch (ClassCastException e) {
-            throw new UsernameNotFoundException("Invalid user principal type", e);
-        }
     }
 
     @PostMapping("/verify-otp")

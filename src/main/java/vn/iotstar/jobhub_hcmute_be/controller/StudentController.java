@@ -66,12 +66,18 @@ public class StudentController {
     }
 
     @GetMapping("/profile")
-    //@Operation(security = {@SecurityRequirement(name = "api-key")}) // Yêu cầu xác thực bằng API key
-    public ResponseEntity<GenericResponse> getProfile(@RequestHeader("Authorization") String authorizationHeader) {
-        String jwt = authorizationHeader.substring(7);
-        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-        return studentService.getProfile(userId);
+    public ResponseModel getProfile(@RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String jwt = authorizationHeader.substring(7);
+            String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+            actionResult = userService.getProfile(userId);
+        } catch (ClassCastException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+        }
+        return responseBuild.build(actionResult);
     }
+
 
     @Procedure("application/json")
     @ResponseBody
