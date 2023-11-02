@@ -1,21 +1,23 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
 import lombok.Data;
+import vn.iotstar.jobhub_hcmute_be.constant.Gender;
+import vn.iotstar.jobhub_hcmute_be.entity.Role;
+
+import java.util.Date;
 
 @Data
 public class ProfileDTO {
     String phone;
     String address;
-    String note;
     String fullName;
     String email;
     String avatar;
-    String role;
-    String state;
-    String createdAt;
-    String updatedAt;
-
+    Role role;
+    String isActive;
+    Date lastLoginAt;
     String studentId;
-
-    String gender;
+    Gender gender;
+    String about;
+    Date dateOfBirth;
 }
