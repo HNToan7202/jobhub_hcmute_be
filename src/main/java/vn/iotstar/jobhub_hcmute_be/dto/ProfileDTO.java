@@ -14,7 +14,7 @@ public class ProfileDTO {
     String email;
     String avatar;
     Role role;
-    String isActive;
+    Boolean isActive;
     Date lastLoginAt;
     String studentId;
     Gender gender;
