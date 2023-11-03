@@ -394,6 +394,7 @@ public class JobServiceImpl implements JobService {
                     job.setLocation(jobUpdateRequest.getLocation());
                     job.setDescription(jobUpdateRequest.getDescription());
                     job.setDeadline(jobUpdateRequest.getDeadline());
+                    job.setExperience(jobUpdateRequest.getExperience());
 
                     // Check if position is existed
                     Optional<Position> position = positionRepository.findByName(jobUpdateRequest.getPositionName());
