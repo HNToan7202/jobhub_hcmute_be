@@ -8,6 +8,7 @@ import java.util.Date;
 
 @Data
 public class ProfileDTO {
+    String userId;
     String phone;
     String address;
     String fullName;

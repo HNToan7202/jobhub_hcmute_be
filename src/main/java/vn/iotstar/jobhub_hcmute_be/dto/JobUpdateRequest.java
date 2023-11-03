@@ -20,6 +20,7 @@ public class JobUpdateRequest {
     Integer quantity;
     String benefit;
     String salaryRange;
+    Integer experience;
     String requirement;
     String location;
     String description;
