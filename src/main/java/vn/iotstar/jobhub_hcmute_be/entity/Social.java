@@ -15,6 +15,7 @@ public class Social {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Nationalized
     private String name;
 
     private String socialUrl;

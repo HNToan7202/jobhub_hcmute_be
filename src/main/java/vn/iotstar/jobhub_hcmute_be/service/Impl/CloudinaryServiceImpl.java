@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
@@ -23,6 +24,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         this.cloudinary = cloudinary;
     }
 
+    @Async
     @Override
     public String uploadImage(MultipartFile imageFile) throws IOException {
         if (imageFile == null) {
@@ -39,6 +41,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         return (String) uploadResult.get("secure_url");
     }
 
+    @Async
     @Override
     public void deleteImage(String imageUrl) throws IOException {
         Map<String, String> params= ObjectUtils.asMap(

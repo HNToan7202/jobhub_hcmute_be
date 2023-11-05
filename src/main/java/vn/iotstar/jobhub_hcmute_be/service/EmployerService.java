@@ -39,6 +39,10 @@ public interface EmployerService {
     ResponseEntity<GenericResponse> changeLogo(String userId, MultipartFile imageFile) throws IOException;
 
 
+    ActionResult addBg(String userId, MultipartFile imageFile) throws IOException;
+
+    ActionResult deleteBg(String userId, String imgeUrl) throws IOException;
+
     ResponseEntity<GenericResponse> updateCompanyProfile(String userId, EmployerUpdateDTO request) throws Exception;
 
     ActionResult getApplicants(String employerId, Pageable pageable, String state);

@@ -105,6 +105,38 @@ public class EmployerController {
         return employerService.changeLogo(userId, imageFile);
     }
 
+
+    @PutMapping("/add-bg")
+    public ResponseModel uploadBackground(@RequestParam MultipartFile imageFile,
+                                                        @RequestHeader("Authorization") String token) throws IOException {
+        ActionResult actionResult = new ActionResult();
+        String jwt = token.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        try {
+            actionResult = employerService.addBg(userId, imageFile);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PutMapping("/delete-bg")
+    public ResponseModel deleteItemBg(@RequestBody DeleteItemRequest deleteItemRequest,
+                                          @RequestHeader("Authorization") String token) throws IOException {
+        ActionResult actionResult = new ActionResult();
+        String jwt = token.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        try {
+            actionResult = employerService.deleteBg(userId, deleteItemRequest.getImageUrl());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+
     @PutMapping("/update-profile-company")
     public ResponseEntity<GenericResponse> update(@RequestBody EmployerUpdateDTO request,
                                                   @RequestHeader("Authorization") String authorizationHeader,

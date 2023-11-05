@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class EmployerUpdateDTO {
@@ -22,5 +23,7 @@ public class EmployerUpdateDTO {
     //private String email;
 
     private String about;
+
+    Map<String, String> linkContacts;
 
 }

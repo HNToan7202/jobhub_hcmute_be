@@ -162,6 +162,49 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
+    public ActionResult addBg(String userId, MultipartFile imageFile) throws IOException {
+        ActionResult actionResult = new ActionResult();
+        Employer user = findById(userId).get();
+
+        List<String> bg = user.getBackGround();
+
+        if(bg.size() >= 5){
+            actionResult.setErrorCode(ErrorCodeEnum.MAXIMUM_BACKGROUND);
+        }
+        else {
+            String bgUrl = cloudinaryService.uploadImage(imageFile);
+            bg.add(bgUrl);
+            user.setBackGround(bg);
+           user =  save(user);
+            actionResult.setData(user.getBackGround());
+            actionResult.setErrorCode(ErrorCodeEnum.UPDATE_BACKGROUND_SUCCESSFULLY);
+        }
+        return actionResult;
+    }
+
+
+    @Override
+    public ActionResult deleteBg(String userId, String imgeUrl) throws IOException {
+        ActionResult actionResult = new ActionResult();
+        Employer user = findById(userId).get();
+
+        List<String> bg = user.getBackGround();
+        bg.stream().filter(bgUrl -> bgUrl.equals(imgeUrl)).findFirst().ifPresent(bg::remove);
+
+        if (imgeUrl != null) {
+            cloudinaryService.deleteImage(imgeUrl);
+        }
+
+        user.setBackGround(bg);
+        user =  save(user);
+        actionResult.setData(user.getBackGround());
+        actionResult.setErrorCode(ErrorCodeEnum.UPDATE_BACKGROUND_SUCCESSFULLY);
+
+        return actionResult;
+    }
+
+
+    @Override
     public ResponseEntity<GenericResponse> updateCompanyProfile(String userId, EmployerUpdateDTO request) throws Exception {
         Optional<Employer> employerOptional = findById(userId);
         String phone = request.getPhone();

@@ -68,6 +68,10 @@ public enum ErrorCodeEnum {
 
     GET_PROFILE_SUCCESSFULLY(200, 200, "Get profile successfully"),
 
+    MAXIMUM_BACKGROUND(400, 400, "Maximum background"),
+
+    UPDATE_BACKGROUND_SUCCESSFULLY(200, 200, "Update background successfully"),
+
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

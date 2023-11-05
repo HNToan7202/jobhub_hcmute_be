@@ -17,14 +17,17 @@ public class Education {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Nationalized
     String title;
 
+    @Nationalized
     String location;
 
     String yearBegin;
 
     String yearEnd;
 
+    @Nationalized
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
