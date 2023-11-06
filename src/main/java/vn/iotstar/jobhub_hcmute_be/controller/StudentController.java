@@ -78,9 +78,6 @@ public class StudentController {
         return responseBuild.build(actionResult);
     }
 
-
-    @Procedure("application/json")
-    @ResponseBody
     @PostMapping("{studentId}/update-resume")
     public ResponseEntity<?> updateResume(@RequestBody ResumeDTO resumeDTO, @RequestHeader("Authorization") String authorizationHeader, @PathVariable("studentId") String studentId, BindingResult bindingResult) throws Exception {
         String jwt = authorizationHeader.substring(7);
