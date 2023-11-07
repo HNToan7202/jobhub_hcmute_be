@@ -216,8 +216,9 @@ public class ResumeServiceImpl implements ResumeService {
                 student.setResume(resume);
             }
             System.out.println("resumeDTO: " + resumeDTO.getIsEducationsEdited());
-            if (resumeDTO.getIsEducationsEdited()) {
+            if (resumeDTO.getIsEducationsEdited() == true && resumeDTO.getEducations() != null) {
                 List<Education> educations = new ArrayList<>();
+                List<Education> educationsOld = resume.getEducations();
                 for (EducationDTO educationDTO : resumeDTO.getEducations()) {
                     Education education = new Education();
                     if (educationDTO.getId() != null && educationDTO.getIsEdit()) {
@@ -239,27 +240,28 @@ public class ResumeServiceImpl implements ResumeService {
 
                         education = educationRepository.save(education);
                         System.out.println("education: " + resume.getEducations().toString());
-                    } else if(educationDTO.getId() == null && !educationDTO.getIsEdit()){
+                    } else if(educationDTO.getId() == null && educationDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(educationDTO, education);
                         education.setResume(resume);
                         educations.add(education);
                     }
-                    else if(educationDTO.getId()!= null && educationDTO.getIsDelete()){
+                    else if(educationDTO.getId()!= null && educationDTO.getIsDelete() == true){
                         Optional<Education> optionalEducation = educationRepository.findById(educationDTO.getId());
                         if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                               educationsOld.remove(optionalEducation.get());
                         }
-                        else throw new RuntimeException("Education not found");
                     }
                 }
+                if(educations.isEmpty()){
+                    educationsOld.addAll(educations);
+                }
 
-                List<Education> educationsOld = resume.getEducations();
-                educationsOld.addAll(educations);
                 resume.setEducations(educationsOld);
 
             }
-            if (resumeDTO.getIsCoursesEdited()) {
+            if (resumeDTO.getIsCoursesEdited() == true && resumeDTO.getCourses() != null) {
                 List<Course> courses = new ArrayList<>();
+                List<Course> coursesOld = resume.getCourses();
                 for (CourseDTO courseDTO : resumeDTO.getCourses()) {
                     Course course = new Course();
                     if (courseDTO.getId() != null && courseDTO.getIsEdit()) {
@@ -274,27 +276,25 @@ public class ResumeServiceImpl implements ResumeService {
                         course = optCourse.get();
                         BeanUtils.copyProperties(courseDTO, course);
                         course = courseRepository.save(course);
-                    } else if (courseDTO.getId() == null && !courseDTO.getIsEdit()){
+                    } else if (courseDTO.getId() == null && courseDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(courseDTO, course);
                         course.setResume(resume);
                         courses.add(course);
                     }
                     if(courseDTO.getId()!= null && courseDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(courseDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                        Optional<Course> courseOptional = courseRepository.findById(courseDTO.getId());
+                        if(courseOptional.isPresent()){
+                            coursesOld.remove(courseOptional.get());
                         }
-                        else throw new RuntimeException("Education not found");
                     }
-
                 }
-                List<Course> coursesOld = resume.getCourses();
                 coursesOld.addAll(courses);
                 resume.setCourses(coursesOld);
             }
 
-            if (resumeDTO.getIsCertificatesEdited()) {
+            if (resumeDTO.getIsCertificatesEdited() == true && resumeDTO.getCertificates() != null) {
                 List<Certificate> certificates = new ArrayList<>();
+                List<Certificate> certificatesOld = resume.getCertificates();
                 for (CertificateDTO certificateDTO : resumeDTO.getCertificates()) {
                     Certificate certificate = new Certificate();
                     if (certificateDTO.getId() != null && certificateDTO.getIsEdit()) {
@@ -309,27 +309,25 @@ public class ResumeServiceImpl implements ResumeService {
                         certificate = optCertificate.get();
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate = certificateRepository.save(certificate);
-                    } else if (certificateDTO.getId() == null && !certificateDTO.getIsEdit()){
+                    } else if (certificateDTO.getId() == null && certificateDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate.setResume(resume);
                         certificates.add(certificate);
                     }
-                     if(certificateDTO.getId()!= null && certificateDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(certificate.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                     if(certificateDTO.getId()!= null && certificateDTO.getIsDelete() == true){
+                        Optional<Certificate> certificateOptional = certificateRepository.findById(certificate.getId());
+                        if(certificateOptional.isPresent()){
+                            certificatesOld.remove(certificateOptional.get());
                         }
-                        else throw new RuntimeException("Education not found");
                     }
-
                 }
-                List<Certificate> certificatesOld = resume.getCertificates();
                 certificatesOld.addAll(certificates);
                 resume.setCertificates(certificatesOld);
             }
 
-            if (resumeDTO.getIsExperiencesEdited()) {
+            if (resumeDTO.getIsExperiencesEdited() == true && resumeDTO.getExperiences() != null) {
                 List<Experience> experiences = new ArrayList<>();
+                List<Experience> experiencesOld = resume.getExperiences();
                 for (ExperienceDTO experienceDTO : resumeDTO.getExperiences()) {
                     Experience experience = new Experience();
                     if (experienceDTO.getId() != null && experienceDTO.getIsEdit()) {
@@ -349,22 +347,24 @@ public class ResumeServiceImpl implements ResumeService {
                         experience.setResume(resume);
                         experiences.add(experience);
                     }
-                    if(experience.getId()!= null && experienceDTO.getIsDelete()){
-                        assert experienceDTO.getId() != null;
-                        Optional<Education> optionalEducation = educationRepository.findById(experienceDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                    if(experienceDTO.getId()!= null && experienceDTO.getIsDelete() == true){
+                        Optional<Experience> experienceOptional = experienceRepository.findById(experienceDTO.getId());
+                        if(experienceOptional.isPresent()){
+                            experiencesOld.remove(experienceOptional.get());
+                            System.err.println("experiencesOld" + experiencesOld.size());
                         }
-                        else throw new RuntimeException("Experience not found");
                     }
-
                 }
-                List<Experience> experiencesOld = resume.getExperiences();
-                experiencesOld.addAll(experiences);
+                System.err.println("experiences "+ experiencesOld.size());
+                if(experiences.isEmpty()){
+                    experiencesOld.addAll(experiences);
+                }
                 resume.setExperiences(experiencesOld);
+                System.err.println("experiencesOld" + resume.getExperiences().size());
             }
-            if (resumeDTO.getIsPrizesEdited()) {
+            if (resumeDTO.getIsPrizesEdited() == true && resumeDTO.getPrizes() != null) {
                 List<Prize> prizes = new ArrayList<>();
+                List<Prize> prizesOld = resume.getPrizes();
                 for (PrizeDTO prizeDTO : resumeDTO.getPrizes()) {
                     Prize prize = new Prize();
                     if (prizeDTO.getId() != null && prizeDTO.getIsEdit()) {
@@ -385,20 +385,18 @@ public class ResumeServiceImpl implements ResumeService {
                         prizes.add(prize);
                     }
                     if(prizeDTO.getId()!= null && prizeDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(prizeDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                        Optional<Prize> prizeOptional = prizeRepository.findById(prizeDTO.getId());
+                        if(prizeOptional.isPresent()){
+                            prizesOld.remove(prizeOptional.get());
                         }
-                        else throw new RuntimeException("Prize not found");
                     }
-
                 }
-                List<Prize> prizesOld = resume.getPrizes();
                 prizesOld.addAll(prizes);
                 resume.setPrizes(prizesOld);
             }
-            if (resumeDTO.getIsProjectsEdited()) {
+            if (resumeDTO.getIsProjectsEdited() == true && resumeDTO.getProjects() != null) {
                 List<Project> projects = new ArrayList<>();
+                List<Project> projectsOld = resume.getProjects();
                 for (ProjectDTO projectDTO : resumeDTO.getProjects()) {
                     Project project = new Project();
                     if (projectDTO.getId() != null && projectDTO.getIsEdit()) {
@@ -413,27 +411,25 @@ public class ResumeServiceImpl implements ResumeService {
                         project = optProject.get();
                         BeanUtils.copyProperties(projectDTO, project);
                         project = projectRepository.save(project);
-                    } else if (projectDTO.getId() == null && !projectDTO.getIsEdit()){
+                    } else if (projectDTO.getId() == null && projectDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(projectDTO, project);
                         project.setResume(resume);
                         projects.add(project);
                     }
-                    if(projectDTO.getId()!= null && projectDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(projectDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                    if(projectDTO.getId()!= null && projectDTO.getIsDelete() == true){
+                        Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
+                        if(projectOptional.isPresent()){
+                            projectsOld.remove(projectOptional.get());
                         }
-                        else throw new RuntimeException("Project not found");
                     }
-
                 }
-                List<Project> projectsOld = resume.getProjects();
                 projectsOld.addAll(projects);
                 resume.setProjects(projectsOld);
             }
 
-            if (resumeDTO.getIsSocialActivitiesEdited()) {
+            if (resumeDTO.getIsSocialActivitiesEdited() == true && resumeDTO.getSocialActivities() != null) {
                 List<SocialActivity> socialActivities = new ArrayList<>();
+                List<SocialActivity> socialActivitiesOld = resume.getSocialActivities();
                 for (SocialActivityDTO socialActivityDTO : resumeDTO.getSocialActivities()) {
                     SocialActivity socialActivity = new SocialActivity();
                     if (socialActivityDTO.getId() != null && socialActivityDTO.getIsEdit()) {
@@ -448,27 +444,26 @@ public class ResumeServiceImpl implements ResumeService {
                         socialActivity = optSocialActivity.get();
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity = socialActivityRepository.save(socialActivity);
-                    } else if (socialActivityDTO.getId() == null && !socialActivityDTO.getIsEdit()){
+                    } else if (socialActivityDTO.getId() == null && socialActivityDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity.setResume(resume);
                         socialActivities.add(socialActivity);
                     }
-                    if(socialActivityDTO.getId()!= null && socialActivityDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(socialActivityDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                    if(socialActivityDTO.getId()!= null && socialActivityDTO.getIsDelete()==true){
+                        Optional<SocialActivity> socialActivityOptional = socialActivityRepository.findById(socialActivityDTO.getId());
+                        if(socialActivityOptional.isPresent()){
+                            socialActivitiesOld.remove(socialActivityOptional.get());
                         }
-                        else throw new RuntimeException("Education not found");
                     }
-
                 }
-                List<SocialActivity> socialActivitiesOld = resume.getSocialActivities();
+
                 socialActivitiesOld.addAll(socialActivities);
                 resume.setSocialActivities(socialActivitiesOld);
             }
 
-            if (resumeDTO.getIsSocialsEdited()) {
+            if (resumeDTO.getIsSocialsEdited()== true && resumeDTO.getSocials() != null ) {
                 List<Social> socials = new ArrayList<>();
+                List<Social> socialsOld = resume.getSocials();
                 for (SocialDTO socialDTO : resumeDTO.getSocials()) {
                     Social social = new Social();
                     if (socialDTO.getId() != null && socialDTO.getIsEdit()) {
@@ -483,27 +478,24 @@ public class ResumeServiceImpl implements ResumeService {
                         social = optSocial.get();
                         BeanUtils.copyProperties(socialDTO, social);
                         social = socialRepository.save(social);
-                    } else if (socialDTO.getId() == null && !socialDTO.getIsEdit()) {
+                    } else if (socialDTO.getId() == null && socialDTO.getIsEdit() == false){
                         BeanUtils.copyProperties(socialDTO, social);
                         social.setResume(resume);
                         socials.add(social);
                     }
                     if(socialDTO.getId()!= null && socialDTO.getIsDelete()){
-                        Optional<Education> optionalEducation = educationRepository.findById(socialDTO.getId());
-                        if(optionalEducation.isPresent()){
-                            educationRepository.deleteById(optionalEducation.get().getId());
+                        Optional<Social> socialOptional = socialRepository.findById(socialDTO.getId());
+                        if(socialOptional.isPresent()){
+                            socialsOld.remove(socialOptional.get());
                         }
-                        else throw new RuntimeException("Education not found");
                     }
                 }
-                List<Social> socialsOld = resume.getSocials();
                 socialsOld.addAll(socials);
                 resume.setSocials(socialsOld);
             }
 
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
-
             resume = resumeRepository.save(resume);
             return ResponseEntity.status(200).body(GenericResponse.builder()
                     .success(true)
@@ -515,6 +507,7 @@ public class ResumeServiceImpl implements ResumeService {
             return ResponseEntity.status(500).body(GenericResponse.builder()
                     .success(false)
                     .message("Internal Server Error")
+                    .result(e.getMessage())
                     .statusCode(500)
                     .build());
             // Xử lý ngoại lệ nếu cần

@@ -12,10 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.UserProfileResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.VerifyOtpRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -84,4 +81,6 @@ public class UserController {
         UserDetail userDetail = (UserDetail) authentication.getPrincipal();
         return userService.changeUserPassord(userDetail.getUser(), passwordResetRequest);
     }
+
+
 }

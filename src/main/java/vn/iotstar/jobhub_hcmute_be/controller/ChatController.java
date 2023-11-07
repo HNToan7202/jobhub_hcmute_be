@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 import vn.iotstar.jobhub_hcmute_be.model.Message;
 
-@Controller
+@RestController
 public class ChatController {
 
     @Autowired
