@@ -124,13 +124,14 @@ public class UserServiceImpl implements UserService {
     public ActionResult getProfile(String userId) {
         ActionResult actionResult = new ActionResult();
         Optional<Student> student = studentRepository.findById(userId);
+
          if(student.isEmpty())
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         else {
             ProfileDTO profileDTO = new ProfileDTO();
             BeanUtils.copyProperties(student.get(), profileDTO);
             //cắt chuỗi mail trước dấu @
-            actionResult.setData(profileDTO);
+            actionResult.setData(student);
             actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
         }
         return actionResult;
@@ -410,7 +411,6 @@ public class UserServiceImpl implements UserService {
             myOtp = passwordResetOtpRepository.findByUser(user).get();
             myOtp.updateOtp(otp);
         } else {
-
             myOtp = new PasswordResetOtp(otp, user);
         }
         passwordResetOtpRepository.save(myOtp);

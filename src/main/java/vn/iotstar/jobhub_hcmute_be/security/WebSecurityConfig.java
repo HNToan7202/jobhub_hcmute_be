@@ -89,8 +89,11 @@ public class WebSecurityConfig {
 
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowCredentials(true);
+//        configuration.setAllowedOrigins(List.of("*"));
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://172.16.10.231:3000");
+        configuration.addAllowedOrigin("https://jobhub-hcmute.azurewebsites.net");
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH" ));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));

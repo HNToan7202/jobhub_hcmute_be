@@ -51,6 +51,7 @@ public class PasswordResetOtp implements Serializable {
 
 
     private Date calculateExpiryDate(final int expiryTimeInMinutes) {
+        //
         final Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(new Date().getTime());
         cal.add(Calendar.MINUTE, expiryTimeInMinutes);
@@ -58,6 +59,7 @@ public class PasswordResetOtp implements Serializable {
     }
 
     public void updateOtp(final String otp) {
+        //hàm này để update lại otp khi user request lại
         this.otp = otp;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }

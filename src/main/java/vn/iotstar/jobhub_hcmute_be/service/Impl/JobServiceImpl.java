@@ -230,8 +230,8 @@ public class JobServiceImpl implements JobService {
             BeanUtils.copyProperties(job.getEmployer(), companyDTO);
             jobDTO.setTotalApply(job.getJobApplies() == null ? 0 : job.getJobApplies().size());
             jobDTO.setCompany(companyDTO);
-            String html =  Encode.forHtml(job.getDescription());
-            jobDTO.setDescription(html);
+//            String html =  Encode.forHtml(job.getDescription());
+//            jobDTO.setDescription(html);
             //Encode.forHtml(value);
 
             jobDTOs.add(jobDTO);
