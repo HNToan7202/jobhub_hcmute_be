@@ -10,7 +10,7 @@ import vn.iotstar.jobhub_hcmute_be.notification.FirebaseMessageService;
 import vn.iotstar.jobhub_hcmute_be.notification.NotificationMessage;
 
 @RestController
-@RequestMapping("notification")
+@RequestMapping("/api/v1/notification")
 public class NotificationController {
 
     @Autowired

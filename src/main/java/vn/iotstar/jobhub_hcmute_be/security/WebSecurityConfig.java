@@ -92,7 +92,7 @@ public class WebSecurityConfig {
         configuration.setAllowCredentials(true);
 //        configuration.setAllowedOrigins(List.of("*"));
         configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://172.16.10.231:3000");
+        configuration.addAllowedOrigin("http://localhost:3001");
         configuration.addAllowedOrigin("https://jobhub-hcmute.azurewebsites.net");
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH" ));
