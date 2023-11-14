@@ -1,9 +1,14 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.config.PayConfig;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
+import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
+import vn.iotstar.jobhub_hcmute_be.service.TransactionsService;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -12,15 +17,31 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
+
 public class PaymentController {
+    @Autowired
+    ResponseBuild responseBuild;
+    @Autowired
+    TransactionsService transactionsService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @GetMapping("/pay")
-    public String getPay(@RequestParam String amount_pay) throws UnsupportedEncodingException, UnsupportedEncodingException {
+    public PaymentController(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
+    @GetMapping("/api/v1/pay")
+    public ResponseModel getPay(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String amount_pay) throws UnsupportedEncodingException, UnsupportedEncodingException {
+        String jwt = authorizationHeader.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        ActionResult actionResult = transactionsService.BeginTransaction(userId, Long.parseLong(amount_pay));
+        if (actionResult.getErrorCode() != ErrorCodeEnum.OK) {
+            return responseBuild.build(actionResult);
+        }
+        Object data = actionResult.getData();
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
-        long amount =  Long.parseLong(amount_pay) * 100;
+        long amount = Long.parseLong(amount_pay);
         String bankCode = "NCB";
 
         String vnp_TxnRef = PayConfig.getRandomNumber(8);
@@ -80,8 +101,21 @@ public class PaymentController {
         String vnp_SecureHash = PayConfig.hmacSHA512(PayConfig.secretKey, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = PayConfig.vnp_PayUrl + "?" + queryUrl;
+        actionResult.setData(paymentUrl);
+        ResponseModel responseModel = responseBuild.build(actionResult);
+        return responseModel;
 
-        return paymentUrl;
+    }
+
+    @GetMapping("/api/v1/pay/complete")
+    public ResponseModel completePayment(@RequestHeader("Authorization") String authorizationHeader, @RequestParam long time) {
+        String jwt = authorizationHeader.substring(7);
+        String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+        ActionResult actionResult = transactionsService.AfterTransaction(userId, time);
+        ResponseModel responseModel = responseBuild.build(actionResult);
+        return responseModel;
     }
 
 }
+
+

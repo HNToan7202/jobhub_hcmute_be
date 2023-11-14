@@ -72,6 +72,11 @@ public enum ErrorCodeEnum {
 
     UPDATE_BACKGROUND_SUCCESSFULLY(200, 200, "Update background successfully"),
 
+    USER_IS_TRANSACTION(400, 400, "Customers are still making transactions, please complete the transaction or try again after 15 minutes"),
+
+    TRANSACTION_SAVED(200, 200, "Transaction saved"),
+
+    DETECTION_OF_VIOLATIONS(400, 400, "Detection of violations"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

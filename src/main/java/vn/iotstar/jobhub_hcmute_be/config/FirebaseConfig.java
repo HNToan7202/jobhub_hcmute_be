@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.List;
 
 @Configuration
 //file này để cấu hình firebase
@@ -24,7 +25,16 @@ public class FirebaseConfig {
                 //build
                 .build();
         //khởi tạo app để cấu hình
+        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+        if (firebaseApps != null && !firebaseApps.isEmpty()) {
+            for (FirebaseApp app : firebaseApps) {
+                if (app.getName().equals("my-app")) {
+                    // FirebaseApp đã tồn tại, không cần khởi tạo lại
+                    return FirebaseMessaging.getInstance(app);
+                }
+            }
+        }
         FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "my-app");
-        return  FirebaseMessaging.getInstance(app);//trả về instance của firebase
+        return FirebaseMessaging.getInstance(app);//trả về instance của firebase
     }
 }

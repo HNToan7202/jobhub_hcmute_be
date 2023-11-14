@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.Nationalized;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.constant.Gender;
+import vn.iotstar.jobhub_hcmute_be.constant.Rating;
 
 import java.io.Serializable;
 import java.util.*;
@@ -56,5 +57,17 @@ public class Employer extends User implements Serializable {
     private String foundedYear;
 
     private String teamSize;
-    
+
+    @OneToMany(mappedBy = "employer")
+    @JsonBackReference
+    @ToString.Exclude
+    private List<Transactions> transactions;
+
+    private Boolean isTransaction = false;
+
+    private Long transaction_money = 0L;
+
+    private String sponsor = Rating.NORMAL.toString();
+
+
 }
