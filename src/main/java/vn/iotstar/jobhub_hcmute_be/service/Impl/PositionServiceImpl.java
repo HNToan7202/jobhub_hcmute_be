@@ -1,7 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
@@ -46,6 +46,21 @@ public class PositionServiceImpl implements PositionService {
 
         actionResult.setErrorCode(ErrorCodeEnum.GET_POSITION_SUCCESS);
         actionResult.setData(positionList);
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult topPopularJobByPosition(){
+        ActionResult actionResult = new ActionResult();
+        try{
+            List<Position> listPos = positionRepository.findTop9ByOrderByAmountPositionDesc();
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+            actionResult.setData(listPos);
+        }
+        catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            actionResult.setData(e.getMessage());
+        }
         return actionResult;
     }
 }

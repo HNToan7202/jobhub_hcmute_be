@@ -1,9 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
-import jakarta.websocket.Decoder;
 import lombok.extern.slf4j.Slf4j;
-import org.owasp.encoder.Encode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -240,7 +238,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable) {
+    public Page<Job> findAllByIsActiveOrderByCreatedAtDesc(Boolean isActive, Pageable pageable) {
         return jobRepository.findByIsActiveOrderByCreatedAtDesc(isActive, pageable);
     }
 
@@ -255,7 +253,7 @@ public class JobServiceImpl implements JobService {
     public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
         actionResult = new ActionResult();
         try {
-            Page<Job> jobs = findAllByIsActiveIsTrueOrderByCreatedAtDesc(isActive, pageable);
+            Page<Job> jobs = findAllByIsActiveOrderByCreatedAtDesc(isActive, pageable);
             response = new HashMap<>();
             response.put("jobs", jobs.getContent());
             response.put("currentPage", jobs.getNumber());
@@ -317,10 +315,16 @@ public class JobServiceImpl implements JobService {
             // Check if position is existed
             Optional<Position> position = positionRepository.findByName(jobRequest.getPositionName());
             if (position.isPresent()) {
-                job.setPosition(position.get());
+                Position pos = position.get();
+                Long amount = pos.getAmountPosition() + jobRequest.getQuantity();
+                pos.setAmountPosition(amount);
+                positionRepository.save(pos);
+                job.setPosition(pos);
+
             } else {
                 Position newPosition = new Position();
                 newPosition.setName(jobRequest.getPositionName());
+                newPosition.setAmountPosition(Long.valueOf(jobRequest.getQuantity()));
                 //newPosition = positionRepository.save(newPosition);
                 job.setPosition(newPosition);
             }
@@ -472,5 +476,25 @@ public class JobServiceImpl implements JobService {
 
         return actionResult;
     }
+
+    @Override
+    public ActionResult changeStateJob(String jobId){
+        ActionResult actionResult = new ActionResult();
+        Optional<Job> jobOptional = findById(jobId);
+        if(jobOptional.isEmpty()){
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+
+        }
+        else {
+            Job job = jobOptional.get();
+            job.setIsActive(!job.getIsActive());
+            jobRepository.save(job);
+            actionResult.setData(job);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }
+        return actionResult;
+    }
+
+
 
 }

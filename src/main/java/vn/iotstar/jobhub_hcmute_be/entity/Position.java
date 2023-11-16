@@ -25,6 +25,10 @@ public class Position implements Serializable {
     @NotNull
     private String name;
 
+    private Long amountPosition = 0L;
+
+    private String icon;
+
     @OneToMany(mappedBy = "position", cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude

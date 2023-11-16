@@ -27,11 +27,6 @@ public class Employer extends User implements Serializable {
     @ToString.Exclude
     private List<Job> jobs;
 
-    @OneToMany(mappedBy = "employer")
-    @JsonBackReference
-    @ToString.Exclude
-    private List<Event> events;
-
     @ElementCollection
     @CollectionTable(name = "recruiter_linkContacts", joinColumns = @JoinColumn(name = "recruiter_id"))
     @MapKeyColumn(name = "linkContact_key")
@@ -65,7 +60,7 @@ public class Employer extends User implements Serializable {
 
     private Boolean isTransaction = false;
 
-    private Long transaction_money = 0L;
+    private Long transactionMoney = 0L;
 
     private String sponsor = Rating.NORMAL.toString();
 

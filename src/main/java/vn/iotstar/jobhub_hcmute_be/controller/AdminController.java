@@ -1,13 +1,21 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.EventDto;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
+import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
+import vn.iotstar.jobhub_hcmute_be.service.JobService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 import java.util.Objects;
@@ -24,9 +32,48 @@ public class AdminController {
     final
     AdminService adminService;
 
+    @Autowired
+    JobService jobService;
+
+
+    @Autowired
+    ResponseBuild responseBuild;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
     public AdminController(UserService userService, AdminService adminService) {
         this.userService = userService;
         this.adminService = adminService;
+    }
+
+
+    @GetMapping("/profile")
+    public ResponseModel getProfile(@RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String jwt = authorizationHeader.substring(7);
+            String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+            actionResult = userService.getProfileAdmin(userId);
+        } catch (ClassCastException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PostMapping("/event/add")
+    public ResponseModel addEvent(@Valid @RequestBody EventDto eventDto, @RequestHeader("Authorization") String authorizationHeader){
+
+        ActionResult actionResult = new ActionResult();
+        try {
+            String jwt = authorizationHeader.substring(7);
+            String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+            actionResult = adminService.addNewEvent(eventDto, userId);
+        }
+        catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
     //@PostAuthorize("hasRole('ADMIN')")
@@ -41,24 +88,47 @@ public class AdminController {
         return userService.getAccounts(size, page);
     }
 
-    @GetMapping("/get-list-user")
-    public ResponseEntity<GenericResponse> getAccounts(
-            @RequestParam(name = "role", required = false, defaultValue = "") String role,
+    @GetMapping("/get-user")
+    public ResponseModel getAccounts(
+            @RequestParam(name = "role", required = false, defaultValue = "ALL") String role,
+            @RequestParam(name = "active", required = false) Boolean active,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page
-    ) throws Exception {
-        return userService.getAccounts(role, size, page);
+            @RequestParam(name = "index", required = false, defaultValue = "0") int index
+    ) {
+        ActionResult actionResult = new ActionResult();
+        try{
+            actionResult = userService.getAccounts(size, index, role,active);
+        }
+        catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        }
+        return responseBuild.build(actionResult);
     }
 
-    @PostMapping("/accept-employer")
-    public ResponseEntity<?> acceptEmployer(@RequestBody EmployerRequest employerRequest, BindingResult bindingResult) throws Exception {
+
+
+    @PostMapping("/employer/verify")
+    public ResponseModel acceptEmployer(@RequestBody EmployerRequest employerRequest, BindingResult bindingResult) throws Exception {
+        ActionResult actionResult;
         if (bindingResult.hasErrors()) {
             throw new Exception(Objects.requireNonNull(bindingResult
                             .getFieldError())
                     .getDefaultMessage()
             );
         }
-        return adminService.acceptEmployer(employerRequest.getEmployerId());
+       actionResult =  adminService.changeStateEmployer(employerRequest);
+        return responseBuild.build(actionResult);
+    }
+
+    @PutMapping("/job/{jobId}/change-state")
+    public ResponseModel changeStateJob(@PathVariable String jobId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = jobService.changeStateJob(jobId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
 }

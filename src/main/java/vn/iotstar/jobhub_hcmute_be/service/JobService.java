@@ -55,7 +55,7 @@ public interface JobService {
 
     ActionResult findAllByEmployer(String id, Pageable pageable, Boolean isActive);
 
-    Page<Job> findAllByIsActiveIsTrueOrderByCreatedAtDesc(Boolean isActive, Pageable pageable);
+    Page<Job> findAllByIsActiveOrderByCreatedAtDesc(Boolean isActive, Pageable pageable);
 
     List<Job> findAllByIsActive(Boolean isActive);
 
@@ -69,4 +69,6 @@ public interface JobService {
     ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId);
 
     ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable);
+
+    ActionResult changeStateJob(String jobId);
 }

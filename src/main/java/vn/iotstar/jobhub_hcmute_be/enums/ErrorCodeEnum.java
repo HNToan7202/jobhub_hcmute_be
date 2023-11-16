@@ -77,6 +77,23 @@ public enum ErrorCodeEnum {
     TRANSACTION_SAVED(200, 200, "Transaction saved"),
 
     DETECTION_OF_VIOLATIONS(400, 400, "Detection of violations"),
+
+    PAGE_INDEX_MUST_NOT_BE_LESS_THAN_0(400, 400, "Page index must not be less than 0"),
+
+
+    GET_ALL_USER_SUCCESSFULLY(200, 200, "Get all user successfully"),
+
+    GET_ADMIN_PROFILE_SUCCESSFULLY(200, 200, "Get admin profile successfully"),
+
+    USER_IS_ACTIVED(400, 400, "User is actived"),
+
+    EMPLOYR_ACCEPT_SUCCESS(200, 200, "Accept employer success"),
+
+    EMPLOYER_NOT_ACTIVE_SUCCESS(200, 200, "Employer not active success"),
+
+    ADMIN_NOT_FOUND(404, 404, "Admin not found"),
+
+    POST_EVENT_SUCCESS(200, 200, "Post event success"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

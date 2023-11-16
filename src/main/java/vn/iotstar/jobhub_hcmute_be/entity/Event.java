@@ -38,8 +38,7 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @ToString.Exclude
-    private Employer employer;
-
+    private Admin admin;
 
     @PrePersist
     void createdAt() {
@@ -48,7 +47,6 @@ public class Event {
             this.time = LocalTime.parse("00:00:00");
         }
     }
-
     @PreUpdate
     void updatedAt() {
         this.updatedAt = new Date();

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
+import vn.iotstar.jobhub_hcmute_be.constant.State;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -79,7 +80,6 @@ public class Job implements Serializable {
     @ToString.Exclude
     private Employer employer;
 
-
     //Để test xoá được hay không
     @OneToMany(mappedBy = "job", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
@@ -101,4 +101,5 @@ public class Job implements Serializable {
         this.updatedAt = new Date();
     }
 
+    int status;
 }

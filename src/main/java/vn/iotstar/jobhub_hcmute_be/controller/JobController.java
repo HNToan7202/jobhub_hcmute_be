@@ -41,7 +41,7 @@ public class JobController {
     }
 
     @GetMapping("/get-all-jobs")
-    public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true") Boolean isActive) {
+    public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true",required = false) Boolean isActive) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = jobService.getAllJobs(PageRequest.of(index, size), isActive);
@@ -50,27 +50,6 @@ public class JobController {
         }
         return responseBuild.build(actionResult);
     }
-//    @GetMapping("/get-all-job")
-//    public ResponseModel getAllJob(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
-//        ActionResult actionResult = new ActionResult();
-//        try {
-//            actionResult = jobElasticsearchService.findAllJobs(PageRequest.of(index, size));
-//        } catch (Exception e) {
-//            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
-//        }
-//        return responseBuild.build(actionResult);
-//    }
-//
-//    @GetMapping("/find-job")
-//    public ResponseModel findJob(@RequestParam String name, @RequestParam String location, @RequestParam String position, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
-//        ActionResult actionResult = new ActionResult();
-//        try {
-//            actionResult = jobElasticsearchService.searchJobs(name, location, position, PageRequest.of(index, size));
-//        } catch (Exception e) {
-//            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
-//        }
-//        return responseBuild.build(actionResult);
-//    }
 
     @GetMapping("/get-all")
     public ResponseModel getAllJob(@RequestParam(defaultValue = "true") Boolean isActive) {
@@ -111,18 +90,16 @@ public class JobController {
     }
 
     @GetMapping
-    public ResponseModel getAllJobsByFilters(@RequestParam(defaultValue = "") String name, @RequestParam(defaultValue = "") String posName,
+    public ResponseModel getAllJobsByFilters(@RequestParam(defaultValue = "") String name,
+                                             @RequestParam(defaultValue = "") String posName,
                                              @RequestParam(defaultValue = "") String location,
-                                             @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
+                                             @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
         ActionResult actionResult = new ActionResult();
         try {
-            actionResult = jobService.getAllJobsByFilters(name,posName, location, PageRequest.of(index,size));
+            actionResult = jobService.getAllJobsByFilters(name, posName, location, PageRequest.of(index, size));
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
     }
-
-
-
 }

@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import vn.iotstar.jobhub_hcmute_be.notification.NotificationMessage;
 
 @RestController
 @RequestMapping("/api/v1/notification")
+@Tag(name="Notification", description="Notification API")
 public class NotificationController {
 
     @Autowired

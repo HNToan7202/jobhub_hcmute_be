@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
@@ -346,5 +347,14 @@ public class EmployerServiceImpl implements EmployerService {
         helper.setFrom(env.getProperty("spring.mail.username"), request.getCompanyName());
         javaMailSender.send(message);
         return "Email Sent!";
+    }
+
+    @Override
+    public ActionResult topCompany(Pageable pageable){
+        ActionResult actionResult = new ActionResult();
+        Page<Employer> employerPage = employerRepository.findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(1L,pageable );
+        actionResult.setData(employerPage.getContent());
+        actionResult.setErrorCode(ErrorCodeEnum.OK);
+        return actionResult;
     }
 }

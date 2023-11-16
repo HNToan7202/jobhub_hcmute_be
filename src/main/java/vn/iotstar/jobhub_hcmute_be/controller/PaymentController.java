@@ -1,6 +1,8 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.config.PayConfig;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
@@ -17,7 +19,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
-
+@PreAuthorize("hasRole('EMPLOYER')")
+@RequestMapping("/api/v1/pay")
+@Tag(name = "Pay", description = "Pay API")
 public class PaymentController {
     @Autowired
     ResponseBuild responseBuild;
@@ -29,7 +33,7 @@ public class PaymentController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @GetMapping("/api/v1/pay")
+    @GetMapping
     public ResponseModel getPay(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String amount_pay) throws UnsupportedEncodingException, UnsupportedEncodingException {
         String jwt = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
@@ -86,11 +90,11 @@ public class PaymentController {
                 //Build hash data
                 hashData.append(fieldName);
                 hashData.append('=');
-                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
                 //Build query
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                 query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
                 if (itr.hasNext()) {
                     query.append('&');
                     hashData.append('&');
@@ -102,18 +106,16 @@ public class PaymentController {
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = PayConfig.vnp_PayUrl + "?" + queryUrl;
         actionResult.setData(paymentUrl);
-        ResponseModel responseModel = responseBuild.build(actionResult);
-        return responseModel;
+        return responseBuild.build(actionResult);
 
     }
 
-    @GetMapping("/api/v1/pay/complete")
+    @GetMapping("/complete")
     public ResponseModel completePayment(@RequestHeader("Authorization") String authorizationHeader, @RequestParam long time) {
         String jwt = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
         ActionResult actionResult = transactionsService.AfterTransaction(userId, time);
-        ResponseModel responseModel = responseBuild.build(actionResult);
-        return responseModel;
+        return responseBuild.build(actionResult);
     }
 
 }

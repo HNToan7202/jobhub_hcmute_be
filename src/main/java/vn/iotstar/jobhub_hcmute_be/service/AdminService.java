@@ -1,9 +1,10 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
 import org.springframework.data.domain.Example;
-import org.springframework.http.ResponseEntity;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
+import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
+import vn.iotstar.jobhub_hcmute_be.dto.EventDto;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,5 +23,7 @@ public interface AdminService {
 
     void deleteById(String s);
 
-    ResponseEntity<?> acceptEmployer(String employerId);
+    ActionResult changeStateEmployer( EmployerRequest employerRequest);
+
+    ActionResult addNewEvent(EventDto eventDto, String adminId);
 }

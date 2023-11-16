@@ -42,6 +42,8 @@ public interface UserService {
 
     ActionResult getProfile(String userId);
 
+    ActionResult getProfileAdmin(String userId);
+
     Optional<User> findByEmail(String email);
 
     ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO);
@@ -56,7 +58,7 @@ public interface UserService {
 
     ResponseEntity<GenericResponse> getAccounts(int size, int page);
 
-    ResponseEntity<GenericResponse> getAccounts(String role,int size, int page) throws Exception;
+    ActionResult getAccounts(int size, int page, String role, Boolean isActive) throws Exception;
 
     ResponseEntity<GenericResponse> validateVerificationAccount(String token);
 

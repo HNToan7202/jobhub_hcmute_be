@@ -74,6 +74,10 @@ public class UserServiceImpl implements UserService {
     private StudentRepository studentRepository;
 
 
+    @Autowired
+    AdminRepository adminRepository;
+
+
     @Override
     @Deprecated
     public User getById(String s) {
@@ -133,6 +137,21 @@ public class UserServiceImpl implements UserService {
             //cắt chuỗi mail trước dấu @
             actionResult.setData(student);
             actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getProfileAdmin(String userId) {
+        ActionResult actionResult = new ActionResult();
+        Optional<Admin> student = adminRepository.findById(userId);
+        if(student.isEmpty())
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        else {
+            ProfileDTO profileDTO = new ProfileDTO();
+            BeanUtils.copyProperties(student.get(), profileDTO);
+            actionResult.setData(profileDTO);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_ADMIN_PROFILE_SUCCESSFULLY);
         }
         return actionResult;
     }
@@ -234,7 +253,6 @@ public class UserServiceImpl implements UserService {
                                     .statusCode(HttpStatus.CONFLICT.value())
                                     .build()
                     );
-
         if (!employerRegisterDTO.getPassword().equals(employerRegisterDTO.getConfirmPassword()))
             return ResponseEntity.status(409)
                     .body(
@@ -351,33 +369,55 @@ public class UserServiceImpl implements UserService {
                         .build());
     }
 
-    @Cacheable(key = "#role", value = "users")
+
+
     @Override
-    public ResponseEntity<GenericResponse> getAccounts(String role, int size, int page) throws Exception {
+    public ActionResult getAccounts( int size, int page, String role, Boolean isActive) throws Exception {
+        ActionResult actionResult = new ActionResult();
         if (page < 0) {
-            return ResponseEntity.ok(GenericResponse.builder()
-                    .message("Page index must not be less than 0")
-                    .statusCode(500)
-                    .success(false)
-                    .build());
+            actionResult.setErrorCode(ErrorCodeEnum.PAGE_INDEX_MUST_NOT_BE_LESS_THAN_0);
         }
         Pageable pageable = PageRequest.of(page,size);
         Page<User> users;
-        Role roleUser = roleRepository.findByName(role);
-        if(role.isEmpty()){
-            users = findAll(pageable);
-            return getGenericResponseResponseEntity(users);
-        }
-        if(roleUser == null){
-            return ResponseEntity.ok(GenericResponse.builder()
-                    .message("Role not found")
-                    .statusCode(500)
-                    .success(false)
-                    .build());
-        }
-        users = userRepository.findByRole_NameAndIsActiveIsTrue(role, pageable);
 
-        return getGenericResponseResponseEntity(users);
+        switch (role) {
+            case "ALL" -> {
+
+                if(isActive == null){
+                    users = findAll(pageable);
+                }
+                else {
+                    users = userRepository.findByIsActive(isActive, pageable);
+                }
+                Map<String, Object> response = toMap( users);
+                actionResult.setData(response);
+                actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
+            }
+            case "STUDENT", "EMPLOYER", "ADMIN" -> {
+                if(isActive == null){
+                    users = userRepository.findByRole_Name(role, pageable);
+                }
+                else  {
+                    users = userRepository.findByRole_NameAndIsActive(role, isActive, pageable);
+                }
+
+                Map<String, Object> response = toMap(users);
+                actionResult.setData(response);
+                actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
+            }
+            default -> throw new Exception("Invalid role");
+        }
+        return actionResult;
+    }
+
+    private Map<String, Object> toMap( Page<User> users) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", users.getContent());
+        response.put("pageNumber", users.getNumber());
+        response.put("pageSize", users.getSize());
+        response.put("totalPages", users.getTotalPages());
+        response.put("totalElements", users.getTotalElements());
+        return response;
     }
 
     @Override

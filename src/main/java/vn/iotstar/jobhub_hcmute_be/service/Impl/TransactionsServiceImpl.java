@@ -104,8 +104,8 @@ public class TransactionsServiceImpl implements TransactionsService {
             transactionOld.get().setTime(time);
 
             employer.get().setIsTransaction(false);
-            employer.get().setTransaction_money(employer.get().getTransaction_money() + transactionOld.get().getAmount());
-            String codeRanting = Rating.getCode(employer.get().getTransaction_money());
+            employer.get().setTransactionMoney(employer.get().getTransactionMoney() + transactionOld.get().getAmount());
+            String codeRanting = Rating.getCode(employer.get().getTransactionMoney());
             employer.get().setSponsor(codeRanting);
 
             employerRepository.save(employer.get());
