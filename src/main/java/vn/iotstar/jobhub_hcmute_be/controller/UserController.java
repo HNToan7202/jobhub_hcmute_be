@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
+import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -20,10 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
-import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
-import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
-import vn.iotstar.jobhub_hcmute_be.service.StudentService;
-import vn.iotstar.jobhub_hcmute_be.service.UserService;
+import vn.iotstar.jobhub_hcmute_be.service.*;
 
 import java.util.Objects;
 
@@ -43,6 +41,9 @@ public class UserController {
     private final UserRepository userRepository;
 
     final StudentService studentService;
+
+    @Autowired
+    ResumeService resumeService;
 
     @Autowired
     ResponseBuild responseBuild;
@@ -82,7 +83,9 @@ public class UserController {
         return userService.changeUserPassord(userDetail.getUser(), passwordResetRequest);
     }
 
-
-
-
+    @GetMapping("{userId}/detail-resume")
+    public ResponseEntity<?> getDetailResume(@PathVariable String userId) {
+        User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        return resumeService.getDetailResume(user.getUserId());
+    }
 }
