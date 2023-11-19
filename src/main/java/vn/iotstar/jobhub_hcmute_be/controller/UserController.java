@@ -88,4 +88,15 @@ public class UserController {
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
         return resumeService.getDetailResume(user.getUserId());
     }
+
+    @GetMapping("{userId}/profile")
+    public ResponseModel getProfile(@PathVariable String userId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.getProfile(userId);
+        } catch (ClassCastException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+        }
+        return responseBuild.build(actionResult);
+    }
 }
