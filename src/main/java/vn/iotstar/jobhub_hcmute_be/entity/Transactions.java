@@ -21,6 +21,7 @@ public class Transactions {
     @Column(columnDefinition = "Nvarchar(max)")
     private String name;
     private String code;
+    private String bank;
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude

@@ -83,7 +83,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public ActionResult AfterTransaction(String userId, long time) {
+    public ActionResult AfterTransaction(String userId, long time, String bank) {
         ActionResult result = new ActionResult();
         try {
             Optional<Employer> employer = employerRepository.findById(userId);
@@ -102,6 +102,7 @@ public class TransactionsServiceImpl implements TransactionsService {
             }
             transactionOld.get().setStatus(StatusTransaction.SUCCESS.toString());
             transactionOld.get().setTime(time);
+            transactionOld.get().setBank(bank);
 
             employer.get().setIsTransaction(false);
             employer.get().setTransactionMoney(employer.get().getTransactionMoney() + transactionOld.get().getAmount());

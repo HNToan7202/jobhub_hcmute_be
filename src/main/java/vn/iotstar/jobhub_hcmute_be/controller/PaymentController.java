@@ -111,10 +111,10 @@ public class PaymentController {
     }
 
     @GetMapping("/complete")
-    public ResponseModel completePayment(@RequestHeader("Authorization") String authorizationHeader, @RequestParam long time) {
+    public ResponseModel completePayment(@RequestHeader("Authorization") String authorizationHeader, @RequestParam long time, @RequestParam String bank) {
         String jwt = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
-        ActionResult actionResult = transactionsService.AfterTransaction(userId, time);
+        ActionResult actionResult = transactionsService.AfterTransaction(userId, time, bank);
         return responseBuild.build(actionResult);
     }
 

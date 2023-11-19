@@ -1,9 +1,10 @@
 package vn.iotstar.jobhub_hcmute_be.constant;
 
 public enum StatusTransaction {
-     PENDING("pending", "Đang chờ"),
+    PENDING("pending", "Đang chờ"),
     SUCCESS("success", "Thành công"),
-    CANCEL("cancel", "Hủy");
+    CANCEL("cancel", "Hủy"),
+    EXP("exp", "Hết hạn");
     private String code;
     private String name;
 

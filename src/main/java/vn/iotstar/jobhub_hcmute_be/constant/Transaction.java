@@ -3,7 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.constant;
 public enum Transaction {
     BASIC_PACKAGE("BASIC", 5000000, "Gói cơ bản"),
     STANDARD_PACKAGE("STANDARD", 10000000, "Gói tiêu chuẩn"),
-    PREMIUM_PACKAGE("PREMIUM", 20000000, "Gói cao cấp");
+    PREMIUM_PACKAGE("EXTENDED", 20000000, "Gói cao cấp");
 
     private String code;
     private long amount;

@@ -13,6 +13,9 @@ import java.util.Date;
 @Data
 public class JobApplyDto implements Serializable {
     String jobApplyId;
+    String nameJob;
+    String logoJob;
+    String locationJob;
     String email;
     String phone;
     String fullName;
@@ -22,4 +25,6 @@ public class JobApplyDto implements Serializable {
     Date updatedAt;
     State state;
     String resumeUpoad;
+
+
 }

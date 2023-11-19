@@ -215,6 +215,9 @@ public class JobApplyServiceImpl implements JobApplyService {
         for(JobApply jobApply : jobApplyPage.getContent()) {
             JobApplyDto jobApplyDto = new JobApplyDto();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
+            jobApplyDto.setLocationJob(jobApply.getJob().getLocation());
+            jobApplyDto.setLogoJob(jobApply.getJob().getLogo());
+            jobApplyDto.setNameJob(jobApply.getJob().getName());
 
             jobApplyDtos.add(jobApplyDto);
         }
