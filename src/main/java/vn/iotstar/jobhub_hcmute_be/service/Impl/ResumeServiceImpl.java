@@ -252,10 +252,7 @@ public class ResumeServiceImpl implements ResumeService {
                         }
                     }
                 }
-                if(educations.isEmpty()){
-                    educationsOld.addAll(educations);
-                }
-
+                educationsOld.addAll(educations);
                 resume.setEducations(educationsOld);
 
             }
@@ -356,9 +353,8 @@ public class ResumeServiceImpl implements ResumeService {
                     }
                 }
                 System.err.println("experiences "+ experiencesOld.size());
-                if(experiences.isEmpty()){
-                    experiencesOld.addAll(experiences);
-                }
+
+                experiencesOld.addAll(experiences);
                 resume.setExperiences(experiencesOld);
                 System.err.println("experiencesOld" + resume.getExperiences().size());
             }

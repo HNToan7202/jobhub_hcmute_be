@@ -43,6 +43,7 @@ public class Employer extends User implements Serializable {
     private List<String> backGround;
 
     @ElementCollection
+    @Nationalized
     private List<String> address;
 
     private String logo;
