@@ -125,7 +125,7 @@ public class UserController {
         return responseBuild.build(actionResult);
     }
 
-    @GetMapping("{studentId}/resume-upload")
+    @GetMapping("{studentId}/cv-upload")
     public ResponseEntity<?> getResume(
             @PathVariable String studentId) {
         User user = userService.findById(studentId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + studentId));
