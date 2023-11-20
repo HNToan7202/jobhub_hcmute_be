@@ -104,6 +104,41 @@ public class ResumeServiceImpl implements ResumeService {
         return resumeRepository.findAll(pageable);
     }
 
+    @Override
+    public ActionResult setMainCV(String CvId, String userId){
+        ActionResult actionResult = new ActionResult();
+        Student student = new Student();
+        Optional<Student> opt = studentRepository.findById(userId);
+        if (opt.isEmpty()) {
+          actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+          return  actionResult;
+        }
+        student = opt.get();
+        Resume resume = student.getResume();
+
+        if(resume == null){
+            actionResult.setErrorCode(ErrorCodeEnum.CV_NOT_FOUND);
+            return actionResult;
+        }
+        else{
+            List<ResumeUpload> resumeUploads = resume.getResumeUploads();
+            for (ResumeUpload resumeUpload: resumeUploads) {
+
+                if(resumeUpload.getResumeId().equals(CvId)){
+                    resumeUpload.setIsMain(true);
+                }
+                else{
+                    resumeUpload.setIsMain(false);
+                }
+            }
+            resume.setResumeUploads(resumeUploads);
+            resumeRepository.save(resume);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+            return actionResult;
+        }
+
+    }
+
 
     @Override
     public ResponseEntity<?> uploadResumeFile(MultipartFile resumeFile, String userId, Boolean isMain) throws IOException {

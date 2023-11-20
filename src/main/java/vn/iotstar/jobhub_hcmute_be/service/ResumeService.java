@@ -29,6 +29,8 @@ public interface ResumeService {
 
     Page<Resume> findAll(Pageable pageable);
 
+    ActionResult setMainCV(String CvId, String userId);
+
     ResponseEntity<?> uploadResumeFile(MultipartFile resumFile, String userId, Boolean isMain) throws IOException;
 
     ResponseEntity<?> getResumeUpload(String userId);

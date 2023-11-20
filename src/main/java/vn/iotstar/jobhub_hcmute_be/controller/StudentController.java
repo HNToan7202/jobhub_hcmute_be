@@ -131,6 +131,18 @@ public class StudentController {
         // Nếu tệp hợp lệ, gọi dịch vụ để xử lý tệp CV
         return resumeService.uploadResumeFile(resumeFile, user.getUserId(), isMain);
     }
+    @PutMapping("/{cvId}/set-main-cv")
+    public ResponseModel setMainCV(@PathVariable("cvId") String cvId, @RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String jwt = authorizationHeader.substring(7);
+            String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+            actionResult = resumeService.setMainCV(cvId, userId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
 
     @DeleteMapping("/cv/{resumeUploadID}")
     public ResponseModel deleteCV(@RequestHeader("Authorization") String token, @PathVariable String resumeUploadID) {
