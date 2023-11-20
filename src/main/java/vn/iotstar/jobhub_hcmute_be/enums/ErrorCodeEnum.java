@@ -94,6 +94,10 @@ public enum ErrorCodeEnum {
     ADMIN_NOT_FOUND(404, 404, "Admin not found"),
 
     POST_EVENT_SUCCESS(200, 200, "Post event success"),
+
+    GET_ALL_EMPLOYER_SUCCESSFULLY(200, 200, "Get all employer successfully"),
+
+    GET_PROFILE_EMPLOYER_SUCCESSFULLY(200, 200, "Get profile employer successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

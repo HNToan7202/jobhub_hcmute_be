@@ -21,4 +21,6 @@ public interface EmployerRepository extends JpaRepository<Employer, String> {
 
    Page<Employer> findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(Long transactionMoney, Pageable pageable);
 
+   Page<Employer> findAllByIsActiveIsTrueOrderByTransactionMoneyDesc(Pageable pageable);
+
 }

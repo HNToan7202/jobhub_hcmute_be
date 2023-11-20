@@ -77,6 +77,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     AdminRepository adminRepository;
 
+    @Autowired
+    private EmployerRepository employerRepository;
+
 
     @Override
     @Deprecated
@@ -486,9 +489,36 @@ public class UserServiceImpl implements UserService {
         save(user);
     }
 
-//
-//
+    @Override
+    public ActionResult getAllEmployer(Pageable pageable){
+        ActionResult actionResult = new ActionResult();
+        Page<Employer> employers = employerRepository.findAllByIsActiveIsTrueOrderByTransactionMoneyDesc(pageable);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("employers", employers.getContent());
+        map.put("pageNumber", employers.getPageable().getPageNumber());
+        map.put("pageSize", employers.getSize());
+        map.put("totalPages", employers.getTotalPages());
+        map.put("totalElements", employers.getTotalElements());
+        actionResult.setData(map);
+        actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_EMPLOYER_SUCCESSFULLY);
+        return actionResult;
+    }
 
+    @Override
+    public ActionResult detailProfileEmployer(String employerId){
+        ActionResult actionResult = new ActionResult();
+        Optional<Employer> employer = employerRepository.findById(employerId);
+        if(employer.isEmpty()){
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        }
+        else {
+            EmployerDTO employerDTO = new EmployerDTO();
+            BeanUtils.copyProperties(employer.get(), employerDTO);
+            actionResult.setData(employerDTO);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_EMPLOYER_SUCCESSFULLY);
+        }
+        return actionResult;
+    }
 
 }
 

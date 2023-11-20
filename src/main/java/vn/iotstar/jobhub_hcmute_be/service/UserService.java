@@ -70,6 +70,10 @@ public interface UserService {
 
     void changeUserPassword(User user, String newPassword, String confirmPassword);
 
+    ActionResult getAllEmployer(Pageable pageable);
+
+    ActionResult detailProfileEmployer(String employerId);
+
 //    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 //
 //    ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;

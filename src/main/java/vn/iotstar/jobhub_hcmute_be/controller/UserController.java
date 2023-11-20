@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -95,8 +96,39 @@ public class UserController {
         try {
             actionResult = userService.getProfile(userId);
         } catch (ClassCastException e) {
-            actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("/get-all-employer")
+    public ResponseModel getAllEmployer(
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "index", required = false, defaultValue = "0") int index
+    ) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.getAllEmployer(PageRequest.of(index, size));
+        } catch (ClassCastException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+    @GetMapping("{employerId}/detail-employer")
+    public ResponseModel getDetailEmployer(@PathVariable String employerId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.detailProfileEmployer(employerId);
+        } catch (ClassCastException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("{studentId}/resume-upload")
+    public ResponseEntity<?> getResume(
+            @PathVariable String studentId) {
+        User user = userService.findById(studentId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + studentId));
+        return resumeService.getResumeUpload(user.getUserId());
     }
 }
