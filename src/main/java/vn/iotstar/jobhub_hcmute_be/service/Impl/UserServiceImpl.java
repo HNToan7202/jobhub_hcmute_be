@@ -490,9 +490,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ActionResult getAllEmployer(Pageable pageable){
+    public ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize) {
         ActionResult actionResult = new ActionResult();
-        Page<Employer> employers = employerRepository.findAllByIsActiveIsTrueOrderByTransactionMoneyDesc(pageable);
+        Page<Employer> employers = employerRepository.findEmployers(pageable, companyName, teamSize);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("employers", employers.getContent());
         map.put("pageNumber", employers.getPageable().getPageNumber());

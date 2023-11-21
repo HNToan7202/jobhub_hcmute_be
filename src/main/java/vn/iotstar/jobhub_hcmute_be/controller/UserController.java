@@ -101,14 +101,19 @@ public class UserController {
         return responseBuild.build(actionResult);
     }
 
+    //companyName, address, teamSize
+
     @GetMapping("/get-all-employer")
     public ResponseModel getAllEmployer(
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "index", required = false, defaultValue = "0") int index
+            @RequestParam(name = "index", required = false, defaultValue = "0") int index,
+            @RequestParam(name ="companyName", defaultValue = "") String companyName,
+            @RequestParam(name ="address", defaultValue = "") String address,
+            @RequestParam(name ="teamSize", defaultValue = "") String teamSize
     ) {
         ActionResult actionResult = new ActionResult();
         try {
-            actionResult = userService.getAllEmployer(PageRequest.of(index, size));
+            actionResult = userService.getAllEmployer(PageRequest.of(index, size), companyName, address, teamSize);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

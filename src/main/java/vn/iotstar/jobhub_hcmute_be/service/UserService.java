@@ -70,7 +70,7 @@ public interface UserService {
 
     void changeUserPassword(User user, String newPassword, String confirmPassword);
 
-    ActionResult getAllEmployer(Pageable pageable);
+    ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize);
 
     ActionResult detailProfileEmployer(String employerId);
 
