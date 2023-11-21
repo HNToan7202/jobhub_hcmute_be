@@ -41,6 +41,7 @@ public class User implements Serializable {
 //    private String address;
 
     @Nationalized
+    @Column(columnDefinition = "Nvarchar(max)")
     private String about;
 
     private Boolean isActive = true;
