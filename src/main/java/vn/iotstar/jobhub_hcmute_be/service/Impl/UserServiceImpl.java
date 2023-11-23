@@ -127,21 +127,23 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll(pageable);
     }
 
-    @Override
-    public ActionResult getProfile(String userId) {
-        ActionResult actionResult = new ActionResult();
-        Optional<Student> student = studentRepository.findById(userId);
 
-         if(student.isEmpty())
-            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+    //Đánh node các hàm dưới đây
+    @Override
+    public ActionResult getProfile(String userId ) {
+        ActionResult actionResult = new ActionResult(); //(1)
+        Optional<Student> student = studentRepository.findById(userId); //(2)
+
+         if(student.isEmpty()) //(3)
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
         else {
-            ProfileDTO profileDTO = new ProfileDTO();
-            BeanUtils.copyProperties(student.get(), profileDTO);
+            ProfileDTO profileDTO = new ProfileDTO(); //(5)
+            BeanUtils.copyProperties(student.get(), profileDTO); //(6)
             //cắt chuỗi mail trước dấu @
-            actionResult.setData(student);
-            actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
+            actionResult.setData(student); //(7)
+            actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY); //(8)
         }
-        return actionResult;
+        return actionResult; //(9)
     }
 
     @Override

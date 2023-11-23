@@ -479,20 +479,19 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ActionResult changeStateJob(String jobId){
-        ActionResult actionResult = new ActionResult();
-        Optional<Job> jobOptional = findById(jobId);
-        if(jobOptional.isEmpty()){
-            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
-
+        ActionResult actionResult = new ActionResult(); //(1)
+        Optional<Job> jobOptional = jobRepository.findById(jobId); //(2)
+        if(jobOptional.isEmpty()){ //(3)
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
         }
         else {
-            Job job = jobOptional.get();
-            job.setIsActive(!job.getIsActive());
-            jobRepository.save(job);
-            actionResult.setData(job);
-            actionResult.setErrorCode(ErrorCodeEnum.OK);
+            Job job = jobOptional.get(); //(5)
+            job.setIsActive(!job.getIsActive()); //(6)
+            jobRepository.save(job); //(7)
+            actionResult.setData(job); //(8)
+            actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
         }
-        return actionResult;
+        return actionResult; //(10)
     }
 
 

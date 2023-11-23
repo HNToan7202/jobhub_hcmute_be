@@ -125,16 +125,6 @@ public class StudentServiceImpl implements StudentService {
         String phone =  request.getPhone();
         if (user.isEmpty())
             throw new Exception("User doesn't exist");
-
-//        if (request.getDateOfBirth().after(new Date()))
-//            throw new Exception("Invalid date of birth");
-
-        //Kiểm tra format của số điện thoại đúng định dạng của việt nam
-//        if (!request.getPhone().matches("^(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})$"))
-//            throw new Exception("Invalid phone number");
-        //Chỉ 1 định dạng duy nhất là 84 không có số 0 -> nhập 0 -> 84
-//       if (request.getPhone().startsWith("0"))
-//            phone = "84" + request.getPhone().substring(1);
         if(!phone.isEmpty()){
             Optional<Student> optional = studentRepository.findByPhoneAndIsActiveIsTrue(phone);
             if(optional.isPresent() && !optional.get().getUserId().equals(userId))
@@ -152,6 +142,5 @@ public class StudentServiceImpl implements StudentService {
         actionResult.setData(user.get());
         actionResult.setErrorCode(ErrorCodeEnum.UPDATE_PROFILE_SUCCESS);
         return actionResult;
-
     }
 }

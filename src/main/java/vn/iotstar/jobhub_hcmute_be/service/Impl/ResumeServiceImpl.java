@@ -167,7 +167,8 @@ public class ResumeServiceImpl implements ResumeService {
             student.setResume(resume);
         }
         ResumeUpload resume = new ResumeUpload();
-        int count = student.getResume().getResumeUploads().size();
+        int count = student.getResume().getResumeUploads().stream().filter(ResumeUpload::getIsMain).toArray().length;
+        //lấy cv active
         if (count == 0) {
             isMain = true;
         }
@@ -580,6 +581,7 @@ public class ResumeServiceImpl implements ResumeService {
             System.out.println("CV:"+opt.get().getResumeId());
             ResumeUpload resumeUpload = opt.get();
             resumeUpload.setIsActive(false);
+            resumeUpload.setIsMain(false);
             resumeUploadRepository.save(resumeUpload);
             actionResult.setData(resumeUpload);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
