@@ -128,7 +128,7 @@ public class JobServiceImpl implements JobService {
         System.out.println("Clearing cache...");
     }
 
-    @Cacheable(value = "applicationCache", key = "#jobId")
+   // @Cacheable(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult getDetail(String jobId) {
         ActionResult actionResult = new ActionResult();
@@ -248,7 +248,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-    @Cacheable("jobs")
+   // @Cacheable("jobs")
     @Override
     public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
         actionResult = new ActionResult();
@@ -269,7 +269,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-    @Cacheable("jobList")
+   // @Cacheable("jobList")
     @Override
     public ActionResult getAlls(Boolean isActive){
         actionResult = new ActionResult();
@@ -284,7 +284,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-    @CachePut(value = "applicationCache", key = "#employerId")
+  //  @CachePut(value = "applicationCache", key = "#employerId")
     @Override
     public ActionResult postJob(PostJobRequest jobRequest, String employerId) {
         actionResult = new ActionResult();
@@ -378,7 +378,7 @@ public class JobServiceImpl implements JobService {
 
 
 
-    @CachePut(value = "applicationCache", key = "#jobId")
+   // @CachePut(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId) {
         ActionResult actionResult = new ActionResult();
