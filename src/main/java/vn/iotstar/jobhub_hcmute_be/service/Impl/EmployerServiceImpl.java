@@ -413,7 +413,7 @@ public class EmployerServiceImpl implements EmployerService {
             String content = templateEngine.process("interview-invitation", context);
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
-            helper.setSubject("Mời phỏng vấn");
+            helper.setSubject("Interview with " + interview.getJobApply().getJob().getEmployer().getCompanyName());
             helper.setTo(interview.getJobApply().getStudent().getEmail());
             helper.setText(content, true);
 
