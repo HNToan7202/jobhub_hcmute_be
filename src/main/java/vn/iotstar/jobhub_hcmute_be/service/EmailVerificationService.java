@@ -10,7 +10,7 @@ public interface EmailVerificationService {
 
 
     @Async
-    String sendOtp(String email);
+    void sendOtp(String email);
 
     @Async
     String sendOtpEmployer(String email, String fullname);

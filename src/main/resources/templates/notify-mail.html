@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JobPost</title>
+    <style>
+        /* CSS cho phần header */
+        header {
+            text-align: left;
+            padding: 20px;
+            /*background-color: #007BFF;*/
+            color: green;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<p>Dear <strong></strong>,</p>
+    <div>
+    [[${content}]]
+    </div>
+
+<p>Confirmation of Job Post registration by our administrator with the email address: <strong></strong></p>
+
+<p>To use your account, please follow the instructions below:</p>
+
+<p><strong>Step 1:</strong> Click on the link below to confirm the registration is not compulsory: <a th:href="${token}">registration-confirm</a></p>
+
+<p>Thank you and Best Regards!</p>
+</body>
+</html>
