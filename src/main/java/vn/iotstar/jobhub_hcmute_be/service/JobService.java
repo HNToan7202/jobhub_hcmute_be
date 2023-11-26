@@ -71,4 +71,6 @@ public interface JobService {
     ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable);
 
     ActionResult changeStateJob(String jobId);
+
+    ActionResult employerChangeStateJob(String userId, String jobId);
 }

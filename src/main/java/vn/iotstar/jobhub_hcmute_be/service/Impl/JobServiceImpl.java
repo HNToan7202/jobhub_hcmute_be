@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -311,7 +309,6 @@ public class JobServiceImpl implements JobService {
             job.setTime(jobRequest.getTime());
             job.setLink(jobRequest.getLink());
 
-
             // Check if position is existed
             Optional<Position> position = positionRepository.findByName(jobRequest.getPositionName());
             if (position.isPresent()) {
@@ -490,6 +487,28 @@ public class JobServiceImpl implements JobService {
             jobRepository.save(job); //(7)
             actionResult.setData(job); //(8)
             actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
+        }
+        return actionResult; //(10)
+    }
+
+    @Override
+    public ActionResult employerChangeStateJob(String userId, String jobId){
+        ActionResult actionResult = new ActionResult(); //(1)
+        Optional<Job> jobOptional = jobRepository.findById(jobId); //(2)
+        if(jobOptional.isEmpty()){ //(3)
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
+        }
+        else {
+            Job job = jobOptional.get(); //(5)
+            if(job.getEmployer().getUserId().equals(userId)){
+                job.setIsActive(!job.getIsActive()); //(6)
+                jobRepository.save(job); //(7)
+                actionResult.setData(job); //(8)
+                actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
+            }
+            else {
+                actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+            }
         }
         return actionResult; //(10)
     }
