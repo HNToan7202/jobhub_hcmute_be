@@ -14,8 +14,9 @@ import java.util.Date;
 public class InterviewModel implements Serializable {
     private String interviewId;
     private String note;
-    private Date startTime;
-    private Date endTime;
+    private Date time;
+    private String startTime;
+    private String endTime;
     private String interviewLink;
     private JobApply jobApply;
     private String nameCandidate;
@@ -33,6 +34,7 @@ public class InterviewModel implements Serializable {
                 .nameCandidate(interview.getJobApply().getFullName())
                 .nameJob(interview.getJobApply().getJob().getName())
                 .jobId(interview.getJobApply().getJob().getJobId())
+                .time(interview.getTime())
     			.build();
     }
 

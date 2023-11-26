@@ -23,9 +23,9 @@ public class Interview implements Serializable {
 
 	private String note;
 
-	private Date startTime;
+	private String startTime;
 
-	private Date endTime;
+	private String endTime;
 	
 	private String interviewLink;
 

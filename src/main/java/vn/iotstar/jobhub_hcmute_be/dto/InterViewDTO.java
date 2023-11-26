@@ -6,8 +6,9 @@ import java.util.Date;
 
 @Data
 public class InterViewDTO {
-    private Date startTime;
-    private Date endTime;
+    private Date time;
+    private String startTime;
+    private String endTime;
     private String interviewLink;
     private String note;
 }
