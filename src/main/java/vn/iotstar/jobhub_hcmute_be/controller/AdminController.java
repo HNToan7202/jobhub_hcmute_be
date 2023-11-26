@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
@@ -119,6 +120,7 @@ public class AdminController {
        actionResult =  adminService.changeStateEmployer(employerRequest);
         return responseBuild.build(actionResult);
     }
+
 
     @PutMapping("/job/{jobId}/change-state")
     public ResponseModel changeStateJob(@PathVariable String jobId) {

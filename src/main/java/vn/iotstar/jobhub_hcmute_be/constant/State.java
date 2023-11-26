@@ -8,8 +8,8 @@ public enum State {
     CANCELED(5, "CANCELED"),
     DONE(6, "DONE");
 
-    int status;
-    String statusName;
+    final int status;
+    final String statusName;
 
     State(int status, String statusName) {
         this.status = status;

@@ -49,6 +49,10 @@ public class UserController {
     @Autowired
     ResponseBuild responseBuild;
 
+    @Autowired
+    NotificationService notificationService;
+
+
     public UserController(JwtTokenProvider jwtTokenProvider, UserService userService, CloudinaryService cloudinaryService, EmailVerificationService emailVerificationService, UserRepository userRepository, StudentService studentService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
@@ -135,5 +139,17 @@ public class UserController {
             @PathVariable String studentId) {
         User user = userService.findById(studentId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + studentId));
         return resumeService.getResumeUpload(user.getUserId());
+    }
+
+    @PostMapping("notify-message")
+    public ResponseModel sendMailMessage(@RequestBody NotificationRequest request){
+        ActionResult actionResult = new ActionResult();
+        try{
+            actionResult = notificationService.notificationMessage(request);
+        }
+        catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 }

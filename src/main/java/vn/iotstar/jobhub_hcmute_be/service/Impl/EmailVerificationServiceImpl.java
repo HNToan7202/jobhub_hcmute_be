@@ -1,7 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
-import org.springframework.scheduling.annotation.Async;
 import vn.iotstar.jobhub_hcmute_be.entity.EmailVerification;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.repository.EmailVerificationRepository;
@@ -22,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @EnableScheduling
@@ -41,7 +41,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
 
     @Override
-    public String sendOtp(String email) {
+    public void sendOtp(String email) {
         String otp = generateOtp();
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -71,7 +71,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             }
 
             emailVerificationRepository.save(emailVerification);
-            return otp;
+            CompletableFuture.completedFuture(otp);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
