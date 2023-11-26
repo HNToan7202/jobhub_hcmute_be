@@ -368,6 +368,7 @@ public class EmployerServiceImpl implements EmployerService {
                 Interview interview = new Interview();
                 interview.setJobApply(jobApply);
                 interview.setInterviewLink(interViewDTO.getInterviewLink());
+                interview.setTime(interViewDTO.getTime());
                 interview.setStartTime(interViewDTO.getStartTime());
                 interview.setEndTime(interViewDTO.getEndTime());
 
