@@ -263,4 +263,17 @@ public class EmployerController {
         }
     }
 
+    @PostMapping("/{jobApplyId}/create-interview")
+    public ResponseModel createInterview(@PathVariable String jobApplyId,
+                                         @RequestBody InterViewDTO interViewDTO){
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = employerService.createInterview(jobApplyId, interViewDTO);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
 }

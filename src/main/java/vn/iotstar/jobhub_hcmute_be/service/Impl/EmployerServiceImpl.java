@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
@@ -22,21 +21,13 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.constant.Utils;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.EmployerUpdateDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.ReplyRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.UpdateStateRequest;
-import vn.iotstar.jobhub_hcmute_be.entity.Employer;
-import vn.iotstar.jobhub_hcmute_be.entity.Job;
-import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
+import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
-import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
+import vn.iotstar.jobhub_hcmute_be.model.InterviewModel;
+import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
 
@@ -72,6 +63,9 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     TemplateEngine templateEngine;
+
+    @Autowired
+    InterviewRepository interviewRepository;
 
 
 
@@ -314,6 +308,7 @@ public class EmployerServiceImpl implements EmployerService {
         return actionResult;
     }
 
+    @Async
     @Override
     public ActionResult replyCandidate(ReplyRequest request) throws MessagingException, UnsupportedEncodingException {
         ActionResult actionResult = new ActionResult();
@@ -356,5 +351,55 @@ public class EmployerServiceImpl implements EmployerService {
         actionResult.setData(employerPage.getContent());
         actionResult.setErrorCode(ErrorCodeEnum.OK);
         return actionResult;
+    }
+
+    @Override
+    public ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO){
+        ActionResult actionResult = new ActionResult();
+        try {
+
+            Optional<JobApply> optionalJobApply = jobApplyRepository.findById(jobApplyId);
+            if(optionalJobApply.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
+                return actionResult;
+            }
+
+            //Tạo phỏng vấn
+            JobApply jobApply = optionalJobApply.get();
+            if(jobApply.getState() == State.PENDING){
+
+                Interview interview = new Interview();
+                interview.setJobApply(jobApply);
+                interview.setInterviewLink(interViewDTO.getInterviewLink());
+                interview.setStartTime(interViewDTO.getStartTime());
+                interview.setEndTime(interViewDTO.getEndTime());
+
+                jobApply.setInterview(interview);
+                jobApply.setState(State.RECEIVED);
+
+                jobApplyRepository.save(jobApply);
+              //  interview = jobApplyRepository.save(jobApply).getInterview();
+                interview =  interviewRepository.save(interview);
+                InterviewModel interviewModel = InterviewModel.transform(interview);
+                actionResult.setData(interviewModel);
+
+                //Mời phỏng vấn
+                ReplyRequest request = new ReplyRequest();
+                request.setCompanyName(jobApply.getJob().getEmployer().getCompanyName());
+                request.setEmail(jobApply.getStudent().getEmail());
+                request.setSubject(interViewDTO.getSubject());
+                request.setContent("Bạn đã được mời phỏng vấn vào lúc " + interview.getStartTime() + " tại đường dẫn " + interview.getInterviewLink());
+                actionResult.setErrorCode(ErrorCodeEnum.CREATE_INTERVIEW_SUCCESSFULLY);
+                replyCandidate(request);
+            }
+            else {
+                actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_HAS_BEEN_CREATED);
+            }
+        }catch (Exception e) {
+            System.out.println(e);
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+
     }
 }

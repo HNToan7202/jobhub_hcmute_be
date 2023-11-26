@@ -8,6 +8,7 @@ import org.hibernate.annotations.Nationalized;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +41,11 @@ public class Event {
     @ToString.Exclude
     private Admin admin;
 
+    @OneToMany
+    @JsonBackReference
+    @ToString.Exclude
+    private List<Job> job; // jobApplyId -> job -> employer
+
     @PrePersist
     void createdAt() {
         this.createdAt = this.updatedAt = new Date();
@@ -51,6 +57,5 @@ public class Event {
     void updatedAt() {
         this.updatedAt = new Date();
     }
-
 
 }

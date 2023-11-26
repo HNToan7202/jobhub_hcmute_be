@@ -22,4 +22,5 @@ public class NotificationController {
     public String sendNotificationByToken(@RequestBody NotificationMessage notificationMessage){
         return firebaseMessageService.sendNotificationByToken(notificationMessage);
     }
+
 }
