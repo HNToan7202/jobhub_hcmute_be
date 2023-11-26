@@ -54,4 +54,6 @@ public interface EmployerService {
     String reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
 
     ActionResult topCompany(Pageable pageable);
+
+    ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO);
 }

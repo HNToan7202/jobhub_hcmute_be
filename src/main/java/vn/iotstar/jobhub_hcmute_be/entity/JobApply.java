@@ -65,7 +65,7 @@ public class JobApply implements Serializable {
     @ToString.Exclude
     private Resume resume;
 
-    @OneToOne(mappedBy = "jobApply", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "jobApply")
     @JsonBackReference
     @ToString.Exclude
     private Interview interview;

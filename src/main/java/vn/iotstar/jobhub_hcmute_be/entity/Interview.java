@@ -20,6 +20,12 @@ public class Interview implements Serializable {
 	private String interviewId;
 
 	private Date time;
+
+	private String note;
+
+	private Date startTime;
+
+	private Date endTime;
 	
 	private String interviewLink;
 
@@ -27,7 +33,9 @@ public class Interview implements Serializable {
 	@JoinColumn(name = "jobApply_id")
 	@JsonBackReference
 	@ToString.Exclude
-	private JobApply jobApply;
+	private JobApply jobApply; // jobApplyId -> job -> employer
+
+
 
 	@ManyToMany
 	@JoinTable(

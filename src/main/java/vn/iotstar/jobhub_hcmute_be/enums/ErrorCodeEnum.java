@@ -98,6 +98,10 @@ public enum ErrorCodeEnum {
     GET_ALL_EMPLOYER_SUCCESSFULLY(200, 200, "Get all employer successfully"),
 
     GET_PROFILE_EMPLOYER_SUCCESSFULLY(200, 200, "Get profile employer successfully"),
+
+    CREATE_INTERVIEW_SUCCESSFULLY(200, 200, "Create interview successfully"),
+
+    INTERVIEW_HAS_BEEN_CREATED(400, 400, "Interview has been created"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 
