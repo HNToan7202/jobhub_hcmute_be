@@ -379,15 +379,9 @@ public class EmployerServiceImpl implements EmployerService {
                 interview =  interviewRepository.save(interview);
                 InterviewModel interviewModel = InterviewModel.transform(interview);
                 actionResult.setData(interviewModel);
-
                 //Mời phỏng vấn
-                ReplyRequest request = new ReplyRequest();
-                request.setCompanyName(jobApply.getJob().getEmployer().getCompanyName());
-                request.setEmail(jobApply.getStudent().getEmail());
-                request.setSubject(interViewDTO.getSubject());
-                request.setContent("Bạn đã được mời phỏng vấn vào lúc " + interview.getStartTime() + " tại đường dẫn " + interview.getInterviewLink());
                 actionResult.setErrorCode(ErrorCodeEnum.CREATE_INTERVIEW_SUCCESSFULLY);
-                replyCandidate(request);
+                sendMailInterview(interview);
             }
             else {
                 actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_HAS_BEEN_CREATED);
@@ -398,6 +392,37 @@ public class EmployerServiceImpl implements EmployerService {
         }
         return actionResult;
 
+    }
+
+    @Async
+    public void sendMailInterview(Interview interview){
+        try {
+            Context context = new Context();
+            context.setLocale(new Locale("vi", "VN"));
+            context.setVariables(
+                    Map.of(
+                            "name", interview.getJobApply().getStudent().getFullName(),
+                            "jobName", interview.getJobApply().getJob().getName(),
+                            "companyName", interview.getJobApply().getJob().getEmployer().getCompanyName(),
+                            "startTime", interview.getStartTime(),
+                            "endTime", interview.getEndTime(),
+                            "interviewLink", interview.getInterviewLink(),
+                            "resumeLink", interview.getJobApply().getResumeUpoad()
+                    )
+            );
+            String content = templateEngine.process("interview-invitation", context);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+            helper.setSubject("Interview with " + interview.getJobApply().getJob().getEmployer().getCompanyName());
+            helper.setTo(interview.getJobApply().getStudent().getEmail());
+            helper.setText(content, true);
+
+            String companyName = interview.getJobApply().getJob().getEmployer().getCompanyName();
+            helper.setFrom(Objects.requireNonNull(env.getProperty("spring.mail.username")), companyName);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     @Override

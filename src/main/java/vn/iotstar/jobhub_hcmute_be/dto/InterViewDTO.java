@@ -9,7 +9,5 @@ public class InterViewDTO {
     private Date startTime;
     private Date endTime;
     private String interviewLink;
-    private String subject;
-    private String content;
     private String note;
 }
