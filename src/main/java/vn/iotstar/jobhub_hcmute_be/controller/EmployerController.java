@@ -189,6 +189,22 @@ public class EmployerController {
         return responseBuild.build(actionResult);
     }
 
+    @GetMapping("/get-all-interview")
+    public ResponseModel getAllInterview(@RequestParam(defaultValue = "0") int index,
+                                         @RequestParam(defaultValue = "10") int size,
+                                         @RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = employerService.getAllInterview(userIdFromToken, PageRequest.of(index, size));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
     @PutMapping("student/state/{usedId}")
     public ResponseModel updateCandidateState(@RequestHeader("Authorization") String authorizationHeader,
                                               @PathVariable String usedId,
