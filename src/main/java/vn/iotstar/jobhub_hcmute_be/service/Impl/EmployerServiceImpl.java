@@ -363,8 +363,7 @@ public class EmployerServiceImpl implements EmployerService {
 
             //Tạo phỏng vấn
             JobApply jobApply = optionalJobApply.get();
-            if(jobApply.getState() == State.PENDING){
-
+            if(jobApply.getState() == State.PENDING && jobApply.getInterview() == null){
                 Interview interview = new Interview();
                 interview.setJobApply(jobApply);
                 interview.setInterviewLink(interViewDTO.getInterviewLink());
