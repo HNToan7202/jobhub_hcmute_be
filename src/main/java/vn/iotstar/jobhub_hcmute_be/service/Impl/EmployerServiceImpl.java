@@ -67,9 +67,6 @@ public class EmployerServiceImpl implements EmployerService {
     @Autowired
     InterviewRepository interviewRepository;
 
-
-
-
     public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByJob_Employer_UserId(pageable, userId);
     }
@@ -401,5 +398,31 @@ public class EmployerServiceImpl implements EmployerService {
         }
         return actionResult;
 
+    }
+
+    @Override
+    public ActionResult getAllInterview(String employerId, Pageable pageable){
+        ActionResult actionResult = new ActionResult();
+        try {
+            Page<Interview> interviews = interviewRepository.findByJobApply_Job_Employer_UserId(employerId, pageable);
+            List<InterviewModel> interviewModels = new ArrayList<>();
+            for(Interview interview : interviews.getContent()){
+                InterviewModel interviewModel = InterviewModel.transform(interview);
+                interviewModels.add(interviewModel);
+            }
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("interviews", interviewModels);
+            map.put("pageNumber", interviews.getPageable().getPageNumber());
+            map.put("pageSize", interviews.getSize());
+            map.put("totalPages", interviews.getTotalPages());
+            map.put("totalElements", interviews.getTotalElements());
+
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
     }
 }
