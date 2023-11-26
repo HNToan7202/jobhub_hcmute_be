@@ -276,4 +276,17 @@ public class EmployerController {
         return responseBuild.build(actionResult);
     }
 
+    @PutMapping("/job/{jobId}/change-state")
+    public ResponseModel changeStateJob( @RequestHeader("Authorization") String authorizationHeader,@PathVariable String jobId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = jobService.employerChangeStateJob(recruiterId, jobId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
 }
