@@ -71,6 +71,7 @@ public class StudentController {
         try {
             String jwt = authorizationHeader.substring(7);
             String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+
             actionResult = userService.getProfile(userId);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);

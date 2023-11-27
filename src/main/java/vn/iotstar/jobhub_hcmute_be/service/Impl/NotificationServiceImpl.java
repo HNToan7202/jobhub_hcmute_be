@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.dto.NotificationRequest;
-import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
-import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.EmailVerificationRepository;
@@ -20,7 +18,6 @@ import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.service.NotificationService;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -46,37 +43,26 @@ public class NotificationServiceImpl implements NotificationService {
 
     Context context;
 
+    @Override
     @Async
-    public CompletableFuture<ActionResult> sendApplyJob(String jobApplyId) {
-        ActionResult actionResult = new ActionResult();
+    public void sendApplyJob(String mail, String student, String jobName) {
         try {
-            Optional<JobApply> optionalJobApply = jobApplyRepository.findById(jobApplyId);
-            if(optionalJobApply.isPresent()){
-                JobApply jobApply = optionalJobApply.get();
-
                 MimeMessage message = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-                String mailTo = jobApply.getJob().getEmployer().getEmail();
-
-                helper.setTo(mailTo);
+                helper.setTo(mail);
                 // Load Thymeleaf template
-
                 Context context = new Context();
-                String mailContent = templateEngine.process("send-otp", context);
+                context.setVariable("jobName",jobName);
+                context.setVariable("jobLocation", student);
+                String mailContent = templateEngine.process("notify-mail", context);
                 helper.setText(mailContent, true);
-                helper.setSubject("Bạn có đơn ứng tuyển mới mới");
+                helper.setSubject("Bạn có đơn ứng tuyển mới mới cho công việc " + jobName);
                 mailSender.send(message);
-
-            }
-
-
 
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return CompletableFuture.completedFuture(actionResult);
     }
 
 

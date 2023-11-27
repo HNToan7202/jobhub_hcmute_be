@@ -19,6 +19,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
+import vn.iotstar.jobhub_hcmute_be.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +39,9 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    NotificationService notificationService;
 
     public Page<JobApply> findAllByStudent_UserIdOrderByCreatedAtDesc(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, userId);
@@ -201,7 +205,7 @@ public class JobApplyServiceImpl implements JobApplyService {
         JobApply jobApply = jobApplyRepository.save(application);
         actionResult.setData(jobApply);
         actionResult.setErrorCode(ErrorCodeEnum.APPLICATION_SUCCESSFULLY);
-
+        notificationService.sendApplyJob(job.getEmployer().getEmail(), candidate.getFullName(), job.getName());
         return actionResult;
     }
 

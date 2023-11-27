@@ -6,9 +6,11 @@ import vn.iotstar.jobhub_hcmute_be.dto.NotificationRequest;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CompletableFuture;
 
 public interface NotificationService {
+
+    @Async
+    void sendApplyJob(String mail, String student, String jobName);
 
     ActionResult notificationMessage(NotificationRequest request) throws MessagingException, UnsupportedEncodingException;
 }
