@@ -304,5 +304,18 @@ public class EmployerController {
         }
         return responseBuild.build(actionResult);
     }
+    @GetMapping("/{interviewId}/detail-interview")
+    public ResponseModel getDetailInterview(@PathVariable String interviewId, @RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = employerService.getDetailInterview(recruiterId, interviewId);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
 
 }

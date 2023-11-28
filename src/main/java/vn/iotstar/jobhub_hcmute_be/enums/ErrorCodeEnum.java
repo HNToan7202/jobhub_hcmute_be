@@ -102,8 +102,9 @@ public enum ErrorCodeEnum {
     CREATE_INTERVIEW_SUCCESSFULLY(200, 200, "Create interview successfully"),
 
     INTERVIEW_HAS_BEEN_CREATED(400, 400, "Interview has been created"),
-    POST_JOB_SUCCESS(200, 200, "Post job success");
 
+    INTERVIEW_NOT_FOUND(404, 404, "Interview not found"),
+    POST_JOB_SUCCESS(200, 200, "Post job success");
 
 
 

@@ -58,4 +58,6 @@ public interface EmployerService {
     ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO);
 
     ActionResult getAllInterview(String employerId, Pageable pageable);
+
+    ActionResult getDetailInterview(String employerId, String interviewId);
 }

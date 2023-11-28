@@ -450,4 +450,28 @@ public class EmployerServiceImpl implements EmployerService {
         }
         return actionResult;
     }
+
+    @Override
+    public ActionResult getDetailInterview(String employerId, String interviewId){
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Interview> optionalInterview = interviewRepository.findById(interviewId);
+            if(optionalInterview.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_NOT_FOUND);
+                return actionResult;
+            }
+            Interview interview = optionalInterview.get();
+            if(!interview.getJobApply().getJob().getEmployer().getUserId().equals(employerId)){
+                actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_NOT_FOUND);
+                return actionResult;
+            }
+            InterviewModel interviewModel = InterviewModel.transform(interview);
+            actionResult.setData(interviewModel);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
 }
