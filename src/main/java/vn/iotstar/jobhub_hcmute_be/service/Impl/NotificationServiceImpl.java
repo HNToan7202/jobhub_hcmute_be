@@ -53,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
                 // Load Thymeleaf template
                 Context context = new Context();
                 context.setVariable("jobName",jobName);
-                context.setVariable("jobLocation", student);
+                context.setVariable("student", student);
                 String mailContent = templateEngine.process("notify-mail", context);
                 helper.setText(mailContent, true);
                 helper.setSubject("Bạn có đơn ứng tuyển mới mới cho công việc " + jobName);
