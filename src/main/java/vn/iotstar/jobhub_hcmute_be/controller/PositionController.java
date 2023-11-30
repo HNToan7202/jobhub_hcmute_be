@@ -26,7 +26,6 @@ public class PositionController {
     final
     ResponseBuild responseBuild;
 
-
     public PositionController(PositionService positionService, ResponseBuild responseBuild) {
         this.positionService = positionService;
         this.responseBuild = responseBuild;
@@ -42,5 +41,4 @@ public class PositionController {
         }
         return responseBuild.build(actionResult);
     }
-
 }

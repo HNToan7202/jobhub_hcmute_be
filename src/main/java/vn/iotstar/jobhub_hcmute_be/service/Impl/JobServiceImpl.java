@@ -27,6 +27,7 @@ import java.util.*;
 @Transactional
 @Slf4j
 public class JobServiceImpl implements JobService {
+
     @Autowired
     JobRepository jobRepository;
 

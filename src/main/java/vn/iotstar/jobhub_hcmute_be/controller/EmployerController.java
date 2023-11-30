@@ -138,7 +138,7 @@ public class EmployerController {
 
 
     @PutMapping("/update-profile-company")
-    public ResponseEntity<GenericResponse> update(@RequestBody EmployerUpdateDTO request,
+    public ResponseEntity<GenericResponse> update(@Valid @RequestBody EmployerUpdateDTO request,
                                                   @RequestHeader("Authorization") String authorizationHeader,
                                                   BindingResult bindingResult) throws Exception {
         if (bindingResult.hasErrors()) {
