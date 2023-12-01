@@ -295,14 +295,16 @@ public class EmployerServiceImpl implements EmployerService {
                 JobApply updatedJobApply = jobApplyRepository.save(jobApply);
                 actionResult.setData(updatedJobApply);
                 actionResult.setErrorCode(ErrorCodeEnum.UPDATE_STATE_APPLY_SUCCESSFULLY);
+                return actionResult;
 
             } catch (IllegalArgumentException e) {
                 actionResult.setErrorCode(ErrorCodeEnum.INVALID_STATE_VALUE);
+                return actionResult;
             }
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            return actionResult;
         }
-        return actionResult;
     }
 
     @Async
