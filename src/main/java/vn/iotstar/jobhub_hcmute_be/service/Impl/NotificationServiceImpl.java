@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     Context context;
 
     @Override
-    @Async("asyncTaskExecutor")
+    @Async
     public void sendApplyJob(String mail, String student, String jobName) {
         try {
                 MimeMessage message = mailSender.createMimeMessage();
