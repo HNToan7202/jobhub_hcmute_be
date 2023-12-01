@@ -322,7 +322,7 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Async
     @Override
-    public String reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException {
+    public void reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException {
         Context context = new Context();
         context.setLocale(new Locale("vi", "VN"));
         context.setVariable("content", request.getContent());
@@ -334,7 +334,6 @@ public class EmployerServiceImpl implements EmployerService {
         helper.setText(Utils.cleanHTML(request.getContent()), true);
         helper.setFrom(env.getProperty("spring.mail.username"), request.getCompanyName());
         javaMailSender.send(message);
-        return "Email Sent!";
     }
 
     @Override

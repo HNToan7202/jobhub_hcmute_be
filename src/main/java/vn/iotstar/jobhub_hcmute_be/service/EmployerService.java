@@ -51,7 +51,7 @@ public interface EmployerService {
 
     ActionResult replyCandidate(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
 
-    String reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
+    void reply(ReplyRequest request) throws MessagingException, UnsupportedEncodingException;
 
     ActionResult topCompany(Pageable pageable);
 
