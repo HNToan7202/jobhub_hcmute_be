@@ -31,7 +31,6 @@ public class ShortList {
     @ToString.Exclude
     private Job job;
 
-    @JsonBackReference
     private Date createdAt;
 
     @JsonBackReference
