@@ -7,9 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
-import vn.iotstar.jobhub_hcmute_be.entity.Student;
-
-import java.util.List;
 import java.util.Optional;
 
 @Hidden

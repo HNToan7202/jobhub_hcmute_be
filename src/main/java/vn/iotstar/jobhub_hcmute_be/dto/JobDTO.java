@@ -39,4 +39,7 @@ public class JobDTO implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isApplied;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isShortListed;
 }

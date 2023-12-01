@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -17,6 +18,7 @@ public class BlackList implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String blackId;
+
     @Nationalized
     private String reason;
 
@@ -28,6 +30,7 @@ public class BlackList implements Serializable {
     private Student student;
 
     @PrePersist
+    @JsonBackReference
     void date() {
         this.date = new Date();
     }
