@@ -287,22 +287,16 @@ public class EmployerServiceImpl implements EmployerService {
                 actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
                 return actionResult;
             }
-
-            try {
-                JobApply jobApply = optionalJobApply.get();
-                State newState = State.getStatusName(updateStateRequest.getStatus());
-                jobApply.setState(newState);
-                JobApply updatedJobApply = jobApplyRepository.save(jobApply);
-                actionResult.setData(updatedJobApply);
-                actionResult.setErrorCode(ErrorCodeEnum.UPDATE_STATE_APPLY_SUCCESSFULLY);
-                return actionResult;
-
-            } catch (IllegalArgumentException e) {
-                actionResult.setErrorCode(ErrorCodeEnum.INVALID_STATE_VALUE);
-                return actionResult;
-            }
+            JobApply jobApply = optionalJobApply.get();
+            State newState = State.getStatusName(updateStateRequest.getStatus());
+            jobApply.setState(newState);
+            JobApply updatedJobApply = jobApplyRepository.save(jobApply);
+            actionResult.setData(updatedJobApply);
+            actionResult.setErrorCode(ErrorCodeEnum.UPDATE_STATE_APPLY_SUCCESSFULLY);
+            return actionResult;
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            System.err.println(e.getMessage());
             return actionResult;
         }
     }
