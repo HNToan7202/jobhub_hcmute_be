@@ -219,6 +219,7 @@ public class EmployerController {
                 employerService.reply(updateStateRequest.getReplyRequest());
         }
         catch (Exception e) {
+            System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
