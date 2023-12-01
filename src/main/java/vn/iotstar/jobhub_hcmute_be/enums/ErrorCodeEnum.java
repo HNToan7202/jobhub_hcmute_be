@@ -104,6 +104,11 @@ public enum ErrorCodeEnum {
     INTERVIEW_HAS_BEEN_CREATED(400, 400, "Interview has been created"),
 
     INTERVIEW_NOT_FOUND(404, 404, "Interview not found"),
+
+    DELETE_SHORT_LIST_SUCCESS(200, 200, "Delete short list success"),
+    ADD_SHORT_LIST_SUCCESS(200, 200, "Add short list success"),
+
+    FAIL_ADD_BLACKLIST(400, 400, "Fail add blacklist"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

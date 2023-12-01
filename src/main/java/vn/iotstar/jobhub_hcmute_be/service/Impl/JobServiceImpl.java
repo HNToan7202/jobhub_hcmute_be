@@ -15,10 +15,7 @@ import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
-import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.SkillRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
 
 import java.util.*;
@@ -43,6 +40,9 @@ public class JobServiceImpl implements JobService {
     ActionResult actionResult;
 
     Map<String, Object> response;
+
+    @Autowired
+    ShortListRepository shortListRepository;
 
 
 
@@ -166,9 +166,18 @@ public class JobServiceImpl implements JobService {
                 Job job = optional.get();
                 // kiểm tra xem userId đã apply vao job hay chưa
                 boolean isApplied = job.getJobApplies().stream().anyMatch(jobApply -> jobApply.getStudent().getUserId().equals(userId));
+
+                // kiểm tra xem userId đã shortlist vao job hay chưa
+               Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
+
+               boolean isShortList = false;
+               if(shortList.isPresent()){
+                   isShortList = shortList.get().getUser().getUserId().equals(userId);
+               }
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 jobDTO.setIsApplied(isApplied);
+                jobDTO.setIsShortListed(isShortList);
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
@@ -451,7 +460,9 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable){
+
         ActionResult actionResult = new ActionResult();
+
         Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
 
         List<JobDTO> jobDTOs =  jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {

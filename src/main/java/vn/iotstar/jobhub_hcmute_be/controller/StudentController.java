@@ -26,10 +26,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
-import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
-import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
-import vn.iotstar.jobhub_hcmute_be.service.StudentService;
-import vn.iotstar.jobhub_hcmute_be.service.UserService;
+import vn.iotstar.jobhub_hcmute_be.service.*;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -55,6 +52,9 @@ public class StudentController {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    ShortListService shortListService;
 
 
     public StudentController(ResumeService resumeService, UserService userService, JobApplyService jobApplyService, JwtTokenProvider jwtTokenProvider, StudentService studentService) {
@@ -204,7 +204,7 @@ public class StudentController {
 
     }
 
-    @Cacheable("applicants")
+   // @Cacheable("applicants")
     @GetMapping("/jobs/applicants")
     public ResponseModel getAppliedJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
@@ -219,4 +219,43 @@ public class StudentController {
         return responseBuild.build(actionResult);
     }
 
+    @PostMapping("/short-list/{jobId}/add")
+    public ResponseModel addShortList(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String jobId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String studentId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = shortListService.addShortList(studentId, jobId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @DeleteMapping("/short-list/{shortListId}")
+    public ResponseModel deleteShortList(@PathVariable String shortListId, @RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String studentId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = shortListService.deleteShortListById(shortListId, studentId);
+
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+    @GetMapping("/short-list")
+    public ResponseModel getShortListByUser(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String studentId = jwtTokenProvider.getUserIdFromJwt(token);
+            Pageable pageable = PageRequest.of(index, size);
+            actionResult = shortListService.getShortListByUser(studentId, pageable);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
 }

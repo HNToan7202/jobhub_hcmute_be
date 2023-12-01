@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.List;
@@ -20,10 +21,18 @@ public class EmployerUpdateDTO {
 
     private String website;
 
+    @NotNull(message = "Founded year is required")
+    @NotEmpty(message = "Founded year is required")
+    @NotBlank
     private String foundedYear;
 
+    @NotNull(message = "Team size is required")
+    @NotEmpty(message = "Team size is required")
     private String teamSize;
 
+    @Pattern(regexp = "^(\\+84|0)\\d{9,10}$", message = "Phone number is invalid")
+    @NotNull(message = "Phone number is required")
+    @NotEmpty(message = "Phone number is required")
     private String phone;
 
     //private String email;
