@@ -13,12 +13,17 @@ import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.repository.InterviewRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.ResumeUploadRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.StudentService;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -30,6 +35,15 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     CloudinaryService cloudinaryService;
+
+    @Autowired
+    JobApplyRepository jobApplyRepository;
+
+    @Autowired
+    InterviewRepository interviewRepository;
+
+    @Autowired
+    ResumeUploadRepository resumeUploadRepository;
 
     @Override
     public List<Student> findAll() {
@@ -141,6 +155,36 @@ public class StudentServiceImpl implements StudentService {
 
         actionResult.setData(user.get());
         actionResult.setErrorCode(ErrorCodeEnum.UPDATE_PROFILE_SUCCESS);
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getDashBoard(String userId){
+        ActionResult actionResult = new ActionResult();
+
+        try{
+            Optional<Student> user = findById(userId);
+            if (user.isEmpty()) {
+                actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                return actionResult;
+            }
+            Long totalJobApply = jobApplyRepository.countByStudent_UserId(userId);
+            Long totalInterview = interviewRepository.countByJobApply_Student_UserId(userId);
+            Long totalShortList = jobApplyRepository.countByStudent_UserId(userId);
+            Long totalResumeUpload = resumeUploadRepository.countByResume_Student_UserIdAndIsActiveIsTrue(userId);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("totalJobApply", totalJobApply);
+            map.put("totalInterview", totalInterview);
+            map.put("totalShortList", totalShortList);
+            map.put("totalResumeUpload", totalResumeUpload);
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_DASHBOARD_SUCCESS);
+
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            System.err.println(e.getMessage());
+        }
+
         return actionResult;
     }
 }

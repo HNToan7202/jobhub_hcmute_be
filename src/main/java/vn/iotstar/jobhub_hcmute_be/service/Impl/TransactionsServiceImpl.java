@@ -52,7 +52,7 @@ public class TransactionsServiceImpl implements TransactionsService {
                     employer.get().setIsTransaction(false);
                     employerRepository.save(employer.get());
                 } else {
-                    long time = transactionOld.get().getCreate_at();
+                    long time = transactionOld.get().getCreateAt();
                     boolean isWithinTimeLimit = checkTransaction(time);
                     if (isWithinTimeLimit) {
                         result.setErrorCode(ErrorCodeEnum.USER_IS_TRANSACTION);

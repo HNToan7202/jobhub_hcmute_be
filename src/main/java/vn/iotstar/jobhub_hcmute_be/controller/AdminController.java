@@ -133,4 +133,18 @@ public class AdminController {
         return responseBuild.build(actionResult);
     }
 
+    @GetMapping("dashboard")
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String jwt = authorizationHeader.substring(7);
+            String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
+            actionResult = adminService.getDashBoard(userId);
+        }
+        catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
 }

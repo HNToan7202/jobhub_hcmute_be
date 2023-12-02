@@ -30,4 +30,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Page<User> findByRole_Name(String roleName, Pageable pageable);
 
+    Long countByUserIdIsNotNull();
+
+    //Lấy tổng user role khác admin
+    Long countByRole_NameNot(String roleName);
+
 }

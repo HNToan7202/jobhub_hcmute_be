@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +22,8 @@ import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
+import vn.iotstar.jobhub_hcmute_be.service.ShortListService;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,6 +46,9 @@ public class EmployerController {
 
     @Autowired
     JobApplyService jobApplyService;
+
+    @Autowired
+    ShortListService shortListService;
 
     public EmployerController(JobService jobService, JwtTokenProvider jwtTokenProvider, EmployerService employerService) {
         this.jobService = jobService;
@@ -318,5 +324,58 @@ public class EmployerController {
         }
         return responseBuild.build(actionResult);
     }
+
+    @GetMapping("/short-list")
+    public ResponseModel getShortList(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String employerId = jwtTokenProvider.getUserIdFromJwt(token);
+            Pageable pageable = PageRequest.of(index, size);
+            actionResult = shortListService.getShortListByEmployer(employerId, pageable);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+    @GetMapping("/dashboard")
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String employerId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = employerService.getDashboard(employerId);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+    @GetMapping("/transaction/chart")
+    public ResponseModel getTransactionChart(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "6") int monthsAgo){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String employerId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = employerService.getTransactionByMonth(employerId, monthsAgo);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("/transaction/get-all")
+    public ResponseModel getAllTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String employerId = jwtTokenProvider.getUserIdFromJwt(token);
+            Pageable pageable = PageRequest.of(index, size);
+            actionResult = employerService.getAllTransaction(employerId, pageable);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+
 
 }

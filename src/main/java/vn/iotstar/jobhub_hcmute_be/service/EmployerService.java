@@ -60,4 +60,11 @@ public interface EmployerService {
     ActionResult getAllInterview(String employerId, Pageable pageable);
 
     ActionResult getDetailInterview(String employerId, String interviewId);
+
+    ActionResult getDashboard(String employerId);
+
+
+    ActionResult getTransactionByMonth(String employerId, long monthsAgo);
+
+    ActionResult getAllTransaction(String employerId, Pageable pageable);
 }

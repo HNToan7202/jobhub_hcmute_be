@@ -35,4 +35,6 @@ public interface StudentService {
     ResponseEntity<GenericResponse> getProfile(String userId);
 
     ActionResult updateProfile(String userId, UserUpdateRequest request) throws Exception;
+
+    ActionResult getDashBoard(String userId);
 }

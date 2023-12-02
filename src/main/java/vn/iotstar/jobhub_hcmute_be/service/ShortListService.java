@@ -54,5 +54,9 @@ public interface ShortListService {
 
     ActionResult getShortListByUser(String userId, Pageable pageable);
 
+    ActionResult getShortByJob(String jobId, Pageable pageable);
+
+    ActionResult getShortListByEmployer(String userId, Pageable pageable);
+
     ActionResult deleteShortListById(String shortListId, String userId);
 }

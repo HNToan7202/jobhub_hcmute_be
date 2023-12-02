@@ -37,5 +37,10 @@ public interface JobRepository extends JpaRepository<Job, String> {
             "ORDER BY j.createdAt DESC")
     Page<Job> findJobs(String name, String posName, String location, Pageable pageable);
 
+    Long countByEmployer_UserId(String userId);
+
+    //lấy count all job
+    Long countByJobIdIsNotNull();
+
 }
 

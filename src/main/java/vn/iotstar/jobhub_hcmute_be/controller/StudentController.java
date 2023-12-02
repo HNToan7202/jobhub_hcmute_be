@@ -257,4 +257,16 @@ public class StudentController {
         }
         return responseBuild.build(actionResult);
     }
+    @GetMapping("/dashboard")
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+        ActionResult actionResult = new ActionResult();
+        try{
+            String token = authorizationHeader.substring(7);
+            String studentId = jwtTokenProvider.getUserIdFromJwt(token);
+            actionResult = studentService.getDashBoard(studentId);
+        }catch (Exception e){
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
 }

@@ -7,4 +7,5 @@ import vn.iotstar.jobhub_hcmute_be.entity.Event;
 @Repository
 @Hidden
 public interface EventRepository extends JpaRepository<Event, String> {
+    Long countByIdIsNotNull();
 }
