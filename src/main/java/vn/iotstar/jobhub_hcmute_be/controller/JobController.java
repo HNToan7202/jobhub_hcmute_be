@@ -24,7 +24,6 @@ public class JobController {
 
     final JobService jobService;
 
-
     final
     ResponseBuild responseBuild;
 
@@ -41,7 +40,7 @@ public class JobController {
     }
 
     @GetMapping("/get-all-jobs")
-    public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true",required = false) Boolean isActive) {
+    public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true", required = false) Boolean isActive) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = jobService.getAllJobs(PageRequest.of(index, size), isActive);

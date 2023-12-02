@@ -20,4 +20,6 @@ public interface TransactionsRepository extends JpaRepository<Transactions, Stri
 
     Page<Transactions> findAllByEmployer(Employer employer, Pageable pageable);
 
+    Long countByIdIsNotNull();
+
 }
