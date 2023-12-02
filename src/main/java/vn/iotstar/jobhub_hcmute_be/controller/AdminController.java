@@ -24,7 +24,7 @@ import java.util.Objects;
 @RestController
 @PostAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/admin")
-@Tag(name="Admin", description="Admin API")
+@Tag(name = "Admin", description = "Admin API")
 public class AdminController {
 
     final
@@ -63,15 +63,14 @@ public class AdminController {
     }
 
     @PostMapping("/event/add")
-    public ResponseModel addEvent(@Valid @RequestBody EventDto eventDto, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel addEvent(@Valid @RequestBody EventDto eventDto, @RequestHeader("Authorization") String authorizationHeader) {
 
         ActionResult actionResult = new ActionResult();
         try {
             String jwt = authorizationHeader.substring(7);
             String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
             actionResult = adminService.addNewEvent(eventDto, userId);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
@@ -79,13 +78,13 @@ public class AdminController {
 
     //@PostAuthorize("hasRole('ADMIN')")
     @GetMapping("/hello")
-    public ResponseEntity<?> hello(){
+    public ResponseEntity<?> hello() {
         return ResponseEntity.ok("hello");
     }
 
     @GetMapping("/user/get-list")
     public ResponseEntity<?> getListUser(@RequestParam(name = "size", required = false, defaultValue = "10") int size,
-                                      @RequestParam(name = "page", required = false, defaultValue = "0") int page) {
+                                         @RequestParam(name = "page", required = false, defaultValue = "0") int page) {
         return userService.getAccounts(size, page);
     }
 
@@ -97,15 +96,13 @@ public class AdminController {
             @RequestParam(name = "index", required = false, defaultValue = "0") int index
     ) {
         ActionResult actionResult = new ActionResult();
-        try{
-            actionResult = userService.getAccounts(size, index, role,active);
-        }
-        catch (Exception e){
+        try {
+            actionResult = userService.getAccounts(size, index, role, active);
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         }
         return responseBuild.build(actionResult);
     }
-
 
 
     @PostMapping("/employer/verify")
@@ -117,7 +114,7 @@ public class AdminController {
                     .getDefaultMessage()
             );
         }
-       actionResult =  adminService.changeStateEmployer(employerRequest);
+        actionResult = adminService.changeStateEmployer(employerRequest);
         return responseBuild.build(actionResult);
     }
 
@@ -134,14 +131,13 @@ public class AdminController {
     }
 
     @GetMapping("dashboard")
-    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String jwt = authorizationHeader.substring(7);
             String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
             actionResult = adminService.getDashBoard(userId);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);

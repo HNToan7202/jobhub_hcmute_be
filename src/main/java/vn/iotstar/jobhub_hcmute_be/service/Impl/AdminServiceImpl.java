@@ -24,23 +24,23 @@ import java.util.Optional;
 @Transactional
 public class AdminServiceImpl implements AdminService {
 
-   @Autowired
-   private AdminRepository adminRepository;
+    @Autowired
+    private AdminRepository adminRepository;
 
-   @Autowired
-   private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-   @Autowired
+    @Autowired
     EmployerRepository employerRepository;
 
-   @Autowired
+    @Autowired
     EventRepository eventRepository;
 
-   @Autowired
+    @Autowired
     JobRepository jobRepository;
 
-   @Autowired
-   InterviewRepository interviewRepository;
+    @Autowired
+    InterviewRepository interviewRepository;
 
     @Autowired
     JobApplyRepository jobApplyRepository;
@@ -50,6 +50,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    TransactionsRepository transactionsRepository;
 
     @Override
     @Deprecated
@@ -83,7 +86,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ActionResult changeStateEmployer( EmployerRequest employerRequest) {
+    public ActionResult changeStateEmployer(EmployerRequest employerRequest) {
         ActionResult actionResult = new ActionResult();
         Optional<Employer> optionalUsers = employerRepository.findById(employerRequest.getEmployerId());
 
@@ -99,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYR_ACCEPT_SUCCESS);
                 return actionResult;
             }
-            if(employerRequest.getEmployState() == EmployState.NOT_ACTIVE){
+            if (employerRequest.getEmployState() == EmployState.NOT_ACTIVE) {
                 employer.setEmployState(EmployState.NOT_ACTIVE);
                 employerRepository.save(employer);
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYER_NOT_ACTIVE_SUCCESS);
@@ -111,29 +114,27 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ActionResult addNewEvent(EventDto eventDto,  String adminId){
+    public ActionResult addNewEvent(EventDto eventDto, String adminId) {
         ActionResult actionResult = new ActionResult();
         Optional<Admin> optional = adminRepository.findById(adminId);
 
-        if(optional.isPresent()){
+        if (optional.isPresent()) {
             Event event = new Event();
             BeanUtils.copyProperties(eventDto, event);
             event.setAdmin(optional.get());
             eventRepository.save(event);
             actionResult.setErrorCode(ErrorCodeEnum.POST_EVENT_SUCCESS);
-        }
-        else {
+        } else {
             actionResult.setErrorCode(ErrorCodeEnum.ADMIN_NOT_FOUND);
         }
         return actionResult;
     }
 
     @Override
-    public ActionResult getDashBoard(String adminId){
+    public ActionResult getDashBoard(String adminId) {
         ActionResult actionResult = new ActionResult();
         Optional<Admin> optional = adminRepository.findById(adminId);
-        if(optional.isPresent()){
-
+        if (optional.isPresent()) {
             Long totalEmployer = employerRepository.countByUserIdIsNotNull();
             Long totalJob = jobRepository.countByJobIdIsNotNull();
             Long totalInterview = interviewRepository.countByInterviewIdIsNotNull();
@@ -142,7 +143,7 @@ public class AdminServiceImpl implements AdminService {
             Long totalStudent = studentRepository.countByUserIdIsNotNull();
             Long totalUser = userRepository.countByRole_NameNot("ADMIN");
             Long totalEvent = eventRepository.countByIdIsNotNull();
-
+            Long totalTransaction = transactionsRepository.countByIdIsNotNull();
             Map<String, Long> map = Map.of(
                     "totalEmployer", totalEmployer,
                     "totalJob", totalJob,
@@ -151,13 +152,13 @@ public class AdminServiceImpl implements AdminService {
                     "totalShortList", totalShortList,
                     "totalStudent", totalStudent,
                     "totalUser", totalUser,
-                    "totalEvent", totalEvent
+                    "totalEvent", totalEvent,
+                    "totalTransaction", totalTransaction
             );
 
             actionResult.setData(map);
             actionResult.setErrorCode(ErrorCodeEnum.GET_DASHBOARD_SUCCESS);
-        }
-        else {
+        } else {
             actionResult.setErrorCode(ErrorCodeEnum.ADMIN_NOT_FOUND);
         }
         return actionResult;
