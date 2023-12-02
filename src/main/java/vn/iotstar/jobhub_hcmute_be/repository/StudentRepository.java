@@ -18,4 +18,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     Optional<Student> findByPhoneAndIsActiveIsTrue(String phone);
 
     Optional<Student> findByUserIdAndIsActiveIsTrue(String userId);
+
+    Long countByUserIdIsNotNull();
+
 }

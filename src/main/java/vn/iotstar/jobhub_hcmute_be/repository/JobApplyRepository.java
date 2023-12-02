@@ -22,6 +22,10 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
 
     Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId);
 
+    Long countByJob_Employer_UserId(String userId);
+
+    Long countByStudent_UserId(String userId);
+
     Page<JobApply> findAllByJob_Employer_UserIdAndState(Pageable pageable, String userId, State state);
 
     Page<JobApply> findAllByJob_Employer_UserIdAndCreatedAtBetween(
@@ -43,5 +47,6 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
 
     Page<JobApply> findAllByJob_JobIdAndJob_Employer_UserIdAndState(Pageable pageable, String jobId, String userId, State state);
 
+    Long countByJobApplyIdIsNotNull();
 
 }

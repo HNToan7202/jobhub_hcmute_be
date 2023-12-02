@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.Employer;
+
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Hidden
@@ -28,4 +32,5 @@ public interface EmployerRepository extends JpaRepository<Employer, String> {
             "ORDER BY e.transactionMoney DESC")
     Page<Employer> findEmployers(Pageable pageableString, String companyName, String teamSize);
 
+    Long countByUserIdIsNotNull();
 }

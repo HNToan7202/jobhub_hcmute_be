@@ -49,6 +49,8 @@ public class EmployerServiceImpl implements EmployerService {
     @Autowired
     JobApplyRepository jobApplyRepository;
 
+
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -66,6 +68,14 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     InterviewRepository interviewRepository;
+
+    @Autowired
+    ShortListRepository shortListRepository;
+
+
+    @Autowired
+    TransactionsRepository transactionsRepository;
+
 
     public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByJob_Employer_UserId(pageable, userId);
@@ -469,4 +479,79 @@ public class EmployerServiceImpl implements EmployerService {
         }
         return actionResult;
     }
+
+    @Override
+    public ActionResult getDashboard(String employerId){
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
+            if(optionalEmployer.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                return actionResult;
+            }
+            Employer employer = optionalEmployer.get();
+            Map<String, Object> map = new HashMap<String, Object>();
+            Long totalApply = jobApplyRepository.countByJob_Employer_UserId(employerId);
+            Long totalJob = jobRepository.countByEmployer_UserId(employerId);
+            Long totalShortList = shortListRepository.countByJob_Employer_UserId(employerId);
+            Long totalInterview = interviewRepository.countByJobApply_Job_Employer_UserId(employerId);
+            map.put("totalApply", totalApply);
+            map.put("totalJob", totalJob);
+            map.put("totalShortList", totalShortList);
+            map.put("totalInterview", totalInterview);
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+
+    }
+
+    @Override
+    public ActionResult getTransactionByMonth(String employerId, long monthsAgo){
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
+            if(optionalEmployer.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                return actionResult;
+            }
+
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getAllTransaction(String employerId, Pageable pageable){
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
+            if(optionalEmployer.isEmpty()){
+                actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                return actionResult;
+            }
+            Page<Transactions> transactions = transactionsRepository.findAllByEmployer(optionalEmployer.get(), pageable);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("totalMoney", optionalEmployer.get().getTransactionMoney());
+            map.put("transactions", transactions.getContent());
+            map.put("pageNumber", transactions.getPageable().getPageNumber());
+            map.put("pageSize", transactions.getSize());
+            map.put("totalPages", transactions.getTotalPages());
+            map.put("totalElements", transactions.getTotalElements());
+
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
+
 }

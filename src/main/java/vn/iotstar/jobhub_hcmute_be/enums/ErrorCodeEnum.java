@@ -109,6 +109,8 @@ public enum ErrorCodeEnum {
     ADD_SHORT_LIST_SUCCESS(200, 200, "Add short list success"),
 
     FAIL_ADD_BLACKLIST(400, 400, "Fail add blacklist"),
+
+    GET_DASHBOARD_SUCCESS(200, 200, "Get dashboard success"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 

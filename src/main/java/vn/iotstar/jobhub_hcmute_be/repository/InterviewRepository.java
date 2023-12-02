@@ -14,4 +14,9 @@ import java.util.Optional;
 public interface InterviewRepository extends JpaRepository<Interview, String> {
     Page<Interview> findByJobApply_Job_Employer_UserId(String employerId, Pageable pageable);
 
+    Long countByJobApply_Job_Employer_UserId(String employerId);
+
+    Long countByJobApply_Student_UserId(String studentId);
+
+    Long countByInterviewIdIsNotNull();
 }

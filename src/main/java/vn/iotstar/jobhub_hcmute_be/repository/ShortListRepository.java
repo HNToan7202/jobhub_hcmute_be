@@ -16,5 +16,15 @@ import java.util.Optional;
 public interface ShortListRepository extends JpaRepository<ShortList, String> {
     Page<ShortList> findAllByUser_UserId (String userId, Pageable pageable);
 
+    Page<ShortList> findAllByJob_JobId (String jobId, Pageable pageable);
+
+    Page<ShortList> findAllByJob_Employer_UserId(String userId, Pageable pageable);
+
     Optional<ShortList> findByJob_JobId(String jobId);
+
+    Long countByJob_Employer_UserId(String userId);
+
+    Long countByUser_UserId(String userId);
+
+    Long countByIdIsNotNull();
 }

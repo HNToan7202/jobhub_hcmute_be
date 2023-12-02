@@ -13,13 +13,11 @@ import vn.iotstar.jobhub_hcmute_be.entity.Event;
 import vn.iotstar.jobhub_hcmute_be.dto.EventDto;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
-import vn.iotstar.jobhub_hcmute_be.repository.AdminRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.EventRepository;
-import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
+import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -37,6 +35,21 @@ public class AdminServiceImpl implements AdminService {
 
    @Autowired
     EventRepository eventRepository;
+
+   @Autowired
+    JobRepository jobRepository;
+
+   @Autowired
+   InterviewRepository interviewRepository;
+
+    @Autowired
+    JobApplyRepository jobApplyRepository;
+
+    @Autowired
+    ShortListRepository shortListRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     @Override
     @Deprecated
@@ -108,6 +121,41 @@ public class AdminServiceImpl implements AdminService {
             event.setAdmin(optional.get());
             eventRepository.save(event);
             actionResult.setErrorCode(ErrorCodeEnum.POST_EVENT_SUCCESS);
+        }
+        else {
+            actionResult.setErrorCode(ErrorCodeEnum.ADMIN_NOT_FOUND);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getDashBoard(String adminId){
+        ActionResult actionResult = new ActionResult();
+        Optional<Admin> optional = adminRepository.findById(adminId);
+        if(optional.isPresent()){
+
+            Long totalEmployer = employerRepository.countByUserIdIsNotNull();
+            Long totalJob = jobRepository.countByJobIdIsNotNull();
+            Long totalInterview = interviewRepository.countByInterviewIdIsNotNull();
+            Long totalJobApply = jobApplyRepository.countByJobApplyIdIsNotNull();
+            Long totalShortList = shortListRepository.countByIdIsNotNull();
+            Long totalStudent = studentRepository.countByUserIdIsNotNull();
+            Long totalUser = userRepository.countByRole_NameNot("ADMIN");
+            Long totalEvent = eventRepository.countByIdIsNotNull();
+
+            Map<String, Long> map = Map.of(
+                    "totalEmployer", totalEmployer,
+                    "totalJob", totalJob,
+                    "totalInterview", totalInterview,
+                    "totalJobApply", totalJobApply,
+                    "totalShortList", totalShortList,
+                    "totalStudent", totalStudent,
+                    "totalUser", totalUser,
+                    "totalEvent", totalEvent
+            );
+
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_DASHBOARD_SUCCESS);
         }
         else {
             actionResult.setErrorCode(ErrorCodeEnum.ADMIN_NOT_FOUND);

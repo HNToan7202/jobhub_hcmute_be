@@ -14,7 +14,10 @@ public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String Id;
-    private final long create_at = System.currentTimeMillis();
+
+    @Column(name = "createAt")
+    private final long createAt = System.currentTimeMillis();
+
     private long time;
     private String status;
     private long amount;

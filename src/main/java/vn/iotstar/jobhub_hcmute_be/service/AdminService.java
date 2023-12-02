@@ -26,4 +26,6 @@ public interface AdminService {
     ActionResult changeStateEmployer( EmployerRequest employerRequest);
 
     ActionResult addNewEvent(EventDto eventDto, String adminId);
+
+    ActionResult getDashBoard(String adminId);
 }

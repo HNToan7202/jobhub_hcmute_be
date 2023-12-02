@@ -25,7 +25,7 @@ public class ShortList {
     @ManyToOne
     @ToString.Exclude
     @JsonBackReference
-    private User user;
+    private Student user;
 
     @ManyToOne
     @ToString.Exclude
