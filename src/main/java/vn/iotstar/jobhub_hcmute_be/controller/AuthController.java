@@ -18,10 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.*;
-import vn.iotstar.jobhub_hcmute_be.dto.EmailVerificationRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
-import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.Admin;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.exception.UserNotFoundException;
@@ -44,7 +42,7 @@ import static vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Validated
-@Tag(name="Authentication", description="Auth API")
+@Tag(name = "Authentication", description = "Auth API")
 public class AuthController {
 
     final
@@ -80,7 +78,6 @@ public class AuthController {
     ResponseBuild responseBuild;
 
 
-
     public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder, RoleRepository roleRepository, EmailVerificationService emailVerificationService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
@@ -108,7 +105,7 @@ public class AuthController {
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader) {
         String accessToken = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
-        if (userId!= null){
+        if (userId != null) {
             return refreshTokenService.logout(userId);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -145,7 +142,7 @@ public class AuthController {
             @RequestBody @Valid RegisterRequest signUpMailDTO,
             BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors() ) {
+        if (bindingResult.hasErrors()) {
             String errorMessage = Objects.requireNonNull(
                     bindingResult.getFieldError()).getDefaultMessage();
 
@@ -181,6 +178,7 @@ public class AuthController {
         }
         return userService.employerRegister(employerRegisterDTO);
     }
+
     @PostMapping("/send-otp")
     public ResponseEntity<GenericResponse> sendOtp(@RequestBody EmailVerificationRequest emailVerificationRequest) {
         try {
@@ -205,29 +203,27 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseModel resetPassword(@RequestParam final String email) throws MessagingException, UnsupportedEncodingException {
+    public ResponseModel resetPassword(@RequestBody final ForgotPasswordto dto) throws MessagingException, UnsupportedEncodingException {
         ActionResult actionResult = new ActionResult();
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if(!optionalUser.isPresent()){
+        Optional<User> optionalUser = userService.findByEmail(dto.getEmail());
+        if (optionalUser.isEmpty()) {
             actionResult.setErrorCode(USER_NOT_FOUND);
         }
-        if(optionalUser.isPresent()){
+        if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             String otp = UUID.randomUUID().toString();
             userService.createPasswordResetOtpForUser(user, otp);
-            String url = "http://localhost:3000/forget-password/confirm-password?token="+otp;
+            String url = "http://localhost:3000/forget-password/confirm-password?token=" + otp;
             String subject = "Change Password For JobPost";
             Context context = new Context();
-            context.setVariable("url",url);
-            String content = templateEngine.process("forgot-password",context);
-
+            context.setVariable("url", url);
+            String content = templateEngine.process("forgot-password", context);
             MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message,true);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject(subject);
-            helper.setText(content,true);
+            helper.setText(content, true);
             helper.setTo(user.getEmail());
-            helper.setFrom(env.getProperty("spring.mail.username"),"Recruiment Manager");
-
+            helper.setFrom(Objects.requireNonNull(env.getProperty("spring.mail.username")), "Recruiment Manager");
             javaMailSender.send(message);
             actionResult.setErrorCode(CHECK_MAIL_TO_RESET_PASSWORD);
         }
@@ -235,19 +231,30 @@ public class AuthController {
     }
 
     @PutMapping("/reset-password")
-    public ResponseModel resetPassword(@RequestParam("token") String token, @Valid @RequestBody PasswordResetRequest passwordResetRequest){
+    public ResponseModel resetPassword(@RequestParam("token") String token, @Valid @RequestBody PasswordResetRequest passwordResetRequest) {
         ActionResult actionResult = new ActionResult();
         String result = userService.validatePasswordResetOtp(token);
-        if(result == null){
+        if (result == null) {
             User user = userService.getUserByPasswordResetOtp(token)
-                    .orElseThrow(()->new UserNotFoundException("User Not Found")).getUser();
+                    .orElseThrow(() -> new UserNotFoundException("User Not Found")).getUser();
             userService.changeUserPassword(user, passwordResetRequest.getNewPassword()
                     , passwordResetRequest.getConfirmPassword());
             actionResult.setErrorCode(RESET_PASSWORD_SUCCESS);
 
-        }else {
+        } else {
             actionResult.setErrorCode(INTERNAL_SERVER_ERROR);
 
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PutMapping("/confirm-password")
+    public ResponseModel confirmPassword(@Valid @RequestBody ConfirmPassword confirmPassword) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.confirmPassword(confirmPassword);
+        } catch (Exception e) {
+            actionResult.setErrorCode(INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
