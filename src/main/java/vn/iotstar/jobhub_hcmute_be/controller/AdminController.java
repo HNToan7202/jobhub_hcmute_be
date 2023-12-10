@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
+import vn.iotstar.jobhub_hcmute_be.service.TransactionsService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
 import java.util.Objects;
@@ -42,6 +44,9 @@ public class AdminController {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    TransactionsService transactionsService;
 
     public AdminController(UserService userService, AdminService adminService) {
         this.userService = userService;
@@ -137,6 +142,28 @@ public class AdminController {
             String jwt = authorizationHeader.substring(7);
             String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
             actionResult = adminService.getDashBoard(userId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("transaction/get-all")
+    public ResponseModel getAllTransaction(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = transactionsService.getAllTransaction(null, PageRequest.of(index, size));
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("transaction/code/count")
+    public ResponseModel getCountTransaction() {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = transactionsService.getCountTransactions();
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

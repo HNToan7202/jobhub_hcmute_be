@@ -19,10 +19,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
-import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
-import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
-import vn.iotstar.jobhub_hcmute_be.service.JobService;
-import vn.iotstar.jobhub_hcmute_be.service.ShortListService;
+import vn.iotstar.jobhub_hcmute_be.service.*;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -49,6 +46,9 @@ public class EmployerController {
 
     @Autowired
     ShortListService shortListService;
+
+    @Autowired
+    TransactionsService transactionsService;
 
     public EmployerController(JobService jobService, JwtTokenProvider jwtTokenProvider, EmployerService employerService) {
         this.jobService = jobService;
@@ -114,7 +114,7 @@ public class EmployerController {
 
     @PutMapping("/add-bg")
     public ResponseModel uploadBackground(@RequestParam MultipartFile imageFile,
-                                                        @RequestHeader("Authorization") String token) throws IOException {
+                                          @RequestHeader("Authorization") String token) throws IOException {
         ActionResult actionResult = new ActionResult();
         String jwt = token.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
@@ -129,7 +129,7 @@ public class EmployerController {
 
     @PutMapping("/delete-bg")
     public ResponseModel deleteItemBg(@RequestBody DeleteItemRequest deleteItemRequest,
-                                          @RequestHeader("Authorization") String token) throws IOException {
+                                      @RequestHeader("Authorization") String token) throws IOException {
         ActionResult actionResult = new ActionResult();
         String jwt = token.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(jwt);
@@ -166,11 +166,10 @@ public class EmployerController {
         try {
             String token = authorizationHeader.substring(7);
             String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
-            if(day < 0){
+            if (day < 0) {
                 actionResult = employerService.getApplicants(userIdFromToken, PageRequest.of(index, size), state);
-            }
-            else
-                actionResult = jobApplyService.getAllByUserIdAndDateFilters( PageRequest.of(index, size), userIdFromToken, day, state);
+            } else
+                actionResult = jobApplyService.getAllByUserIdAndDateFilters(PageRequest.of(index, size), userIdFromToken, day, state);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
@@ -183,7 +182,7 @@ public class EmployerController {
                                           @RequestParam(defaultValue = "0") int index,
                                           @RequestParam(defaultValue = "10") int size,
                                           @RequestParam(defaultValue = "ALL") String state,
-                                          @RequestHeader("Authorization") String authorizationHeader ) {
+                                          @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
@@ -214,17 +213,15 @@ public class EmployerController {
     @PutMapping("student/state/{usedId}")
     public ResponseModel updateCandidateState(@RequestHeader("Authorization") String authorizationHeader,
                                               @PathVariable String usedId,
-                                              @Valid @RequestBody UpdateStateRequest updateStateRequest){
+                                              @Valid @RequestBody UpdateStateRequest updateStateRequest) {
         ActionResult actionResult = new ActionResult();
-        try
-        {
+        try {
             String token = authorizationHeader.substring(7);
             String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = employerService.updateCandidateState(recruiterId, usedId, updateStateRequest);
-            if(updateStateRequest.getReplyRequest() != null)
+            if (updateStateRequest.getReplyRequest() != null)
                 employerService.reply(updateStateRequest.getReplyRequest());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -232,7 +229,7 @@ public class EmployerController {
     }
 
     @PostMapping("/reply")
-    public ResponseModel reply( @RequestBody ReplyRequest replyRequest) {
+    public ResponseModel reply(@RequestBody ReplyRequest replyRequest) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = employerService.replyCandidate(replyRequest);
@@ -288,7 +285,7 @@ public class EmployerController {
 
     @PostMapping("/{jobApplyId}/create-interview")
     public ResponseModel createInterview(@PathVariable String jobApplyId,
-                                         @RequestBody InterViewDTO interViewDTO){
+                                         @RequestBody InterViewDTO interViewDTO) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = employerService.createInterview(jobApplyId, interViewDTO);
@@ -300,7 +297,7 @@ public class EmployerController {
     }
 
     @PutMapping("/job/{jobId}/change-state")
-    public ResponseModel changeStateJob( @RequestHeader("Authorization") String authorizationHeader,@PathVariable String jobId) {
+    public ResponseModel changeStateJob(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String jobId) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
@@ -311,8 +308,9 @@ public class EmployerController {
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("/{interviewId}/detail-interview")
-    public ResponseModel getDetailInterview(@PathVariable String interviewId, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getDetailInterview(@PathVariable String interviewId, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
         try {
             String token = authorizationHeader.substring(7);
@@ -326,53 +324,68 @@ public class EmployerController {
     }
 
     @GetMapping("/short-list")
-    public ResponseModel getShortList(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getShortList(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String employerId = jwtTokenProvider.getUserIdFromJwt(token);
             Pageable pageable = PageRequest.of(index, size);
             actionResult = shortListService.getShortListByEmployer(employerId, pageable);
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("/dashboard")
-    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String employerId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = employerService.getDashboard(employerId);
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("/transaction/chart")
-    public ResponseModel getTransactionChart(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "6") int monthsAgo){
+    public ResponseModel getTransactionChart(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "6") int monthsAgo) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String employerId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = employerService.getTransactionByMonth(employerId, monthsAgo);
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
 
     @GetMapping("/transaction/get-all")
-    public ResponseModel getAllTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size){
+    public ResponseModel getAllTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String employerId = jwtTokenProvider.getUserIdFromJwt(token);
             Pageable pageable = PageRequest.of(index, size);
-            actionResult = employerService.getAllTransaction(employerId, pageable);
-        }catch (Exception e){
+            actionResult = transactionsService.getAllTransaction(employerId, pageable);
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("/transaction/statics")
+    public ResponseModel getTransactionStatics(@RequestHeader("Authorization") String authorizationHeader) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            String token = authorizationHeader.substring(7);
+            String employerId = jwtTokenProvider.getUserIdFromJwt(token);
+            //    actionResult = transactionsService.staticsTrans(employerId);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
     }

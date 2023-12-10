@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @Entity
@@ -16,20 +18,21 @@ public class Transactions {
     private String Id;
 
     @Column(name = "createAt")
-    private final long createAt = System.currentTimeMillis();
+    private final Date createAt = new Date();
 
     private long time;
     private String status;
     private long amount;
     @Column(columnDefinition = "Nvarchar(max)")
     private String name;
+
     private String code;
+
     private String bank;
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
     private Employer employer;
-
 
 
 }

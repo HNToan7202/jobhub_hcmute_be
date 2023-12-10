@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
+import vn.iotstar.jobhub_hcmute_be.dto.ConfirmPassword;
 import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
@@ -73,6 +74,8 @@ public interface UserService {
     ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize);
 
     ActionResult detailProfileEmployer(String employerId);
+
+    ActionResult confirmPassword(ConfirmPassword confirmPassword);
 
 //    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 //

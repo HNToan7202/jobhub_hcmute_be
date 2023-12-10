@@ -21,9 +21,11 @@ public interface EmployerRepository extends JpaRepository<Employer, String> {
 
     Optional<Employer> findByUserIdAndIsActiveIsTrue(String id);
 
-   Page<Employer> findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(Long transactionMoney, Pageable pageable);
+    Page<Employer> findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(Long transactionMoney, Pageable pageable);
 
-   Page<Employer> findAllByIsActiveIsTrueOrderByTransactionMoneyDesc(Pageable pageable);
+    List<Employer> findTop3ByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(Long transactionMoney);
+
+    Page<Employer> findAllByIsActiveIsTrueOrderByTransactionMoneyDesc(Pageable pageable);
 
     @Query("SELECT e FROM Employer e WHERE " +
             "(e.companyName LIKE %:companyName%) " +

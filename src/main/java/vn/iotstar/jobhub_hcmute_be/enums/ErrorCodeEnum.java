@@ -111,16 +111,19 @@ public enum ErrorCodeEnum {
     FAIL_ADD_BLACKLIST(400, 400, "Fail add blacklist"),
 
     GET_DASHBOARD_SUCCESS(200, 200, "Get dashboard success"),
+    INVALID_TOKEN_LINK(400, 400, "Invalid token link"),
+    CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 
-
     private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();
+
     static {
         for (ErrorCodeEnum returnCode : ErrorCodeEnum.values()) {
             map.put(returnCode.code, returnCode);
         }
     }
+
     private int status;
     private int code;
     private String message;
@@ -130,18 +133,23 @@ public enum ErrorCodeEnum {
         this.code = code;
         this.message = message;
     }
+
     public static ErrorCodeEnum valueOf(int code) {
         return map.get(code);
     }
+
     public int getStatus() {
         return status;
     }
+
     public HttpStatus getHttpStatus() {
         return HttpStatus.valueOf(status);
     }
+
     public int getCode() {
         return code;
     }
+
     public String getMessage() {
         return message;
     }

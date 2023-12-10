@@ -216,13 +216,13 @@ public class JobApplyServiceImpl implements JobApplyService {
         ActionResult actionResult = new ActionResult();
         Page<JobApply> jobApplyPage = findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, studentId);
         List<JobApplyDto> jobApplyDtos = new ArrayList<>();
-        for(JobApply jobApply : jobApplyPage.getContent()) {
+        for (JobApply jobApply : jobApplyPage.getContent()) {
             JobApplyDto jobApplyDto = new JobApplyDto();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
             jobApplyDto.setLocationJob(jobApply.getJob().getLocation());
             jobApplyDto.setLogoJob(jobApply.getJob().getLogo());
             jobApplyDto.setNameJob(jobApply.getJob().getName());
-
+            jobApplyDto.setJobId(jobApply.getJob().getJobId());
             jobApplyDtos.add(jobApplyDto);
         }
         Map<String, Object> map = new HashMap<String, Object>();
@@ -242,21 +242,20 @@ public class JobApplyServiceImpl implements JobApplyService {
     public Page<JobApply> findAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state) {
         Date endDate = new Date();
         Date startDate = calculateStartDate(endDate, days);
-        if(state.equals("ALL"))
+        if (state.equals("ALL"))
             return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetween(pageable, userId, startDate, endDate);
         else
             return jobApplyRepository.findAllByJob_Employer_UserIdAndCreatedAtBetweenAndState(pageable, userId, startDate, endDate, State.getStatusName(state));
     }
 
     @Override
-    public ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state)
-    {
+    public ActionResult getAllByUserIdAndDateFilters(Pageable pageable, String userId, int days, String state) {
         ActionResult actionResult = new ActionResult();
         Page<JobApply> jobApplyPage = findAllByUserIdAndDateFilters(pageable, userId, days, state);
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
-        for(JobApply jobApply : jobApplyPage.getContent()) {
+        for (JobApply jobApply : jobApplyPage.getContent()) {
             JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
             BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
@@ -284,17 +283,17 @@ public class JobApplyServiceImpl implements JobApplyService {
     }
 
     @Override
-    public ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId, String state){
+    public ActionResult getAllByJobIdAndEmployerId(Pageable pageable, String jobId, String userId, String state) {
         ActionResult actionResult = new ActionResult();
         Page<JobApply> jobApplyPage;
-        if(state.equals("ALL"))
+        if (state.equals("ALL"))
             jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserId(pageable, jobId, userId);
         else
-             jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserIdAndState(pageable, jobId, userId, State.getStatusName(state));
+            jobApplyPage = jobApplyRepository.findAllByJob_JobIdAndJob_Employer_UserIdAndState(pageable, jobId, userId, State.getStatusName(state));
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
-        for(JobApply jobApply : jobApplyPage.getContent()) {
+        for (JobApply jobApply : jobApplyPage.getContent()) {
             JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
             BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
