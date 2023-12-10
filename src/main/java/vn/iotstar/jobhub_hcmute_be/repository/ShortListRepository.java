@@ -27,4 +27,6 @@ public interface ShortListRepository extends JpaRepository<ShortList, String> {
     Long countByUser_UserId(String userId);
 
     Long countByIdIsNotNull();
+
+    Optional<ShortList> findByJob_JobIdAndUser_UserId(String jobId, String userId);
 }

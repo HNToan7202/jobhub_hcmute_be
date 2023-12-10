@@ -231,13 +231,13 @@ public class StudentController {
         return responseBuild.build(actionResult);
     }
 
-    @DeleteMapping("/short-list/{shortListId}")
-    public ResponseModel deleteShortList(@PathVariable String shortListId, @RequestHeader("Authorization") String authorizationHeader){
+    @DeleteMapping("/short-list/{jobId}")
+    public ResponseModel deleteShortList(@PathVariable String jobId, @RequestHeader("Authorization") String authorizationHeader){
         ActionResult actionResult = new ActionResult();
         try{
             String token = authorizationHeader.substring(7);
             String studentId = jwtTokenProvider.getUserIdFromJwt(token);
-            actionResult = shortListService.deleteShortListById(shortListId, studentId);
+            actionResult = shortListService.deleteShortListById(jobId, studentId);
 
         }catch (Exception e){
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);

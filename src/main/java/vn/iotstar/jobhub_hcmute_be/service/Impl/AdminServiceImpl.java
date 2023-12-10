@@ -114,20 +114,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ActionResult addNewEvent(EventDto eventDto, String adminId) {
+    public ActionResult addNewEvent(EventDto eventDto,  String adminId){
         ActionResult actionResult = new ActionResult();
         Optional<Admin> optional = adminRepository.findById(adminId);
 
         if (optional.isPresent()) {
             Event event = new Event();
+
             BeanUtils.copyProperties(eventDto, event);
             event.setAdmin(optional.get());
+
             eventRepository.save(event);
             actionResult.setErrorCode(ErrorCodeEnum.POST_EVENT_SUCCESS);
         } else {
             actionResult.setErrorCode(ErrorCodeEnum.ADMIN_NOT_FOUND);
         }
-        return actionResult;
+        return actionResult;/*(10)*/
     }
 
     @Override

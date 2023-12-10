@@ -266,14 +266,14 @@ public class ShortListServiceImpl implements ShortListService {
    }
 
    @Override
-   public ActionResult deleteShortListById(String shortListId, String userId) {
+   public ActionResult deleteShortListById(String jobId, String userId) {
         ActionResult actionResult = new ActionResult();
         try {
-            Optional<ShortList> optionalShortList = findById(shortListId);
+            Optional<ShortList> optionalShortList = shortListRepository.findByJob_JobIdAndUser_UserId(jobId, userId);
             if(optionalShortList.isPresent()){
                 ShortList shortList = optionalShortList.get();
                 if(shortList.getUser().getUserId().equals(userId)){
-                    deleteById(shortListId);
+                    deleteById(optionalShortList.get().getId());
                     actionResult.setErrorCode(ErrorCodeEnum.DELETE_SHORT_LIST_SUCCESS);
                 }
                 else {

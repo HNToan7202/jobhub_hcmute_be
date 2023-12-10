@@ -173,6 +173,8 @@ public class UserServiceImpl implements UserService {
         if (findByEmail(loginDTO.getUserLogin()).isEmpty())
             throw new UserNotFoundException("Account does not exist");
         Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+//        optionalUser.get().setPassword(passwordEncoder.encode("28072002Thanh@"));
+//        userRepository.save(optionalUser.get());
         if (optionalUser.isPresent() && !optionalUser.get().isVerified()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(GenericResponse.builder()
                     .success(false)

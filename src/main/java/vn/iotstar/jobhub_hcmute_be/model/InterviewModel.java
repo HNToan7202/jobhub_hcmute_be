@@ -22,6 +22,8 @@ public class InterviewModel implements Serializable {
     private String nameCandidate;
     private String nameJob;
     private String jobId;
+    private String userId;
+    private String avatar;
 
     public static InterviewModel transform(Interview interview) {
     	return InterviewModel.builder()
@@ -35,6 +37,8 @@ public class InterviewModel implements Serializable {
                 .nameJob(interview.getJobApply().getJob().getName())
                 .jobId(interview.getJobApply().getJob().getJobId())
                 .time(interview.getTime())
+                .userId(interview.getJobApply().getStudent().getUserId())
+                .avatar(interview.getJobApply().getStudent().getAvatar())
     			.build();
     }
 

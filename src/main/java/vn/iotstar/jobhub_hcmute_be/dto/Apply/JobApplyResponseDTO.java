@@ -22,6 +22,8 @@ public class JobApplyResponseDTO implements Serializable {
     String avatar;
     String fullName;
     String name;
+    String email;
+
     List<Skill> skills;
     private State state;
     String resumeUpoad;

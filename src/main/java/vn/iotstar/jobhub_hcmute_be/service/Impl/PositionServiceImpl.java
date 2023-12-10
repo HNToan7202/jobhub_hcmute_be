@@ -39,11 +39,9 @@ public class PositionServiceImpl implements PositionService {
         List<Position> positionList = findAll();
         if(positionList == null)
         {
-            positionList = new ArrayList<>();
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             return actionResult;
         }
-
         actionResult.setErrorCode(ErrorCodeEnum.GET_POSITION_SUCCESS);
         actionResult.setData(positionList);
         return actionResult;

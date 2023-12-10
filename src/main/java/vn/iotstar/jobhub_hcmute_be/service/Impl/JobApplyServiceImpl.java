@@ -205,7 +205,7 @@ public class JobApplyServiceImpl implements JobApplyService {
         JobApply jobApply = jobApplyRepository.save(application);
         actionResult.setData(jobApply);
         actionResult.setErrorCode(ErrorCodeEnum.APPLICATION_SUCCESSFULLY);
-        notificationService.sendApplyJob(job.getEmployer().getEmail(), candidate.getFullName(), job.getName());
+//        notificationService.sendApplyJob(job.getEmployer().getEmail(), candidate.getFullName(), job.getName());
         return actionResult;
     }
 
