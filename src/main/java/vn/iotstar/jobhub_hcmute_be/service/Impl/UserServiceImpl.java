@@ -130,11 +130,11 @@ public class UserServiceImpl implements UserService {
 
     //Đánh node các hàm dưới đây
     @Override
-    public ActionResult getProfile(String userId ) {
+    public ActionResult getProfile(String userId) {
         ActionResult actionResult = new ActionResult(); //(1)
         Optional<Student> student = studentRepository.findById(userId); //(2)
 
-         if(student.isEmpty()) //(3)
+        if (student.isEmpty()) //(3)
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
         else {
             ProfileDTO profileDTO = new ProfileDTO(); //(5)
@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
     public ActionResult getProfileAdmin(String userId) {
         ActionResult actionResult = new ActionResult();
         Optional<Admin> student = adminRepository.findById(userId);
-        if(student.isEmpty())
+        if (student.isEmpty())
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         else {
             ProfileDTO profileDTO = new ProfileDTO();
@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request) {
         String oldPass = user.getPassword();
         String oldPassDTO = passwordEncoder.encode(request.getOldPassword());
-        if(oldPassDTO.equals(oldPassDTO)){
+        if (oldPassDTO.equals(oldPassDTO)) {
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             user = save(user);
             return ResponseEntity.ok().body(GenericResponse.builder()
@@ -243,7 +243,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ResponseEntity<?> employerRegister(EmployerRegisterDTO employerRegisterDTO){
+    public ResponseEntity<?> employerRegister(EmployerRegisterDTO employerRegisterDTO) {
         if (employerRegisterDTO.getPassword().length() < 8 || employerRegisterDTO.getPassword().length() > 32)
             throw new RuntimeException("Password must be between 8 and 32 characters long");
 
@@ -351,7 +351,7 @@ public class UserServiceImpl implements UserService {
                     .success(false)
                     .build());
         }
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<User> users = findAll(pageable);
 
         return getGenericResponseResponseEntity(users);
@@ -375,34 +375,31 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
-    public ActionResult getAccounts( int size, int page, String role, Boolean isActive) throws Exception {
+    public ActionResult getAccounts(int size, int page, String role, Boolean isActive) throws Exception {
         ActionResult actionResult = new ActionResult();
         if (page < 0) {
             actionResult.setErrorCode(ErrorCodeEnum.PAGE_INDEX_MUST_NOT_BE_LESS_THAN_0);
         }
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<User> users;
 
         switch (role) {
             case "ALL" -> {
 
-                if(isActive == null){
+                if (isActive == null) {
                     users = findAll(pageable);
-                }
-                else {
+                } else {
                     users = userRepository.findByIsActive(isActive, pageable);
                 }
-                Map<String, Object> response = toMap( users);
+                Map<String, Object> response = toMap(users);
                 actionResult.setData(response);
                 actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
             }
             case "STUDENT", "EMPLOYER", "ADMIN" -> {
-                if(isActive == null){
+                if (isActive == null) {
                     users = userRepository.findByRole_Name(role, pageable);
-                }
-                else  {
+                } else {
                     users = userRepository.findByRole_NameAndIsActive(role, isActive, pageable);
                 }
 
@@ -415,7 +412,7 @@ public class UserServiceImpl implements UserService {
         return actionResult;
     }
 
-    private Map<String, Object> toMap( Page<User> users) {
+    private Map<String, Object> toMap(Page<User> users) {
         Map<String, Object> response = new HashMap<>();
         response.put("user", users.getContent());
         response.put("pageNumber", users.getNumber());
@@ -478,6 +475,21 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public String validatePasswordReset(String otp, String mail) {
+
+        Optional<PasswordResetOtp> passOtp = passwordResetOtpRepository.findByOtp(otp);
+        Calendar cal = Calendar.getInstance();
+
+        if (passOtp.isEmpty() || !passOtp.get().getUser().getEmail().equals(mail)) {
+            return "Invalid token/link";
+        }
+        if (passOtp.get().getExpiryDate().before(cal.getTime()) || !passOtp.get().getUser().getEmail().equals(mail)) {
+            return "Token/link expired";
+        }
+        return null;
+
+    }
+
     @Override
     public Optional<PasswordResetOtp> getUserByPasswordResetOtp(String otp) {
         return passwordResetOtpRepository.findByOtp(otp);
@@ -507,13 +519,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ActionResult detailProfileEmployer(String employerId){
+    public ActionResult detailProfileEmployer(String employerId) {
         ActionResult actionResult = new ActionResult();
         Optional<Employer> employer = employerRepository.findById(employerId);
-        if(employer.isEmpty()){
+        if (employer.isEmpty()) {
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
-        }
-        else {
+        } else {
             EmployerDTO employerDTO = new EmployerDTO();
             BeanUtils.copyProperties(employer.get(), employerDTO);
             actionResult.setData(employerDTO);
@@ -522,5 +533,22 @@ public class UserServiceImpl implements UserService {
         return actionResult;
     }
 
+    @Override
+    public ActionResult confirmPassword(ConfirmPassword confirmPassword) {
+        ActionResult actionResult = new ActionResult();
+        Optional<User> user = userRepository.findByEmail(confirmPassword.getEmail());
+        if (user.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        } else {
+            String validate = validatePasswordReset(confirmPassword.getOtp(), confirmPassword.getEmail());
+            if (validate != null) {
+                actionResult.setErrorCode(ErrorCodeEnum.INVALID_TOKEN_LINK);
+            } else {
+                changeUserPassword(user.get(), confirmPassword.getNewPassword(), confirmPassword.getNewPassword());
+                actionResult.setErrorCode(ErrorCodeEnum.CHANGE_PASSWORD_SUCCESSFULLY);
+            }
+        }
+        return actionResult;
+    }
 }
 

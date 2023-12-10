@@ -50,7 +50,6 @@ public class EmployerServiceImpl implements EmployerService {
     JobApplyRepository jobApplyRepository;
 
 
-
     @Autowired
     private StudentRepository studentRepository;
 
@@ -112,7 +111,6 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
 
-
     @Override
     public <S extends Employer, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return employerRepository.findBy(example, queryFunction);
@@ -170,14 +168,13 @@ public class EmployerServiceImpl implements EmployerService {
 
         List<String> bg = user.getBackGround();
 
-        if(bg.size() >= 5){
+        if (bg.size() >= 5) {
             actionResult.setErrorCode(ErrorCodeEnum.MAXIMUM_BACKGROUND);
-        }
-        else {
+        } else {
             String bgUrl = cloudinaryService.uploadImage(imageFile);
             bg.add(bgUrl);
             user.setBackGround(bg);
-           user =  save(user);
+            user = save(user);
             actionResult.setData(user.getBackGround());
             actionResult.setErrorCode(ErrorCodeEnum.UPDATE_BACKGROUND_SUCCESSFULLY);
         }
@@ -198,7 +195,7 @@ public class EmployerServiceImpl implements EmployerService {
         }
 
         user.setBackGround(bg);
-        user =  save(user);
+        user = save(user);
         actionResult.setData(user.getBackGround());
         actionResult.setErrorCode(ErrorCodeEnum.UPDATE_BACKGROUND_SUCCESSFULLY);
 
@@ -212,9 +209,9 @@ public class EmployerServiceImpl implements EmployerService {
         String phone = request.getPhone();
         if (employerOptional.isEmpty()) throw new Exception("User doesn't exist");
 
-        if(!phone.isEmpty()){
+        if (!phone.isEmpty()) {
             Optional<Employer> optional = employerRepository.findByPhoneAndIsActiveIsTrue(request.getPhone());
-            if(optional.isPresent() && !optional.get().getUserId().equals(userId))
+            if (optional.isPresent() && !optional.get().getUserId().equals(userId))
                 throw new Exception("Phone number already in use");
         }
 
@@ -244,7 +241,7 @@ public class EmployerServiceImpl implements EmployerService {
         Page<JobApply> jobApplies;
 
 
-        if(state.equals("ALL")){
+        if (state.equals("ALL")) {
             jobApplies = findAllByJob_Employer_UserId(pageable, employerId);
         } else {
             State stateEnum = State.getStatusName(state);
@@ -253,8 +250,8 @@ public class EmployerServiceImpl implements EmployerService {
 
         List<JobApplyResponseDTO> jobApplyDtos = new ArrayList<>();
 
-        for(JobApply jobApply : jobApplies.getContent()) {
-           JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
+        for (JobApply jobApply : jobApplies.getContent()) {
+            JobApplyResponseDTO jobApplyDto = new JobApplyResponseDTO();
             BeanUtils.copyProperties(jobApply, jobApplyDto);
             BeanUtils.copyProperties(jobApply.getJob(), jobApplyDto);
             BeanUtils.copyProperties(jobApply.getStudent(), jobApplyDto);
@@ -276,24 +273,23 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
 
-
     @Override
     public ActionResult updateCandidateState(String recruiterId, String userId, UpdateStateRequest updateStateRequest) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             Optional<Student> student = studentRepository.findById(userId);
-            if(student.isEmpty()){
+            if (student.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
                 return actionResult;
             }
             Optional<Job> job = jobRepository.findById(updateStateRequest.getJobId());
-            if(job.isEmpty()){
+            if (job.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.JOB_NOT_FOUND);
                 return actionResult;
             }
             Optional<JobApply> optionalJobApply = jobApplyRepository.findByStudentAndJob(student.get(), job.get());
 
-            if(optionalJobApply.isEmpty()){
+            if (optionalJobApply.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
                 return actionResult;
             }
@@ -320,11 +316,11 @@ public class EmployerServiceImpl implements EmployerService {
         context.setVariable("content", request.getContent());
         String content = templateEngine.process("mail-template", context);
         MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
         helper.setSubject(request.getSubject());
         helper.setTo(request.getEmail());
         helper.setText(Utils.cleanHTML(request.getContent()), true);
-        helper.setFrom(env.getProperty("spring.mail.username"),"Recruiment Manager");
+        helper.setFrom(env.getProperty("spring.mail.username"), "Recruiment Manager");
         javaMailSender.send(message);
         actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
@@ -338,7 +334,7 @@ public class EmployerServiceImpl implements EmployerService {
         context.setVariable("content", request.getContent());
         String content = templateEngine.process("mail-template", context);
         MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
         helper.setSubject(request.getSubject());
         helper.setTo(request.getEmail());
         helper.setText(Utils.cleanHTML(request.getContent()), true);
@@ -347,28 +343,37 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult topCompany(Pageable pageable){
+    public ActionResult topCompany(Pageable pageable) {
         ActionResult actionResult = new ActionResult();
-        Page<Employer> employerPage = employerRepository.findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(1L,pageable );
+        Page<Employer> employerPage = employerRepository.findByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(1L, pageable);
         actionResult.setData(employerPage.getContent());
         actionResult.setErrorCode(ErrorCodeEnum.OK);
         return actionResult;
     }
 
     @Override
-    public ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO){
+    public ActionResult top3Company() {
+        ActionResult actionResult = new ActionResult();
+        List<Employer> employers = employerRepository.findTop3ByTransactionMoneyGreaterThanEqualOrderByTransactionMoneyDesc(1L);
+        actionResult.setData(employers);
+        actionResult.setErrorCode(ErrorCodeEnum.OK);
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO) {
         ActionResult actionResult = new ActionResult();
         try {
 
             Optional<JobApply> optionalJobApply = jobApplyRepository.findById(jobApplyId);
-            if(optionalJobApply.isEmpty()){
+            if (optionalJobApply.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.CANDIDATE_NOT_FOUND);
                 return actionResult;
             }
 
             //Tạo phỏng vấn
             JobApply jobApply = optionalJobApply.get();
-            if(jobApply.getState() == State.PENDING && jobApply.getInterview() == null){
+            if (jobApply.getState() == State.PENDING && jobApply.getInterview() == null) {
                 Interview interview = new Interview();
                 interview.setJobApply(jobApply);
                 interview.setInterviewLink(interViewDTO.getInterviewLink());
@@ -380,18 +385,17 @@ public class EmployerServiceImpl implements EmployerService {
                 jobApply.setState(State.RECEIVED);
 
                 jobApplyRepository.save(jobApply);
-              //  interview = jobApplyRepository.save(jobApply).getInterview();
-                interview =  interviewRepository.save(interview);
+                //  interview = jobApplyRepository.save(jobApply).getInterview();
+                interview = interviewRepository.save(interview);
                 InterviewModel interviewModel = InterviewModel.transform(interview);
                 actionResult.setData(interviewModel);
                 //Mời phỏng vấn
                 actionResult.setErrorCode(ErrorCodeEnum.CREATE_INTERVIEW_SUCCESSFULLY);
                 sendMailInterview(interview);
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_HAS_BEEN_CREATED);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -400,7 +404,7 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Async
-    public void sendMailInterview(Interview interview){
+    public void sendMailInterview(Interview interview) {
         try {
             Context context = new Context();
             context.setLocale(new Locale("vi", "VN"));
@@ -417,7 +421,7 @@ public class EmployerServiceImpl implements EmployerService {
             );
             String content = templateEngine.process("interview-invitation", context);
             MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message,true, "utf-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
             helper.setSubject("Interview with " + interview.getJobApply().getJob().getEmployer().getCompanyName());
             helper.setTo(interview.getJobApply().getStudent().getEmail());
             helper.setText(content, true);
@@ -431,12 +435,12 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult getAllInterview(String employerId, Pageable pageable){
+    public ActionResult getAllInterview(String employerId, Pageable pageable) {
         ActionResult actionResult = new ActionResult();
         try {
             Page<Interview> interviews = interviewRepository.findByJobApply_Job_Employer_UserId(employerId, pageable);
             List<InterviewModel> interviewModels = new ArrayList<>();
-            for(Interview interview : interviews.getContent()){
+            for (Interview interview : interviews.getContent()) {
                 InterviewModel interviewModel = InterviewModel.transform(interview);
                 interviewModels.add(interviewModel);
             }
@@ -449,7 +453,7 @@ public class EmployerServiceImpl implements EmployerService {
 
             actionResult.setData(map);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -457,23 +461,23 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult getDetailInterview(String employerId, String interviewId){
+    public ActionResult getDetailInterview(String employerId, String interviewId) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Interview> optionalInterview = interviewRepository.findById(interviewId);
-            if(optionalInterview.isEmpty()){
+            if (optionalInterview.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_NOT_FOUND);
                 return actionResult;
             }
             Interview interview = optionalInterview.get();
-            if(!interview.getJobApply().getJob().getEmployer().getUserId().equals(employerId)){
+            if (!interview.getJobApply().getJob().getEmployer().getUserId().equals(employerId)) {
                 actionResult.setErrorCode(ErrorCodeEnum.INTERVIEW_NOT_FOUND);
                 return actionResult;
             }
             InterviewModel interviewModel = InterviewModel.transform(interview);
             actionResult.setData(interviewModel);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -481,11 +485,11 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult getDashboard(String employerId){
+    public ActionResult getDashboard(String employerId) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
-            if(optionalEmployer.isEmpty()){
+            if (optionalEmployer.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
                 return actionResult;
             }
@@ -501,7 +505,7 @@ public class EmployerServiceImpl implements EmployerService {
             map.put("totalInterview", totalInterview);
             actionResult.setData(map);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -510,17 +514,17 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult getTransactionByMonth(String employerId, long monthsAgo){
+    public ActionResult getTransactionByMonth(String employerId, long monthsAgo) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
-            if(optionalEmployer.isEmpty()){
+            if (optionalEmployer.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
                 return actionResult;
             }
 
             actionResult.setErrorCode(ErrorCodeEnum.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
@@ -528,11 +532,11 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
-    public ActionResult getAllTransaction(String employerId, Pageable pageable){
+    public ActionResult getAllTransaction(String employerId, Pageable pageable) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
-            if(optionalEmployer.isEmpty()){
+            if (optionalEmployer.isEmpty()) {
                 actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
                 return actionResult;
             }
@@ -547,7 +551,7 @@ public class EmployerServiceImpl implements EmployerService {
 
             actionResult.setData(map);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

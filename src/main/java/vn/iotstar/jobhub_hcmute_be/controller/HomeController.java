@@ -20,7 +20,7 @@ import vn.iotstar.jobhub_hcmute_be.service.EventService;
 import vn.iotstar.jobhub_hcmute_be.service.PositionService;
 
 @RestController
-@Tag(name="Home", description="Home API")
+@Tag(name = "Home", description = "Home API")
 @RequestMapping("/api/v1/home")
 public class HomeController {
 
@@ -47,11 +47,12 @@ public class HomeController {
     EventService eventService;
 
     @GetMapping("/")
-    public String helloWorld(){
+    public String helloWorld() {
         return "Hello World, This is Group 8!";
     }
+
     @GetMapping("create-admin")
-    public String createAdmin(){
+    public String createAdmin() {
         Admin admin = new Admin();
         admin.setFullName("Admin");
         admin.setIsActive(true);
@@ -61,41 +62,52 @@ public class HomeController {
         admin = repository.save(admin);
         return "Create admin success";
     }
+
     @GetMapping("top-company")
     public ResponseModel topCompanyRegister(
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "index", required = false, defaultValue = "0") int index){
+            @RequestParam(name = "index", required = false, defaultValue = "0") int index) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = employerService.topCompany(PageRequest.of(index, size));
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
-        catch (Exception e){
+        return responseBuild.build(actionResult);
+    }
+
+    @GetMapping("top3-company")
+    public ResponseModel top3CompanyRegister() {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = employerService.top3Company();
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
     }
 
     @GetMapping("position/popular")
-    public ResponseModel topCateJob(){
+    public ResponseModel topCateJob() {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             actionResult = positionService.topPopularJobByPosition();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
 
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("event/get-list")
     public ResponseModel getListEvent(
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "index", required = false, defaultValue = "0") int index){
+            @RequestParam(name = "index", required = false, defaultValue = "0") int index) {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = eventService.getAllEvent(PageRequest.of(index, size));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);

@@ -25,6 +25,6 @@ public class JobApplyDto implements Serializable {
     Date updatedAt;
     State state;
     String resumeUpoad;
-
+    String jobId;
 
 }

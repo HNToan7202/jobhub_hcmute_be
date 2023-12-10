@@ -1,6 +1,9 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.Rating;
 import vn.iotstar.jobhub_hcmute_be.constant.StatusTransaction;
@@ -9,10 +12,18 @@ import vn.iotstar.jobhub_hcmute_be.entity.Employer;
 import vn.iotstar.jobhub_hcmute_be.entity.Transactions;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
+import vn.iotstar.jobhub_hcmute_be.model.TransactionBase;
+import vn.iotstar.jobhub_hcmute_be.model.TransactionModel;
 import vn.iotstar.jobhub_hcmute_be.repository.EmployerRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.TransactionsRepository;
 import vn.iotstar.jobhub_hcmute_be.service.TransactionsService;
 
+import java.security.Timestamp;
+import java.time.DateTimeException;
+import java.time.Month;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -52,7 +63,7 @@ public class TransactionsServiceImpl implements TransactionsService {
                     employer.get().setIsTransaction(false);
                     employerRepository.save(employer.get());
                 } else {
-                    long time = transactionOld.get().getCreateAt();
+                    long time = transactionOld.get().getCreateAt().getTime();
                     boolean isWithinTimeLimit = checkTransaction(time);
                     if (isWithinTimeLimit) {
                         result.setErrorCode(ErrorCodeEnum.USER_IS_TRANSACTION);
@@ -118,5 +129,94 @@ public class TransactionsServiceImpl implements TransactionsService {
             result.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return result;
+    }
+
+    @Override
+    public ActionResult getAllTransaction(String employerId, Pageable pageable) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Page<Transactions> transactions;
+            Map<String, Object> map = new HashMap<String, Object>();
+            if (employerId == null) {
+                transactions = transactionsRepository.findAll(pageable);
+            } else {
+                Optional<Employer> optionalEmployer = employerRepository.findById(employerId);
+                if (optionalEmployer.isEmpty()) {
+                    actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+                    return actionResult;
+                }
+                transactions = transactionsRepository.findAllByEmployer_UserIdAndStatus(employerId, StatusTransaction.SUCCESS.toString(), pageable);
+                map.put("totalMoney", optionalEmployer.get().getTransactionMoney());
+                map.put("countTransaction", transactions.getTotalElements());
+            }
+            List<TransactionModel> transactionModels = transactions.stream().map(TransactionModel::transform).toList();
+            map.put("transactions", transactionModels);
+            map.put("pageNumber", transactions.getPageable().getPageNumber());
+            map.put("pageSize", transactions.getSize());
+            map.put("totalPages", transactions.getTotalPages());
+            map.put("totalElements", transactions.getTotalElements());
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getCountTransactions() {
+
+        ActionResult actionResult = new ActionResult();
+        try {
+
+            long totalCount = transactionsRepository.countByStatus(StatusTransaction.SUCCESS.toString());
+
+            long totalMoney = transactionsRepository.calculateTotalAmountByStatus(StatusTransaction.SUCCESS.toString());
+
+            TransactionBase basicPackage = new TransactionBase(
+                    Transaction.BASIC_PACKAGE.getCode(),
+                    transactionsRepository.countByCodeAndStatus(Transaction.BASIC_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString()),
+                    transactionsRepository.calculateTotalAmountByCodeAndStatus(Transaction.BASIC_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString())
+            );
+
+            TransactionBase standardPackage = new TransactionBase(
+                    Transaction.STANDARD_PACKAGE.getCode(),
+                    transactionsRepository.countByCodeAndStatus(Transaction.STANDARD_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString()),
+                    transactionsRepository.calculateTotalAmountByCodeAndStatus(Transaction.STANDARD_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString())
+            );
+
+            TransactionBase premiumPackage = new TransactionBase(
+                    Transaction.PREMIUM_PACKAGE.getCode(),
+                    transactionsRepository.countByCodeAndStatus(Transaction.PREMIUM_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString()),
+                    transactionsRepository.calculateTotalAmountByCodeAndStatus(Transaction.PREMIUM_PACKAGE.getCode(), StatusTransaction.SUCCESS.toString())
+            );
+
+            Map<String, Object> map = new HashMap<String, Object>();
+
+            map.put("totalCount", totalCount);
+            map.put("totalMoney", totalMoney);
+            map.put("basicPackage", basicPackage);
+            map.put("standardPackage", standardPackage);
+            map.put("premiumPackage", premiumPackage);
+
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        } catch (Exception e) {
+
+            System.err.println(e.getMessage());
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return actionResult;
+    }
+
+
+    private String getMonthName(int month) {
+        try {
+            Month monthEnum = Month.of(month);
+            return monthEnum.toString();
+        } catch (DateTimeException e) {
+            return "Invalid Month";
+        }
     }
 }

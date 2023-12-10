@@ -46,13 +46,15 @@ public class Event {
     @ToString.Exclude
     private List<Job> job; // jobApplyId -> job -> employer
 
+
     @PrePersist
     void createdAt() {
         this.createdAt = this.updatedAt = new Date();
-        if (this.time == null){
+        if (this.time == null) {
             this.time = LocalTime.parse("00:00:00");
         }
     }
+
     @PreUpdate
     void updatedAt() {
         this.updatedAt = new Date();
