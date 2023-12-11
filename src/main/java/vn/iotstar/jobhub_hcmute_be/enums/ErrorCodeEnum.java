@@ -112,6 +112,8 @@ public enum ErrorCodeEnum {
 
     GET_DASHBOARD_SUCCESS(200, 200, "Get dashboard success"),
     INVALID_TOKEN_LINK(400, 400, "Invalid token link"),
+
+    CHANGE_STATE_SUCCESSFULLY(200, 200, "Change state successfully"),
     CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
