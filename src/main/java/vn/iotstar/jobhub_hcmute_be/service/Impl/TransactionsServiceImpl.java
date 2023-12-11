@@ -21,10 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.service.TransactionsService;
 import java.security.Timestamp;
 import java.time.DateTimeException;
 import java.time.Month;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TransactionsServiceImpl implements TransactionsService {
@@ -75,6 +72,7 @@ public class TransactionsServiceImpl implements TransactionsService {
                 }
             }
             Transactions transactions = new Transactions();
+            transactions.setId(UUID.randomUUID().toString().split("-")[0]);
             transactions.setEmployer(employer.get());
             transactions.setAmount(amount);
             transactions.setCode(Transaction.getCode(amount));
