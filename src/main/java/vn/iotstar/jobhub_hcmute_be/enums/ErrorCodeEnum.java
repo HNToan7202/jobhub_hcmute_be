@@ -114,6 +114,8 @@ public enum ErrorCodeEnum {
     INVALID_TOKEN_LINK(400, 400, "Invalid token link"),
 
     CHANGE_STATE_SUCCESSFULLY(200, 200, "Change state successfully"),
+
+    SEND_INVOICE_SUCCESS(200, 200, "Send invoice success"),
     CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 

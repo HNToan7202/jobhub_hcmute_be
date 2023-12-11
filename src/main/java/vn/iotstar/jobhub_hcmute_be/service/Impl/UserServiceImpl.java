@@ -600,5 +600,13 @@ public class UserServiceImpl implements UserService {
         actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
     }
+
+    ActionResult sendInvoice(SendInvoiceRequest request) {
+        ActionResult actionResult = new ActionResult();
+        Context context = new Context();
+        context.setLocale(new Locale("vi", "VN"));
+
+        return actionResult;
+    }
 }
 
