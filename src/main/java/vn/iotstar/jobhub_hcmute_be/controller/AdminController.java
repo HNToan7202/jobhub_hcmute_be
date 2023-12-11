@@ -9,8 +9,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import vn.iotstar.jobhub_hcmute_be.dto.ActiveUserRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
 import vn.iotstar.jobhub_hcmute_be.dto.EventDto;
+import vn.iotstar.jobhub_hcmute_be.dto.SendMailDTO;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -164,6 +166,28 @@ public class AdminController {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = transactionsService.getCountTransactions();
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PostMapping("user/active")
+    public ResponseModel activeUser(@RequestBody ActiveUserRequest activeUserRequest) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.changeStateActive(activeUserRequest.getUserId());
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
+    }
+
+    @PostMapping("user/reply/active")
+    public ResponseModel replyActiveUser(@RequestBody SendMailDTO sendMailDTO) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = userService.replyActive(sendMailDTO);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

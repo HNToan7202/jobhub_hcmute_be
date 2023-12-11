@@ -1,13 +1,18 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +20,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
+import vn.iotstar.jobhub_hcmute_be.constant.Utils;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
@@ -32,6 +39,7 @@ import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @Service
@@ -126,6 +134,13 @@ public class UserServiceImpl implements UserService {
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
+
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    @Autowired
+    private Environment env;
 
 
     //Đánh node các hàm dưới đây
@@ -550,6 +565,39 @@ public class UserServiceImpl implements UserService {
                 actionResult.setErrorCode(ErrorCodeEnum.CHANGE_PASSWORD_SUCCESSFULLY);
             }
         }
+        return actionResult;
+    }
+
+
+    @Override
+    public ActionResult changeStateActive(String userId) {
+        ActionResult actionResult = new ActionResult();
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        } else {
+            user.get().setIsActive(!user.get().getIsActive());
+            user = Optional.of(save(user.get()));
+            actionResult.setData(user);
+            actionResult.setErrorCode(ErrorCodeEnum.CHANGE_STATE_SUCCESSFULLY);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult replyActive(SendMailDTO request) throws MessagingException, UnsupportedEncodingException {
+        Context context = new Context();
+        context.setLocale(new Locale("vi", "VN"));
+        context.setVariable("content", request.getContent());
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
+        helper.setSubject(request.getSubject());
+        helper.setTo(request.getSendTo());
+        helper.setText(Utils.cleanHTML(request.getContent()), true);
+        helper.setFrom(env.getProperty("spring.mail.username"), request.getAuthor());
+        javaMailSender.send(message);
+        ActionResult actionResult = new ActionResult();
+        actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
     }
 }

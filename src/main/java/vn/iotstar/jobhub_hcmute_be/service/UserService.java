@@ -1,23 +1,22 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.ConfirmPassword;
-import vn.iotstar.jobhub_hcmute_be.dto.GenericResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.PasswordResetRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.UserUpdateRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.PasswordResetOtp;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +75,10 @@ public interface UserService {
     ActionResult detailProfileEmployer(String employerId);
 
     ActionResult confirmPassword(ConfirmPassword confirmPassword);
+
+    ActionResult changeStateActive(String userId);
+
+    ActionResult replyActive(SendMailDTO request) throws MessagingException, UnsupportedEncodingException;
 
 //    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 //
