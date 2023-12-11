@@ -199,6 +199,15 @@ public class UserServiceImpl implements UserService {
                     .build());
         }
 
+        if (optionalUser.isPresent() && !optionalUser.get().getIsActive()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(GenericResponse.builder()
+                    .success(false)
+                    .message("Your has been blocked!")
+                    .result(null)
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .build());
+        }
+
         //Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(),
