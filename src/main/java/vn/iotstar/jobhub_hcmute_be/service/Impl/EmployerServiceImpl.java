@@ -360,6 +360,8 @@ public class EmployerServiceImpl implements EmployerService {
         return actionResult;
     }
 
+
+
     @Override
     public ActionResult createInterview(String jobApplyId, InterViewDTO interViewDTO) {
         ActionResult actionResult = new ActionResult();
