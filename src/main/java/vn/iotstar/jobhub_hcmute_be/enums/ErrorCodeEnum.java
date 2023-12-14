@@ -116,6 +116,8 @@ public enum ErrorCodeEnum {
     CHANGE_STATE_SUCCESSFULLY(200, 200, "Change state successfully"),
 
     SEND_INVOICE_SUCCESS(200, 200, "Send invoice success"),
+
+    ACCOUNT_NOT_ACTIVE(400, 400, "Account not active"),
     CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 

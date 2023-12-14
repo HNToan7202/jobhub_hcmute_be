@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
@@ -45,7 +46,6 @@ public class JobServiceImpl implements JobService {
     ShortListRepository shortListRepository;
 
 
-
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
     public void checkJobDeadlines() {
         // Lấy danh sách tất cả công việc từ cơ sở dữ liệu
@@ -60,7 +60,6 @@ public class JobServiceImpl implements JobService {
             }
         }
     }
-
 
 
     @Override
@@ -127,7 +126,7 @@ public class JobServiceImpl implements JobService {
         System.out.println("Clearing cache...");
     }
 
-   // @Cacheable(value = "applicationCache", key = "#jobId")
+    // @Cacheable(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult getDetail(String jobId) {
         ActionResult actionResult = new ActionResult();
@@ -168,12 +167,12 @@ public class JobServiceImpl implements JobService {
                 boolean isApplied = job.getJobApplies().stream().anyMatch(jobApply -> jobApply.getStudent().getUserId().equals(userId));
 
                 // kiểm tra xem userId đã shortlist vao job hay chưa
-               Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
+                Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
 
-               boolean isShortList = false;
-               if(shortList.isPresent()){
-                   isShortList = shortList.get().getUser().getUserId().equals(userId);
-               }
+                boolean isShortList = false;
+                if (shortList.isPresent()) {
+                    isShortList = shortList.get().getUser().getUserId().equals(userId);
+                }
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 jobDTO.setIsApplied(isApplied);
@@ -203,10 +202,9 @@ public class JobServiceImpl implements JobService {
         try {
             Page<Job> jobs;
 
-            if(isActive == null){
+            if (isActive == null) {
                 jobs = findAllByEmployer_UserId(id, pageable);
-            }
-            else {
+            } else {
                 jobs = findAllByEmployer_UserIdAndIsActiveIsTrueOrderByCreatedAtDesc(id, pageable, isActive);
             }
             List<JobDTO> jobDTOs = convertJobToJobDTO(jobs.getContent());
@@ -256,7 +254,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-   // @Cacheable("jobs")
+    // @Cacheable("jobs")
     @Override
     public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
         actionResult = new ActionResult();
@@ -277,9 +275,9 @@ public class JobServiceImpl implements JobService {
     }
 
 
-   // @Cacheable("jobList")
+    // @Cacheable("jobList")
     @Override
-    public ActionResult getAlls(Boolean isActive){
+    public ActionResult getAlls(Boolean isActive) {
         actionResult = new ActionResult();
         List<Job> jobs = findAllByIsActive(isActive);
         List<JobDTO> jobDTOs = convertJobToJobDTO(jobs);
@@ -292,7 +290,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-  //  @CachePut(value = "applicationCache", key = "#employerId")
+    //  @CachePut(value = "applicationCache", key = "#employerId")
     @Override
     public ActionResult postJob(PostJobRequest jobRequest, String employerId) {
         actionResult = new ActionResult();
@@ -303,9 +301,19 @@ public class JobServiceImpl implements JobService {
             return actionResult;
         }
 
+
         try {
 
             Job job = new Job();
+            Optional<Employer> optional = employerRepository.findById(employerId);
+            if (optional.isPresent() && optional.get().getEmployState() == EmployState.ACTIVE) {
+                job.setEmployer(optional.get());
+                job.setLogo(optional.get().getLogo());
+            } else {
+                actionResult.setErrorCode(ErrorCodeEnum.ACCOUNT_NOT_ACTIVE);
+                return actionResult;
+            }
+
             job.setName(jobRequest.getName());
             job.setJobType(JobType.valueOf(jobRequest.getJobType()));
             job.setQuantity(jobRequest.getQuantity());
@@ -352,14 +360,7 @@ public class JobServiceImpl implements JobService {
             }
             job.setSkills(skills);
             job.setIsActive(true);
-            Optional<Employer> optional = employerRepository.findById(employerId);
-            if (optional.isPresent()) {
-                job.setEmployer(optional.get());
-                job.setLogo(optional.get().getLogo());
-            } else {
-                actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
-                return actionResult;
-            }
+
 
             job = jobRepository.save(job);
 
@@ -383,9 +384,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-
-
-   // @CachePut(value = "applicationCache", key = "#jobId")
+    // @CachePut(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult updateJob(String jobId, JobUpdateRequest jobUpdateRequest, String employerId) {
         ActionResult actionResult = new ActionResult();
@@ -459,13 +458,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable){
+    public ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable) {
 
         ActionResult actionResult = new ActionResult();
 
         Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
 
-        List<JobDTO> jobDTOs =  jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
+        List<JobDTO> jobDTOs = jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
             JobDTO jobDTO = new JobDTO();
             BeanUtils.copyProperties(job, jobDTO);
             CompanyDTO companyDTO = new CompanyDTO();
@@ -487,13 +486,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ActionResult changeStateJob(String jobId){
+    public ActionResult changeStateJob(String jobId) {
         ActionResult actionResult = new ActionResult(); //(1)
         Optional<Job> jobOptional = jobRepository.findById(jobId); //(2)
-        if(jobOptional.isEmpty()){ //(3)
+        if (jobOptional.isEmpty()) { //(3)
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
-        }
-        else {
+        } else {
             Job job = jobOptional.get(); //(5)
             job.setIsActive(!job.getIsActive()); //(6)
             jobRepository.save(job); //(7)
@@ -504,27 +502,24 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ActionResult employerChangeStateJob(String userId, String jobId){
+    public ActionResult employerChangeStateJob(String userId, String jobId) {
         ActionResult actionResult = new ActionResult(); //(1)
         Optional<Job> jobOptional = jobRepository.findById(jobId); //(2)
-        if(jobOptional.isEmpty()){ //(3)
+        if (jobOptional.isEmpty()) { //(3)
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND); //(4)
-        }
-        else {
+        } else {
             Job job = jobOptional.get(); //(5)
-            if(job.getEmployer().getUserId().equals(userId)){
+            if (job.getEmployer().getUserId().equals(userId)) {
                 job.setIsActive(!job.getIsActive()); //(6)
                 jobRepository.save(job); //(7)
                 actionResult.setData(job); //(8)
                 actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
             }
         }
         return actionResult; //(10)
     }
-
 
 
 }

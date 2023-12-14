@@ -1,6 +1,5 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +26,7 @@ public class MailController {
     @Autowired
     ResponseBuild responseBuild;
 
+
     @PostMapping("/sendInvoice")
     public ResponseModel sendInvoice(@RequestBody SendInvoiceRequest invoiceRequest) {
         ActionResult actionResult = new ActionResult();
@@ -38,5 +38,4 @@ public class MailController {
         }
         return responseBuild.build(actionResult);
     }
-
 }
