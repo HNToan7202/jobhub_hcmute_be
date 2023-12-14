@@ -2,7 +2,6 @@ package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ import vn.iotstar.jobhub_hcmute_be.service.JobService;
 @RequestMapping("/api/v1/job")
 @Validated
 @Tag(name = "Job", description = "Job API")
-@EnableCaching
 public class JobController {
 
     final JwtTokenProvider jwtTokenProvider;
@@ -26,12 +24,6 @@ public class JobController {
 
     final
     ResponseBuild responseBuild;
-
-    @GetMapping("/clear-cache")
-    public String clearCache() {
-        jobService.clearAllCache();
-        return "Cache cleared";
-    }
 
     public JobController(JwtTokenProvider jwtTokenProvider, JobService jobService, ResponseBuild responseBuild) {
         this.jwtTokenProvider = jwtTokenProvider;

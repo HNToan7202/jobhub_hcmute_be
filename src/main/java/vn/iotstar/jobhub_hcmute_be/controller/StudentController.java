@@ -50,8 +50,6 @@ public class StudentController {
     @Autowired
     ResponseBuild responseBuild;
 
-    @Autowired
-    private CacheManager cacheManager;
 
     @Autowired
     ShortListService shortListService;
@@ -131,6 +129,7 @@ public class StudentController {
         // Nếu tệp hợp lệ, gọi dịch vụ để xử lý tệp CV
         return resumeService.uploadResumeFile(resumeFile, user.getUserId(), isMain);
     }
+
     @PutMapping("/{cvId}/set-main-cv")
     public ResponseModel setMainCV(@PathVariable("cvId") String cvId, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
@@ -185,14 +184,13 @@ public class StudentController {
     public ResponseModel update(@Validated @RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String authorizationHeader, BindingResult bindingResult) throws Exception {
 
         ActionResult actionResult = new ActionResult();
-        if(bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
             ResponseModel responseModel = responseBuild.build(actionResult);
             responseModel.setMessage(bindingResult.getFieldError().getDefaultMessage());
             return responseModel;
         }
-        try
-        {
+        try {
             String token = authorizationHeader.substring(7);
             String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = studentService.updateProfile(userIdFromToken, request);
@@ -203,7 +201,7 @@ public class StudentController {
 
     }
 
-   // @Cacheable("applicants")
+    // @Cacheable("applicants")
     @GetMapping("/jobs/applicants")
     public ResponseModel getAppliedJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
@@ -232,39 +230,41 @@ public class StudentController {
     }
 
     @DeleteMapping("/short-list/{jobId}")
-    public ResponseModel deleteShortList(@PathVariable String jobId, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel deleteShortList(@PathVariable String jobId, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String studentId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = shortListService.deleteShortListById(jobId, studentId);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("/short-list")
-    public ResponseModel getShortListByUser(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getShortListByUser(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String studentId = jwtTokenProvider.getUserIdFromJwt(token);
             Pageable pageable = PageRequest.of(index, size);
             actionResult = shortListService.getShortListByUser(studentId, pageable);
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("/dashboard")
-    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseModel getDashboard(@RequestHeader("Authorization") String authorizationHeader) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             String token = authorizationHeader.substring(7);
             String studentId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = studentService.getDashBoard(studentId);
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
