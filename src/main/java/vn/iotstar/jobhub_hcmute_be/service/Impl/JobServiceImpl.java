@@ -120,11 +120,6 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findAllByEmployer_UserId(employerId, pageable);
     }
 
-    @Override
-    @CacheEvict(value = "applicationCache", allEntries = true)
-    public void clearAllCache() {
-        System.out.println("Clearing cache...");
-    }
 
     // @Cacheable(value = "applicationCache", key = "#jobId")
     @Override

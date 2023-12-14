@@ -1,7 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,10 +43,6 @@ public interface JobService {
     List<Job> findAll(Sort sort);
 
     Page<Job> findAll(Pageable pageable);
-
-
-    @CacheEvict(value = "applicationCache", allEntries = true)
-    void clearAllCache();
 
     ActionResult getDetail(String jobId);
 
