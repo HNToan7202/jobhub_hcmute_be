@@ -367,7 +367,7 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    @Cacheable("users")
+
     @Override
     public ResponseEntity<GenericResponse> getAccounts(int size, int page) {
         if (page < 0) {

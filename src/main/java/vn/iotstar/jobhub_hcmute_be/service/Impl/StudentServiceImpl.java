@@ -112,8 +112,6 @@ public class StudentServiceImpl implements StudentService {
                 .build());
     }
 
-
-    @Cacheable(value = "student", key = "#userId")
     @Override
     public ResponseEntity<GenericResponse> getProfile(String userId){
         Optional<Student> optional = findById(userId);
