@@ -317,6 +317,7 @@ public class JobServiceImpl implements JobService {
             job.setSalaryRange(jobRequest.getSalaryRange());
             job.setRequirement(jobRequest.getRequirement());
             job.setLocation(jobRequest.getLocation());
+            job.setExperience(Integer.valueOf(jobRequest.getExperience()));
             job.setDescription(jobRequest.getDescription());
             job.setDeadline(jobRequest.getDeadline());
             job.setTime(jobRequest.getTime());

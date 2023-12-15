@@ -21,6 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.ShortListRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.service.ShortListService;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,42 +137,41 @@ public class ShortListServiceImpl implements ShortListService {
         return shortListRepository.findAll(pageable);
     }
 
-   @Override
-   public ActionResult addShortList(String userId, String jobId){
+    @Override
+    public ActionResult addShortList(String userId, String jobId) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Student> optionalUser = studentRepository.findById(userId);
             Optional<Job> jobOptional = jobRepository.findById(jobId);
-            if(optionalUser.isPresent() && jobOptional.isPresent()){
+            if (optionalUser.isPresent() && jobOptional.isPresent()) {
                 ShortList shortList = new ShortList();
                 Student user = optionalUser.get();
                 Job job = jobOptional.get();
                 shortList.setUser(user);
                 shortList.setJob(job);
 
-               shortList =  shortListRepository.save(shortList);
+                shortList = shortListRepository.save(shortList);
 
-               actionResult.setData(shortList);
-               actionResult.setErrorCode(ErrorCodeEnum.ADD_SHORT_LIST_SUCCESS);
+                actionResult.setData(shortList);
+                actionResult.setErrorCode(ErrorCodeEnum.ADD_SHORT_LIST_SUCCESS);
 
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
             actionResult.setData(e.getMessage());
         }
         return actionResult;
-   }
+    }
 
-   @Override
-   public ActionResult getShortListByUser(String userId, Pageable pageable){
+    @Override
+    public ActionResult getShortListByUser(String userId, Pageable pageable) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<User> optionalUser = userRepository.findById(userId);
-            if(optionalUser.isPresent()){
+            if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
                 Page<ShortList> shortLists = shortListRepository.findAllByUser_UserId(user.getUserId(), pageable);
                 Map<String, Object> response = new HashMap<>();
@@ -183,24 +183,23 @@ public class ShortListServiceImpl implements ShortListService {
 
                 actionResult.setData(response);
                 actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
             actionResult.setData(e.getMessage());
         }
         return actionResult;
-   }
+    }
 
 
-   @Override
-   public ActionResult getShortByJob(String jobId, Pageable pageable){
+    @Override
+    public ActionResult getShortByJob(String jobId, Pageable pageable) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Job> optionalJob = jobRepository.findById(jobId);
-            if(optionalJob.isPresent()){
+            if (optionalJob.isPresent()) {
                 Job job = optionalJob.get();
                 Page<ShortList> shortLists = shortListRepository.findAllByJob_JobId(job.getJobId(), pageable);
                 Map<String, Object> response = new HashMap<>();
@@ -212,82 +211,76 @@ public class ShortListServiceImpl implements ShortListService {
 
                 actionResult.setData(response);
                 actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
             actionResult.setData(e.getMessage());
         }
         return actionResult;
-   }
+    }
 
-   @Override
-   public ActionResult getShortListByEmployer(String userId, Pageable pageable)
-   {
-       ActionResult actionResult = new ActionResult();
-       try {
-           Optional<User> optionalUser = userRepository.findById(userId);
-           if(optionalUser.isPresent()){
-               User user = optionalUser.get();
-               Page<ShortList> shortLists = shortListRepository.findAllByJob_Employer_UserId(user.getUserId(), pageable);
-               Map<String, Object> response = new HashMap<>();
-               ShortListModel shortListModel = new ShortListModel();
+    @Override
+    public ActionResult getShortListByEmployer(String userId, Pageable pageable) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<User> optionalUser = userRepository.findById(userId);
+            if (optionalUser.isPresent()) {
+                User user = optionalUser.get();
+                Page<ShortList> shortLists = shortListRepository.findAllByJob_Employer_UserId(user.getUserId(), pageable);
+                Map<String, Object> response = new HashMap<>();
+                List<ShortListModel> shortListModelList = shortLists.getContent().stream().map(shortList -> {
+                    ShortListModel shortListModel = new ShortListModel();
+                    JobModel jobModel = new JobModel();
+                    UserModel userModel = new UserModel();
+                    BeanUtils.copyProperties(shortList, shortListModel);
+                    BeanUtils.copyProperties(shortList.getJob(), jobModel);
+                    shortListModel.setJob(jobModel);
+                    BeanUtils.copyProperties(shortList.getUser(), userModel);
+                    shortListModel.setUser(userModel);
+                    return shortListModel;
+                }).toList();
 
-               List<ShortListModel> shortListModelList = shortLists.getContent().stream().map(shortList -> {
-                   BeanUtils.copyProperties(shortList, shortListModel);
-                   JobModel jobModel = new JobModel();
-                   BeanUtils.copyProperties(shortList.getJob(), jobModel);
-                   shortListModel.setJob(jobModel);
-                   UserModel userModel = new UserModel();
-                   BeanUtils.copyProperties(shortList.getUser(), userModel);
-                   shortListModel.setUser(userModel);
-                   return shortListModel;
-               }).toList();
+                response.put("shortLists", shortListModelList);
+                response.put("totalPages", shortLists.getTotalPages());
+                response.put("totalElements", shortLists.getTotalElements());
+                response.put("currentPage", shortLists.getNumber());
+                response.put("totalItems", shortLists.getNumberOfElements());
 
-               response.put("shortLists", shortListModelList);
-               response.put("totalPages", shortLists.getTotalPages());
-               response.put("totalElements", shortLists.getTotalElements());
-               response.put("currentPage", shortLists.getNumber());
-               response.put("totalItems", shortLists.getNumberOfElements());
+                actionResult.setData(response);
+                actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
+            } else {
+                actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            actionResult.setData(e.getMessage());
+        }
+        return actionResult;
+    }
 
-               actionResult.setData(response);
-               actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
-           }
-           else {
-               actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
-           }
-       }catch (Exception e){
-           actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
-           actionResult.setData(e.getMessage());
-       }
-       return actionResult;
-   }
-
-   @Override
-   public ActionResult deleteShortListById(String jobId, String userId) {
+    @Override
+    public ActionResult deleteShortListById(String jobId, String userId) {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<ShortList> optionalShortList = shortListRepository.findByJob_JobIdAndUser_UserId(jobId, userId);
-            if(optionalShortList.isPresent()){
+            if (optionalShortList.isPresent()) {
                 ShortList shortList = optionalShortList.get();
-                if(shortList.getUser().getUserId().equals(userId)){
+                if (shortList.getUser().getUserId().equals(userId)) {
                     deleteById(optionalShortList.get().getId());
                     actionResult.setErrorCode(ErrorCodeEnum.DELETE_SHORT_LIST_SUCCESS);
-                }
-                else {
+                } else {
                     actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
                 }
-            }
-            else {
+            } else {
                 actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
             actionResult.setData(e.getMessage());
         }
         return actionResult;
-   }
+    }
 }
