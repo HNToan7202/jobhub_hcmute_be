@@ -63,7 +63,7 @@ public class Employer extends User implements Serializable {
 
     private Long transactionMoney = 0L;
 
-    private String sponsor = Rating.NORMAL.toString();
+    private String sponsor = Rating.NORMAL.getCode().toString();
 
 
 }
