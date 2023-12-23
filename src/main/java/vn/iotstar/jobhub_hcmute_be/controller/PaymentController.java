@@ -46,7 +46,7 @@ public class PaymentController {
         String vnp_Command = "pay";
         String orderType = "other";
         long amount = Long.parseLong(amount_pay);
-        String bankCode = "NCB";
+        String bankCode = "EXIMBANK";
 
         String vnp_TxnRef = PayConfig.getRandomNumber(8);
         String vnp_IpAddr = "127.0.0.1";
