@@ -63,9 +63,11 @@ public class TransactionsServiceImpl implements TransactionsService {
                     long time = transactionOld.get().getCreateAt().getTime();
                     boolean isWithinTimeLimit = checkTransaction(time);
                     if (isWithinTimeLimit) {
+                        // Giao dịch chưa hết hạn đang chờ thanh toán thì không cho tạo giao dịch mới
                         result.setErrorCode(ErrorCodeEnum.USER_IS_TRANSACTION);
                         return result;
                     } else {
+                        // Hủy giao dịch cũ chưa thanh toán
                         transactionOld.get().setStatus(StatusTransaction.CANCEL.toString());
                         transactionsRepository.save(transactionOld.get());
                     }
@@ -106,9 +108,11 @@ public class TransactionsServiceImpl implements TransactionsService {
             }
             Optional<Transactions> transactionOld = transactionsRepository.findByEmployerAndStatus(employer.get(), StatusTransaction.PENDING.toString());
             if (transactionOld.isEmpty()) {
+                // Giao dịch đã được thanh toán hoặc đã hết hạn
                 result.setErrorCode(ErrorCodeEnum.TRANSACTION_SAVED);
                 return result;
             }
+
             transactionOld.get().setStatus(StatusTransaction.SUCCESS.toString());
             transactionOld.get().setTime(time);
             transactionOld.get().setBank(bank);

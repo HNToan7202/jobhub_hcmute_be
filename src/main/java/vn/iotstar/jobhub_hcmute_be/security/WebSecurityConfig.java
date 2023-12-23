@@ -93,10 +93,11 @@ public class WebSecurityConfig {
 //        configuration.setAllowedOrigins(List.of("*"));
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:3001");
-        configuration.addAllowedOrigin("https://jobhub-hcmute.azurewebsites.net");
+        configuration.addAllowedOrigin("https://job-hub-hcmute-congthanhs-projects.vercel.app");
+        configuration.addAllowedOrigin("https://job-hub-hcmute.vercel.app");
         configuration.setAllowedMethods(List.of("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH" ));
-       // configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
