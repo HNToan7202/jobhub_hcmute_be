@@ -67,7 +67,7 @@ public class UserController {
         boolean isOtpVerified = emailVerificationService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
         if (isOtpVerified) {
             return ResponseEntity.ok().body(GenericResponse.builder().success(true).message("OTP verified successfully!").result(null).statusCode(HttpStatus.OK.value()).build());
-        } else if (userRepository.findByEmailAndIsActiveIsTrue(verifyOtpRequest.getEmail()).isPresent()) {
+        } else if (userRepository.findByEmailAndVerifiedIsTrue(verifyOtpRequest.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GenericResponse.builder().success(true).message("Account is already verified!").statusCode(HttpStatus.NOT_FOUND.value()).build());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GenericResponse.builder().success(true).message("Account is not found!").statusCode(HttpStatus.NOT_FOUND.value()).build());
@@ -111,9 +111,9 @@ public class UserController {
     public ResponseModel getAllEmployer(
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "index", required = false, defaultValue = "0") int index,
-            @RequestParam(name ="companyName", defaultValue = "") String companyName,
-            @RequestParam(name ="address", defaultValue = "") String address,
-            @RequestParam(name ="teamSize", defaultValue = "") String teamSize
+            @RequestParam(name = "companyName", defaultValue = "") String companyName,
+            @RequestParam(name = "address", defaultValue = "") String address,
+            @RequestParam(name = "teamSize", defaultValue = "") String teamSize
     ) {
         ActionResult actionResult = new ActionResult();
         try {
@@ -123,6 +123,7 @@ public class UserController {
         }
         return responseBuild.build(actionResult);
     }
+
     @GetMapping("{employerId}/detail-employer")
     public ResponseModel getDetailEmployer(@PathVariable String employerId) {
         ActionResult actionResult = new ActionResult();
@@ -142,12 +143,11 @@ public class UserController {
     }
 
     @PostMapping("notify-message")
-    public ResponseModel sendMailMessage(@RequestBody NotificationRequest request){
+    public ResponseModel sendMailMessage(@RequestBody NotificationRequest request) {
         ActionResult actionResult = new ActionResult();
-        try{
+        try {
             actionResult = notificationService.notificationMessage(request);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);

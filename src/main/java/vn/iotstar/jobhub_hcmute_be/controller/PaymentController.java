@@ -107,7 +107,6 @@ public class PaymentController {
         String paymentUrl = PayConfig.vnp_PayUrl + "?" + queryUrl;
         actionResult.setData(paymentUrl);
         return responseBuild.build(actionResult);
-
     }
 
     @GetMapping("/complete")

@@ -1,10 +1,10 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.iotstar.jobhub_hcmute_be.dto.PositionDTO;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -26,6 +26,17 @@ public class PositionController {
     public PositionController(PositionService positionService, ResponseBuild responseBuild) {
         this.positionService = positionService;
         this.responseBuild = responseBuild;
+    }
+
+    @PostMapping("")
+    public ResponseModel createPosition(@Valid @RequestBody PositionDTO positionDTO) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            actionResult = positionService.createPosition(positionDTO);
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        }
+        return responseBuild.build(actionResult);
     }
 
     @GetMapping("")
