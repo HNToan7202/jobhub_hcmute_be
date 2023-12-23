@@ -47,7 +47,7 @@ public class PaymentController {
         String orderType = "other";
         long amount = Long.parseLong(amount_pay);
         //thay đổi ngân hàng eximbank
-        String bankCode = "EXIMBANK";
+        String bankCode = "NCB";
 
         String vnp_TxnRef = PayConfig.getRandomNumber(8);
         String vnp_IpAddr = "127.0.0.1";
@@ -75,7 +75,7 @@ public class PaymentController {
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
-        cld.add(Calendar.MINUTE, 15);
+        cld.add(Calendar.DATE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
