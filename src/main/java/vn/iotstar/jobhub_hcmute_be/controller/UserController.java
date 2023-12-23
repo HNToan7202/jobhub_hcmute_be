@@ -67,13 +67,21 @@ public class UserController {
         boolean isOtpVerified = emailVerificationService.verifyOtp(verifyOtpRequest.getEmail(), verifyOtpRequest.getOtp());
         if (isOtpVerified) {
             return ResponseEntity.ok().body(GenericResponse.builder().success(true).message("OTP verified successfully!").result(null).statusCode(HttpStatus.OK.value()).build());
-        } else if (userRepository.findByEmailAndVerifiedIsTrue(verifyOtpRequest.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GenericResponse.builder().success(true).message("Account is already verified!").statusCode(HttpStatus.NOT_FOUND.value()).build());
+        } else if (userRepository.findByEmail(verifyOtpRequest.getEmail()).isPresent()) {
+            User user = userRepository.findByEmail(verifyOtpRequest.getEmail()).get();
+            if (user.isVerified()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GenericResponse.builder().success(true).message("Account is already verified!").statusCode(HttpStatus.NOT_FOUND.value()).build());
+            } else {
+                //set verified
+                user.setVerified(true);
+                userRepository.save(user);
+                return ResponseEntity.ok().body(GenericResponse.builder().success(true).message("OTP verified successfully!").result(null).statusCode(HttpStatus.OK.value()).build());
+            }
+
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GenericResponse.builder().success(true).message("Account is not found!").statusCode(HttpStatus.NOT_FOUND.value()).build());
         }
     }
-
 
     @PostMapping("/reset-password")
     public ResponseEntity<GenericResponse> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest, BindingResult bindingResult) throws Exception {
