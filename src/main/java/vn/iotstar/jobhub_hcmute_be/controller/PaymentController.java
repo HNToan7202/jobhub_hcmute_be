@@ -46,6 +46,7 @@ public class PaymentController {
         String vnp_Command = "pay";
         String orderType = "other";
         long amount = Long.parseLong(amount_pay);
+        //thay đổi ngân hàng eximbank
         String bankCode = "EXIMBANK";
 
         String vnp_TxnRef = PayConfig.getRandomNumber(8);
