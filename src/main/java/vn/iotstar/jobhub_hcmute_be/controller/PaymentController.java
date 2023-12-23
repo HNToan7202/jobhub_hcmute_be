@@ -45,7 +45,7 @@ public class PaymentController {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
-        long amount = Long.parseLong(amount_pay);
+        long amount = Long.parseLong(amount_pay) * 10;
         //thay đổi ngân hàng eximbank
         String bankCode = "NCB";
 
