@@ -213,7 +213,7 @@ public class AuthController {
             User user = optionalUser.get();
             String otp = UUID.randomUUID().toString();
             userService.createPasswordResetOtpForUser(user, otp);
-            String url = "http://localhost:3000/forget-password/confirm-password?token=" + otp;
+            String url = "https://job-hub-hcmute.vercel.app/forget-password/confirm-password?token=" + otp + "&email=" + user.getEmail();
             String subject = "Change Password For JobPost";
             Context context = new Context();
             context.setVariable("url", url);
