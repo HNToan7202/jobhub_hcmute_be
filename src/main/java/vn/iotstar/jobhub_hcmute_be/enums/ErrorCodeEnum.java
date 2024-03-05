@@ -120,7 +120,36 @@ public enum ErrorCodeEnum {
     ACCOUNT_NOT_ACTIVE(400, 400, "Account not active"),
     CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     CREATE_POSITION_SUCCESS(200, 200, "Create position success"),
-    POST_JOB_SUCCESS(200, 200, "Post job success");
+    POST_JOB_SUCCESS(200, 200, "Post job success"),
+    POST_REQUIRED_FIELDS(400, 400, "Please provide required fields."),
+    INVALID_USER(400, 400, "Invalid user"),
+    CREATE_POST_SUCCESS(200, 200, "Create post success"),
+    MAXIMUM_PHOTO(400, 400, "Maximum photo"),
+    POST_NOT_FOUND(404, 404, "Post not found"),
+    GET_POST_SUCCESS(200, 200, "Get post success"),
+    IT_REQUEST_IS_INVALID(400, 400, "It request is invalid"),
+    REQUEST_SENT_SUCCESSFULLY(200, 200, "Request sent successfully"),
+
+    NO_FRIEND_REQUEST(400, 400, "No friend request for this person"),
+    ACCEPT_FRIEND_REQUEST_SUCCESSFULLY(200, 200, "Accept friend request successfully"),
+
+    FRIEND_REQUEST_EXISTED(400, 400, "You have sent a friend request to this person"),
+    FRIEND_REQUEST_NOT_FOUND(400, 400, "Friend request not found"),
+    FRIEND_EXISTED(400, 400, "You and this person are already friends"),
+
+    NOT_FRIEND(400, 400, "You and this person are not friends"),
+
+    REQUEST_ALREADY_SENT(400, 400, "Request already sent"),
+    UNFRIEND_SUCCESSFULLY(200, 200, "Unfriend successfully"),
+    CANCLE_FRIEND_REQUEST_SUCCESSFULLY(200, 200, "Cancle friend request successfully"),
+    SEND_FRIEND_REQUEST_SUCCESSFULLY(200, 200, "Send friend request successfully"),
+    NOT_PUBLIC_FRIEND(400, 400, "Not public friend"),
+    USER_NOT_PERMISSION(400, 400, "User not permission"),
+    DELETE_FRIEND_SUCCESSFULLY(200, 200, "Delete friend successfully"),
+    POST_IS_LOCKED(400, 400, "Post is locked"),
+    COMMENT_NOT_FOUND(404, 404, "Comment not found"),
+    FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed");
+
 
 
     private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();

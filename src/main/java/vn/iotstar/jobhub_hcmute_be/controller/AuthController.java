@@ -117,7 +117,6 @@ public class AuthController {
                         .build());
     }
 
-
     @PostMapping("/create-admin")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> create(@Valid @RequestBody SignUpMailDTO signUpMailDTO) {
@@ -134,7 +133,6 @@ public class AuthController {
                         .statusCode(200)
                         .build()
         );
-
     }
 
     @PostMapping("/signup-email")
@@ -153,7 +151,6 @@ public class AuthController {
                             .statusCode(200)
                             .build()
             );
-
         }
         return userService.userRegisterEmail(signUpMailDTO);
     }
@@ -174,7 +171,6 @@ public class AuthController {
                             .statusCode(200)
                             .build()
             );
-
         }
         return userService.employerRegister(employerRegisterDTO);
     }

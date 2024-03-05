@@ -65,6 +65,5 @@ public class SkillServiceImpl implements SkillService {
         actionResult.setErrorCode(ErrorCodeEnum.GET_SKILL_SUCCESS);
         actionResult.setData(skillList);
         return actionResult;
-
     }
 }

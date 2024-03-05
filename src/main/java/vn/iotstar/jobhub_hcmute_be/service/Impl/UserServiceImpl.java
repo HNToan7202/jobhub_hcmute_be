@@ -38,6 +38,7 @@ import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
+import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -222,11 +223,14 @@ public class UserServiceImpl implements UserService {
         //invalid all refreshToken before
         refreshTokenService.revokeRefreshToken(userDetail.getUserId());
         refreshTokenService.save(refreshToken);
+        String username = CurrentUserUtils.getCurrentUserName();
+        String userId = CurrentUserUtils.getCurrentUserId();
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("accessToken", accessToken);
         tokenMap.put("refreshToken", token);
         tokenMap.put("role", userDetail.getUser().getRole().getName());
-
+        tokenMap.put("username",username );
+        tokenMap.put("userId", userId);
         if (optionalUser.isPresent()) {
             optionalUser.get().setLastLoginAt(new Date());
             save(optionalUser.get());
@@ -240,7 +244,6 @@ public class UserServiceImpl implements UserService {
                 .build());
 
     }
-
     @Override
     public ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request) {
         String oldPass = user.getPassword();
