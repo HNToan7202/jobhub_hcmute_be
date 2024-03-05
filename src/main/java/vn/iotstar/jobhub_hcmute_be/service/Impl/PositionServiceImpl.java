@@ -1,6 +1,8 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.dto.PositionDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Position;
@@ -9,7 +11,9 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.PositionRepository;
 import vn.iotstar.jobhub_hcmute_be.service.PositionService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -44,6 +48,23 @@ public class PositionServiceImpl implements PositionService {
         actionResult.setData(positionList);
         return actionResult;
     }
+
+    @Override
+    public ActionResult getAllPosition(Pageable pageable) {
+        ActionResult actionResult = new ActionResult();
+        Page<Position> positionList = positionRepository.findAll(pageable);
+
+        actionResult.setErrorCode(ErrorCodeEnum.GET_POSITION_SUCCESS);
+        Map<String, Object> response = new HashMap<>();
+        response.put("positions", positionList.getContent());
+        response.put("totalPages", positionList.getTotalPages());
+        response.put("totalElements", positionList.getTotalElements());
+        response.put("currentPage", positionList.getNumber());
+        response.put("totalItems", positionList.getNumberOfElements());
+        actionResult.setData(response);
+        return actionResult;
+    }
+
 
     @Override
     public ActionResult createPosition(PositionDTO positionDTO) {

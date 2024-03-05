@@ -12,6 +12,8 @@ public interface PositionService {
 
     ActionResult getAllPosition();
 
+    ActionResult getAllPosition(Pageable pageable);
+
     ActionResult createPosition(PositionDTO positionDTO);
 
     ActionResult topPopularJobByPosition();
