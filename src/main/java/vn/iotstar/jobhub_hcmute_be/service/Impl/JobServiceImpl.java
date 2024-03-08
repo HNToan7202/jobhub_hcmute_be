@@ -18,6 +18,7 @@ import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
+import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
 
 import java.util.*;
 
@@ -44,6 +45,15 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     ShortListRepository shortListRepository;
+
+    @Autowired
+    UserJobViewsRepository userJobViewsRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
 
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
@@ -126,16 +136,13 @@ public class JobServiceImpl implements JobService {
     public ActionResult getDetail(String jobId) {
         ActionResult actionResult = new ActionResult();
         try {
-
             Optional<Job> optional = findById(jobId);
-
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-
                 actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
                 actionResult.setData(jobDTO);
                 return actionResult;
@@ -155,15 +162,38 @@ public class JobServiceImpl implements JobService {
         ActionResult actionResult = new ActionResult();
         try {
             Optional<Job> optional = findById(jobId);
-
+            Optional<User> user = userRepository.findByUserId(CurrentUserUtils.getCurrentUserId());
+            Optional<Student> student = studentRepository.findById(userId);
             if (optional.isPresent()) {
+                if (student.isPresent()) {
+                    //kiểm tra xem có userJobViews nào chưa
+                    Optional<UserJobViews> userJobViewsOptional = userJobViewsRepository.findByJobAndUser(optional.get(), user.get());
+                    if (userJobViewsOptional.isPresent()) {
+//                        Date date = new Date();
+//                        long time = date.getTime() - userJobViewsOptional.get().getUpdatedAt().getTime();
+//                        if (time > 3600000) {
+//                            userJobViewsOptional.get().setViews(userJobViewsOptional.get().getViews() + 1);
+//                            userJobViewsRepository.save(userJobViewsOptional.get());
+//                            optional.get().setTotalView(optional.get().getTotalView() + 1);
+//                        }
+                        userJobViewsOptional.get().setViews(userJobViewsOptional.get().getViews() + 1);
+                        userJobViewsRepository.save(userJobViewsOptional.get());
+                        optional.get().setTotalView(optional.get().getTotalView() + 1);
+                    } else {
+                        UserJobViews userJobViews = new UserJobViews();
+                        userJobViews.setJob(optional.get());
+                        userJobViews.setUser(user.get());
+                        userJobViewsRepository.save(userJobViews);
+                        optional.get().setTotalView(optional.get().getTotalView() + 1);
+                    }
+                    jobRepository.save(optional.get());
+                }
+
                 Job job = optional.get();
                 // kiểm tra xem userId đã apply vao job hay chưa
                 boolean isApplied = job.getJobApplies().stream().anyMatch(jobApply -> jobApply.getStudent().getUserId().equals(userId));
-
                 // kiểm tra xem userId đã shortlist vao job hay chưa
                 Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
-
                 boolean isShortList = false;
                 if (shortList.isPresent()) {
                     isShortList = shortList.get().getUser().getUserId().equals(userId);
