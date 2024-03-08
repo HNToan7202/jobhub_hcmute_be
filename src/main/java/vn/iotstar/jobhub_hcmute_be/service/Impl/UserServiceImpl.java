@@ -6,7 +6,6 @@ import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -26,6 +25,7 @@ import vn.iotstar.jobhub_hcmute_be.constant.Utils;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginReq;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
@@ -238,6 +238,56 @@ public class UserServiceImpl implements UserService {
                 .result(tokenMap)
                 .statusCode(HttpStatus.OK.value())
                 .build());
+
+    }
+
+
+    @Override
+    public ActionResult login(LoginReq loginDTO) {
+        ActionResult actionResult = new ActionResult();
+        if (findByEmail(loginDTO.getUserLogin()).isEmpty())
+            throw new UserNotFoundException("Account does not exist");
+        Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+//        optionalUser.get().setPassword(passwordEncoder.encode("28072002Thanh@"));
+//        userRepository.save(optionalUser.get());
+        if (optionalUser.isPresent() && !optionalUser.get().isVerified()) {
+
+            actionResult.setErrorCode(ErrorCodeEnum.ACCOUNT_NOT_VERIFIED);
+        }
+
+        if (optionalUser.isPresent() && !optionalUser.get().getIsActive()) {
+            actionResult.setErrorCode(ErrorCodeEnum.ACCOUNT_NOT_ACTIVE);
+        }
+
+
+        //Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(),
+                        loginDTO.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
+        String accessToken = jwtTokenProvider.generateAccessToken(userDetail);
+        RefreshToken refreshToken = new RefreshToken();
+        String token = jwtTokenProvider.generateRefreshToken(userDetail);
+        refreshToken.setToken(token);
+        refreshToken.setUser(userDetail.getUser());
+        //invalid all refreshToken before
+        refreshTokenService.revokeRefreshToken(userDetail.getUserId());
+        refreshTokenService.save(refreshToken);
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("accessToken", accessToken);
+        tokenMap.put("refreshToken", token);
+        tokenMap.put("role", userDetail.getUser().getRole().getName());
+
+        if (optionalUser.isPresent()) {
+            optionalUser.get().setLastLoginAt(new Date());
+            save(optionalUser.get());
+        }
+
+        actionResult.setData(tokenMap);
+        actionResult.setErrorCode(ErrorCodeEnum.LOGIN_SUCCESSFULLY);
+        return actionResult;
+
 
     }
 

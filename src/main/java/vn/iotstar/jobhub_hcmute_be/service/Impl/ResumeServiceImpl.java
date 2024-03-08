@@ -64,6 +64,9 @@ public class ResumeServiceImpl implements ResumeService {
     @Autowired
     ResumeUploadRepository resumeUploadRepository;
 
+    @Autowired
+    SkillRepository skillRepository;
+
     @Override
     public <S extends Resume> List<S> saveAll(Iterable<S> entities) {
         return resumeRepository.saveAll(entities);
@@ -105,29 +108,27 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ActionResult setMainCV(String CvId, String userId){
+    public ActionResult setMainCV(String CvId, String userId) {
         ActionResult actionResult = new ActionResult();
         Student student = new Student();
         Optional<Student> opt = studentRepository.findById(userId);
         if (opt.isEmpty()) {
-          actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
-          return  actionResult;
+            actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+            return actionResult;
         }
         student = opt.get();
         Resume resume = student.getResume();
 
-        if(resume == null){
+        if (resume == null) {
             actionResult.setErrorCode(ErrorCodeEnum.CV_NOT_FOUND);
             return actionResult;
-        }
-        else{
+        } else {
             List<ResumeUpload> resumeUploads = resume.getResumeUploads();
-            for (ResumeUpload resumeUpload: resumeUploads) {
+            for (ResumeUpload resumeUpload : resumeUploads) {
 
-                if(resumeUpload.getResumeId().equals(CvId)){
+                if (resumeUpload.getResumeId().equals(CvId)) {
                     resumeUpload.setIsMain(true);
-                }
-                else{
+                } else {
                     resumeUpload.setIsMain(false);
                 }
             }
@@ -196,7 +197,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ResponseEntity<?> getResumeUpload(String userId){
+    public ResponseEntity<?> getResumeUpload(String userId) {
         Optional<Student> opt = studentRepository.findById(userId);
         if (opt.isEmpty()) {
             return ResponseEntity.status(404).body(GenericResponse.builder()
@@ -216,9 +217,9 @@ public class ResumeServiceImpl implements ResumeService {
         }
         List<ResumeUpload> resumeUploads = student.getResume().getResumeUploads();
         List<ResumeUpload> list2 = new ArrayList<>();
-        for (ResumeUpload resume: resumeUploads
-             ) {
-            if(resume.getIsActive() == true){
+        for (ResumeUpload resume : resumeUploads
+        ) {
+            if (resume.getIsActive() == true) {
                 list2.add(resume);
             }
         }
@@ -252,7 +253,47 @@ public class ResumeServiceImpl implements ResumeService {
                 student.setResume(resume);
             }
             System.out.println("resumeDTO: " + resumeDTO.getIsEducationsEdited());
-            if (resumeDTO.getIsEducationsEdited() == true && resumeDTO.getEducations() != null) {
+            if (resumeDTO.getIsSkillsEdited() && resumeDTO.getSkills() != null) {
+                List<Skill> skills = new ArrayList<>();
+                List<Skill> skillOld = resume.getSkills();
+                for (SkillDTO skillDTO : resumeDTO.getSkills()) {
+                    Skill skill = new Skill();
+                    if (skillDTO.getId() != null && skillDTO.getIsEdit()) {
+                        Optional<Skill> optionalSkill = skillRepository.findById(skillDTO.getId());
+                        if (optionalSkill.isEmpty()) {
+                            return ResponseEntity.status(404).body(GenericResponse.builder()
+                                    .success(false)
+                                    .message("Education Not Found")
+                                    .statusCode(HttpStatus.NOT_FOUND.value())
+                                    .build());
+                        }
+                        skill = optionalSkill.get();
+                        skill.setName(skillDTO.getName());
+                        //BeanUtils.copyProperties(educationDTO, education);
+//                        education.setTitle(educationDTO.getTitle());
+//                        education.setLocation(educationDTO.getLocation());
+//                        education.setYearBegin(educationDTO.getYearBegin());
+//                        education.setYearEnd(educationDTO.getYearEnd());
+//                        education.setDescription(educationDTO.getDescription());
+
+                        skill = skillRepository.save(skill);
+                        System.out.println("education: " + resume.getEducations().toString());
+                    } else if (skillDTO.getId() == null && !skillDTO.getIsEdit()) {
+                        BeanUtils.copyProperties(skillDTO, skill);
+                        List<Resume> resumeList = new ArrayList<>();
+                        resumeList.add(resume);
+                        skill.setResumes(resumeList);
+                        skills.add(skill);
+                    } else if (skillDTO.getId() != null && skillDTO.getIsDelete()) {
+                        Optional<Skill> optionalSkill = skillRepository.findById(skillDTO.getId());
+                        optionalSkill.ifPresent(skillOld::remove);
+                    }
+                }
+                skillOld.addAll(skills);
+                resume.setSkills(skillOld);
+
+            }
+            if (resumeDTO.getIsEducationsEdited() && resumeDTO.getEducations() != null) {
                 List<Education> educations = new ArrayList<>();
                 List<Education> educationsOld = resume.getEducations();
                 for (EducationDTO educationDTO : resumeDTO.getEducations()) {
@@ -276,23 +317,20 @@ public class ResumeServiceImpl implements ResumeService {
 
                         education = educationRepository.save(education);
                         System.out.println("education: " + resume.getEducations().toString());
-                    } else if(educationDTO.getId() == null && educationDTO.getIsEdit() == false){
+                    } else if (educationDTO.getId() == null && !educationDTO.getIsEdit()) {
                         BeanUtils.copyProperties(educationDTO, education);
                         education.setResume(resume);
                         educations.add(education);
-                    }
-                    else if(educationDTO.getId()!= null && educationDTO.getIsDelete() == true){
+                    } else if (educationDTO.getId() != null && educationDTO.getIsDelete()) {
                         Optional<Education> optionalEducation = educationRepository.findById(educationDTO.getId());
-                        if(optionalEducation.isPresent()){
-                               educationsOld.remove(optionalEducation.get());
-                        }
+                        optionalEducation.ifPresent(educationsOld::remove);
                     }
                 }
                 educationsOld.addAll(educations);
                 resume.setEducations(educationsOld);
 
             }
-            if (resumeDTO.getIsCoursesEdited() == true && resumeDTO.getCourses() != null) {
+            if (resumeDTO.getIsCoursesEdited() && resumeDTO.getCourses() != null) {
                 List<Course> courses = new ArrayList<>();
                 List<Course> coursesOld = resume.getCourses();
                 for (CourseDTO courseDTO : resumeDTO.getCourses()) {
@@ -309,23 +347,21 @@ public class ResumeServiceImpl implements ResumeService {
                         course = optCourse.get();
                         BeanUtils.copyProperties(courseDTO, course);
                         course = courseRepository.save(course);
-                    } else if (courseDTO.getId() == null && courseDTO.getIsEdit() == false){
+                    } else if (courseDTO.getId() == null && !courseDTO.getIsEdit()) {
                         BeanUtils.copyProperties(courseDTO, course);
                         course.setResume(resume);
                         courses.add(course);
                     }
-                    if(courseDTO.getId()!= null && courseDTO.getIsDelete()){
+                    if (courseDTO.getId() != null && courseDTO.getIsDelete()) {
                         Optional<Course> courseOptional = courseRepository.findById(courseDTO.getId());
-                        if(courseOptional.isPresent()){
-                            coursesOld.remove(courseOptional.get());
-                        }
+                        courseOptional.ifPresent(coursesOld::remove);
                     }
                 }
                 coursesOld.addAll(courses);
                 resume.setCourses(coursesOld);
             }
 
-            if (resumeDTO.getIsCertificatesEdited() == true && resumeDTO.getCertificates() != null) {
+            if (resumeDTO.getIsCertificatesEdited() && resumeDTO.getCertificates() != null) {
                 List<Certificate> certificates = new ArrayList<>();
                 List<Certificate> certificatesOld = resume.getCertificates();
                 for (CertificateDTO certificateDTO : resumeDTO.getCertificates()) {
@@ -342,23 +378,21 @@ public class ResumeServiceImpl implements ResumeService {
                         certificate = optCertificate.get();
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate = certificateRepository.save(certificate);
-                    } else if (certificateDTO.getId() == null && certificateDTO.getIsEdit() == false){
+                    } else if (certificateDTO.getId() == null && !certificateDTO.getIsEdit()) {
                         BeanUtils.copyProperties(certificateDTO, certificate);
                         certificate.setResume(resume);
                         certificates.add(certificate);
                     }
-                     if(certificateDTO.getId()!= null && certificateDTO.getIsDelete() == true){
+                    if (certificateDTO.getId() != null && certificateDTO.getIsDelete()) {
                         Optional<Certificate> certificateOptional = certificateRepository.findById(certificate.getId());
-                        if(certificateOptional.isPresent()){
-                            certificatesOld.remove(certificateOptional.get());
-                        }
+                        certificateOptional.ifPresent(certificatesOld::remove);
                     }
                 }
                 certificatesOld.addAll(certificates);
                 resume.setCertificates(certificatesOld);
             }
 
-            if (resumeDTO.getIsExperiencesEdited() == true && resumeDTO.getExperiences() != null) {
+            if (resumeDTO.getIsExperiencesEdited() && resumeDTO.getExperiences() != null) {
                 List<Experience> experiences = new ArrayList<>();
                 List<Experience> experiencesOld = resume.getExperiences();
                 for (ExperienceDTO experienceDTO : resumeDTO.getExperiences()) {
@@ -375,26 +409,26 @@ public class ResumeServiceImpl implements ResumeService {
                         experience = optExperience.get();
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience = experienceRepository.save(experience);
-                    } else if (experienceDTO.getId() == null && !experienceDTO.getIsEdit()){
+                    } else if (experienceDTO.getId() == null && !experienceDTO.getIsEdit()) {
                         BeanUtils.copyProperties(experienceDTO, experience);
                         experience.setResume(resume);
                         experiences.add(experience);
                     }
-                    if(experienceDTO.getId()!= null && experienceDTO.getIsDelete() == true){
+                    if (experienceDTO.getId() != null && experienceDTO.getIsDelete()) {
                         Optional<Experience> experienceOptional = experienceRepository.findById(experienceDTO.getId());
-                        if(experienceOptional.isPresent()){
+                        if (experienceOptional.isPresent()) {
                             experiencesOld.remove(experienceOptional.get());
                             System.err.println("experiencesOld" + experiencesOld.size());
                         }
                     }
                 }
-                System.err.println("experiences "+ experiencesOld.size());
+                System.err.println("experiences " + experiencesOld.size());
 
                 experiencesOld.addAll(experiences);
                 resume.setExperiences(experiencesOld);
                 System.err.println("experiencesOld" + resume.getExperiences().size());
             }
-            if (resumeDTO.getIsPrizesEdited() == true && resumeDTO.getPrizes() != null) {
+            if (resumeDTO.getIsPrizesEdited() && resumeDTO.getPrizes() != null) {
                 List<Prize> prizes = new ArrayList<>();
                 List<Prize> prizesOld = resume.getPrizes();
                 for (PrizeDTO prizeDTO : resumeDTO.getPrizes()) {
@@ -411,22 +445,20 @@ public class ResumeServiceImpl implements ResumeService {
                         prize = optPrize.get();
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize = prizeRepository.save(prize);
-                    } else if (prizeDTO.getId() == null && prizeDTO.getIsEdit() == false) {
+                    } else if (prizeDTO.getId() == null && !prizeDTO.getIsEdit()) {
                         BeanUtils.copyProperties(prizeDTO, prize);
                         prize.setResume(resume);
                         prizes.add(prize);
                     }
-                    if(prizeDTO.getId()!= null && prizeDTO.getIsDelete()){
+                    if (prizeDTO.getId() != null && prizeDTO.getIsDelete()) {
                         Optional<Prize> prizeOptional = prizeRepository.findById(prizeDTO.getId());
-                        if(prizeOptional.isPresent()){
-                            prizesOld.remove(prizeOptional.get());
-                        }
+                        prizeOptional.ifPresent(prizesOld::remove);
                     }
                 }
                 prizesOld.addAll(prizes);
                 resume.setPrizes(prizesOld);
             }
-            if (resumeDTO.getIsProjectsEdited() == true && resumeDTO.getProjects() != null) {
+            if (resumeDTO.getIsProjectsEdited() && resumeDTO.getProjects() != null) {
                 List<Project> projects = new ArrayList<>();
                 List<Project> projectsOld = resume.getProjects();
                 for (ProjectDTO projectDTO : resumeDTO.getProjects()) {
@@ -443,23 +475,21 @@ public class ResumeServiceImpl implements ResumeService {
                         project = optProject.get();
                         BeanUtils.copyProperties(projectDTO, project);
                         project = projectRepository.save(project);
-                    } else if (projectDTO.getId() == null && projectDTO.getIsEdit() == false){
+                    } else if (projectDTO.getId() == null && !projectDTO.getIsEdit()) {
                         BeanUtils.copyProperties(projectDTO, project);
                         project.setResume(resume);
                         projects.add(project);
                     }
-                    if(projectDTO.getId()!= null && projectDTO.getIsDelete() == true){
+                    if (projectDTO.getId() != null && projectDTO.getIsDelete()) {
                         Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
-                        if(projectOptional.isPresent()){
-                            projectsOld.remove(projectOptional.get());
-                        }
+                        projectOptional.ifPresent(projectsOld::remove);
                     }
                 }
                 projectsOld.addAll(projects);
                 resume.setProjects(projectsOld);
             }
 
-            if (resumeDTO.getIsSocialActivitiesEdited() == true && resumeDTO.getSocialActivities() != null) {
+            if (resumeDTO.getIsSocialActivitiesEdited() && resumeDTO.getSocialActivities() != null) {
                 List<SocialActivity> socialActivities = new ArrayList<>();
                 List<SocialActivity> socialActivitiesOld = resume.getSocialActivities();
                 for (SocialActivityDTO socialActivityDTO : resumeDTO.getSocialActivities()) {
@@ -476,16 +506,14 @@ public class ResumeServiceImpl implements ResumeService {
                         socialActivity = optSocialActivity.get();
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity = socialActivityRepository.save(socialActivity);
-                    } else if (socialActivityDTO.getId() == null && socialActivityDTO.getIsEdit() == false){
+                    } else if (socialActivityDTO.getId() == null && !socialActivityDTO.getIsEdit()) {
                         BeanUtils.copyProperties(socialActivityDTO, socialActivity);
                         socialActivity.setResume(resume);
                         socialActivities.add(socialActivity);
                     }
-                    if(socialActivityDTO.getId()!= null && socialActivityDTO.getIsDelete()==true){
+                    if (socialActivityDTO.getId() != null && socialActivityDTO.getIsDelete()) {
                         Optional<SocialActivity> socialActivityOptional = socialActivityRepository.findById(socialActivityDTO.getId());
-                        if(socialActivityOptional.isPresent()){
-                            socialActivitiesOld.remove(socialActivityOptional.get());
-                        }
+                        socialActivityOptional.ifPresent(socialActivitiesOld::remove);
                     }
                 }
 
@@ -493,7 +521,7 @@ public class ResumeServiceImpl implements ResumeService {
                 resume.setSocialActivities(socialActivitiesOld);
             }
 
-            if (resumeDTO.getIsSocialsEdited()== true && resumeDTO.getSocials() != null ) {
+            if (resumeDTO.getIsSocialsEdited() == true && resumeDTO.getSocials() != null) {
                 List<Social> socials = new ArrayList<>();
                 List<Social> socialsOld = resume.getSocials();
                 for (SocialDTO socialDTO : resumeDTO.getSocials()) {
@@ -510,14 +538,14 @@ public class ResumeServiceImpl implements ResumeService {
                         social = optSocial.get();
                         BeanUtils.copyProperties(socialDTO, social);
                         social = socialRepository.save(social);
-                    } else if (socialDTO.getId() == null && socialDTO.getIsEdit() == false){
+                    } else if (socialDTO.getId() == null && socialDTO.getIsEdit() == false) {
                         BeanUtils.copyProperties(socialDTO, social);
                         social.setResume(resume);
                         socials.add(social);
                     }
-                    if(socialDTO.getId()!= null && socialDTO.getIsDelete()){
+                    if (socialDTO.getId() != null && socialDTO.getIsDelete()) {
                         Optional<Social> socialOptional = socialRepository.findById(socialDTO.getId());
-                        if(socialOptional.isPresent()){
+                        if (socialOptional.isPresent()) {
                             socialsOld.remove(socialOptional.get());
                         }
                     }
@@ -570,15 +598,14 @@ public class ResumeServiceImpl implements ResumeService {
 
 
     @Override
-    public ActionResult deleteResume(String resumeId, String userId){
+    public ActionResult deleteResume(String resumeId, String userId) {
         ActionResult actionResult = new ActionResult();
         Optional<ResumeUpload> opt = resumeUploadRepository.findById(resumeId);
         if (opt.isEmpty()) {
             actionResult.setErrorCode(ErrorCodeEnum.CV_NOT_FOUND);
             return actionResult;
-        }
-        else {
-            System.out.println("CV:"+opt.get().getResumeId());
+        } else {
+            System.out.println("CV:" + opt.get().getResumeId());
             ResumeUpload resumeUpload = opt.get();
             resumeUpload.setIsActive(false);
             resumeUpload.setIsMain(false);
@@ -586,7 +613,7 @@ public class ResumeServiceImpl implements ResumeService {
             actionResult.setData(resumeUpload);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
             Optional<ResumeUpload> opt2 = resumeUploadRepository.findById(resumeId);
-            if (opt2.isPresent()){
+            if (opt2.isPresent()) {
                 System.out.println("Delete CV failed");
             }
         }

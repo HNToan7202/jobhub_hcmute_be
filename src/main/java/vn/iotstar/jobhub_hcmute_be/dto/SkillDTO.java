@@ -1,23 +1,13 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
+import jakarta.persistence.Entity;
 import lombok.Data;
 
 @Data
-public class ProjectDTO {
-
+public class SkillDTO {
     String id;
-
-    String title;
-
-    String location;
-
-    String yearBegin;
-
-    String yearEnd;
-
-    String description;
+    String name;
 
     Boolean isEdit = false;
-
     Boolean isDelete = false;
 }

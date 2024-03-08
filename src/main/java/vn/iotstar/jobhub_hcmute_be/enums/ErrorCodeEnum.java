@@ -120,6 +120,10 @@ public enum ErrorCodeEnum {
     ACCOUNT_NOT_ACTIVE(400, 400, "Account not active"),
     CHANGE_PASSWORD_SUCCESSFULLY(200, 200, "Change password successfully"),
     CREATE_POSITION_SUCCESS(200, 200, "Create position success"),
+
+    ACCOUNT_NOT_VERIFIED(400, 400, "Account not verified"),
+
+    LOGIN_SUCCESSFULLY(200, 200, "Login successfully"),
     POST_JOB_SUCCESS(200, 200, "Post job success");
 
 
