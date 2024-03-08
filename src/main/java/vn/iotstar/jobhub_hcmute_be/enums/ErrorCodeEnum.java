@@ -148,8 +148,11 @@ public enum ErrorCodeEnum {
     DELETE_FRIEND_SUCCESSFULLY(200, 200, "Delete friend successfully"),
     POST_IS_LOCKED(400, 400, "Post is locked"),
     COMMENT_NOT_FOUND(404, 404, "Comment not found"),
-    FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed");
 
+    ACCOUNT_NOT_VERIFIED(400, 400, "Account not verified"),
+
+    LOGIN_SUCCESSFULLY(200, 200, "Login successfully"),
+    FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed");
 
 
     private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();
