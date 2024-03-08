@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.Role;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Hidden
@@ -23,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByUserId(String userId);
+
     Page<User> findByRole_NameAndIsActiveIsTrue(String roleId, Pageable pageable);
 
     Page<User> findByRole_NameAndIsActive(String role, boolean isActive, Pageable pageable);
@@ -36,4 +39,5 @@ public interface UserRepository extends JpaRepository<User, String> {
     //Lấy tổng user role khác admin
     Long countByRole_NameNot(String roleName);
 
+    List<User> findByUserIdIn(List<String> friendIds);
 }

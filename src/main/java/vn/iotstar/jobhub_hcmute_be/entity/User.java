@@ -64,6 +64,11 @@ public class User implements Serializable {
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();
+        this.friendCount = 0;
+        this.senderCount = 0;
+        this.receiverCount = 0;
+        this.isPublicFriend = true;
+
     }
 
     @PreUpdate
@@ -74,4 +79,47 @@ public class User implements Serializable {
     @JsonBackReference
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private VerificationToken verificationToken;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Post> posts;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Share> shares;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Like> likes;
+    @JsonBackReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    //senders la danh sách ma user này gửi lời mời kết bạn
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    private List<Friend> senders;
+    private Integer senderCount;
+
+    //receivers là danh sách gửi lời mời kết bạn với user này
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    private List<Friend> receivers;
+    private Integer receiverCount;
+
+    private Integer friendCount;
+    private Boolean isPublicFriend;
+
+//  following: Danh sách các người dùng mà người dùng hiện tại đang theo dõi.
+//  followers: Danh sách các người dùng khác đang theo dõi người dùng hiện tại.
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+    private List<Follower> following;
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
+    private List<Follower> followers;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<FriendUser> friends;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserJobViews> userJobViews;
+
+
 }

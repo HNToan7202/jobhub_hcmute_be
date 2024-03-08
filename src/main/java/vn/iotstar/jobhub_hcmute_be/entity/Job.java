@@ -94,6 +94,7 @@ public class Job implements Serializable {
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();
+        this.totalView = 0;
     }
 
     @PreUpdate
@@ -102,4 +103,8 @@ public class Job implements Serializable {
     }
 
     int status;
+    @JsonBackReference
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserJobViews> userJobViews;
+    private Integer totalView;
 }

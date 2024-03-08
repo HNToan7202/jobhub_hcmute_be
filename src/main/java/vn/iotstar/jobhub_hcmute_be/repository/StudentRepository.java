@@ -21,4 +21,5 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     Long countByUserIdIsNotNull();
 
+
 }

@@ -35,4 +35,6 @@ public interface EmployerRepository extends JpaRepository<Employer, String> {
     Page<Employer> findEmployers(Pageable pageableString, String companyName, String teamSize);
 
     Long countByUserIdIsNotNull();
+
+
 }
