@@ -118,6 +118,8 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<FriendUser> friends;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserJobViews> userJobViews;
 
 
 }
