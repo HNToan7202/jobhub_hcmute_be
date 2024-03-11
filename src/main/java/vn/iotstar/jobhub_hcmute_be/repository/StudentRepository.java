@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Hidden
@@ -22,4 +23,5 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     Long countByUserIdIsNotNull();
 
 
+    List<Student> findByUserIdIn(List<String> list);
 }

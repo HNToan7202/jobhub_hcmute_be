@@ -42,5 +42,6 @@ public interface JobRepository extends JpaRepository<Job, String> {
     //lấy count all job
     Long countByJobIdIsNotNull();
 
+    List<Job> findByJobIdIn(List<String> list);
 }
 
