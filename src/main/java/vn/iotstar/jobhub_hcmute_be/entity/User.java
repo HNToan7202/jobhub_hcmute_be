@@ -68,7 +68,6 @@ public class User implements Serializable {
         this.senderCount = 0;
         this.receiverCount = 0;
         this.isPublicFriend = true;
-
     }
 
     @PreUpdate
@@ -97,11 +96,13 @@ public class User implements Serializable {
 
     //senders la danh sách ma user này gửi lời mời kết bạn
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<Friend> senders;
     private Integer senderCount;
 
     //receivers là danh sách gửi lời mời kết bạn với user này
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<Friend> receivers;
     private Integer receiverCount;
 
@@ -110,14 +111,16 @@ public class User implements Serializable {
 
 //  following: Danh sách các người dùng mà người dùng hiện tại đang theo dõi.
 //  followers: Danh sách các người dùng khác đang theo dõi người dùng hiện tại.
+    @JsonBackReference
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
     private List<Follower> following;
+    @JsonBackReference
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
     private List<Follower> followers;
-
+    @JsonBackReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<FriendUser> friends;
-
+    @JsonBackReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserJobViews> userJobViews;
 
