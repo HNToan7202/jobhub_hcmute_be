@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
@@ -23,14 +24,18 @@ public class RecommendationController {
     RecommendationService recommendationService;
     @PreAuthorize("hasAnyRole( 'STUDENT')")
     @RequestMapping("/user/{userId}")
-    public ResponseModel getRecommendationByUserId(@PathVariable("userId") String userId) {
-        ActionResult actionResult = recommendationService.getRecommendationByUserId(userId);
+    public ResponseModel getRecommendationByUserId(@PathVariable("userId") String userId,
+                                                   @RequestParam(defaultValue = "1") Integer page,
+                                                   @RequestParam(defaultValue = "10") Integer size) {
+        ActionResult actionResult = recommendationService.getRecommendationByUserId(userId,page,size);
         return responseBuild.build(actionResult);
     }
     @PreAuthorize("hasAnyRole( 'EMPLOYER')")
     @RequestMapping("/job/{jobId}")
-    public ResponseModel getRecommendationByJobId(@PathVariable("jobId") String jobId) {
-        ActionResult actionResult = recommendationService.getRecommendationByJobId(jobId);
+    public ResponseModel getRecommendationByJobId(@PathVariable("jobId") String jobId,
+                                                  @RequestParam(defaultValue = "1") Integer page,
+                                                  @RequestParam(defaultValue = "10") Integer size) {
+        ActionResult actionResult = recommendationService.getRecommendationByJobId(jobId,page,size);
         return responseBuild.build(actionResult);
     }
 

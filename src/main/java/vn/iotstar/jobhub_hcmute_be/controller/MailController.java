@@ -26,7 +26,6 @@ public class MailController {
     @Autowired
     ResponseBuild responseBuild;
 
-
     @PostMapping("/sendInvoice")
     public ResponseModel sendInvoice(@RequestBody SendInvoiceRequest invoiceRequest) {
         ActionResult actionResult = new ActionResult();
