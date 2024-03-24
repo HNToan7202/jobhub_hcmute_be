@@ -159,19 +159,22 @@ public class ResumeServiceImpl implements ResumeService {
                     .build());
         }
         Student student = opt.get();
+
         if (student.getResume() == null) {
             Resume resume = new Resume();
             resume.setCreateAt(new Date());
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
             student.setResume(resume);
-        }
-        ResumeUpload resume = new ResumeUpload();
-        int count = student.getResume().getResumeUploads().stream().filter(ResumeUpload::getIsMain).toArray().length;
-        //lấy cv active
-        if (count == 0) {
+            studentRepository.save(student);
             isMain = true;
         }
+//        int count = student.getResume().getResumeUploads().stream().filter(ResumeUpload::getIsMain).toArray().length;
+//        //lấy cv active
+//        if (count == 0) {
+//            isMain = true;
+//        }
+        ResumeUpload resume = new ResumeUpload();
         resume.setLinkUpload(url);
         resume.setIsMain(isMain);
         //resume.setCandidate(candidate);
