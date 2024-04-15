@@ -37,7 +37,7 @@ public class Resume implements Serializable {
 
     //private String experience;
 
-//    private String certificate;
+    //    private String certificate;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
     //@JsonBackReference
     @ToString.Exclude
@@ -88,21 +88,21 @@ public class Resume implements Serializable {
     @JsonBackReference
     private Boolean isActive;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "resume_skill",
             joinColumns = @JoinColumn(name = "resume_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
-    @JsonBackReference
+    //@JsonBackReference
     @ToString.Exclude
     private List<Skill> skills;
 
-    @OneToMany(mappedBy = "resume",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
     private List<JobApply> jobApplies;
 
-    @OneToMany(mappedBy = "resume",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonBackReference
     @ToString.Exclude
     private List<ResumeUpload> resumeUploads;

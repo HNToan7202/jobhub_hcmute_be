@@ -6,8 +6,10 @@ import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,6 +31,7 @@ import vn.iotstar.jobhub_hcmute_be.constant.Utils;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginReq;
 import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
 import vn.iotstar.jobhub_hcmute_be.entity.*;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
@@ -37,8 +40,15 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
+
 import vn.iotstar.jobhub_hcmute_be.service.*;
 import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
+
+import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
+import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
+import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
+import vn.iotstar.jobhub_hcmute_be.service.UserService;
+
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -232,15 +242,19 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         //invalid all refreshToken before
         refreshTokenService.revokeRefreshToken(userDetail.getUserId());
         refreshTokenService.save(refreshToken);
+<
         String username = CurrentUserUtils.getCurrentUserName();
         String userId = CurrentUserUtils.getCurrentUserId();
+
 
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("accessToken", accessToken);
         tokenMap.put("refreshToken", token);
         tokenMap.put("role", userDetail.getUser().getRole().getName());
+
         tokenMap.put("username", username);
         tokenMap.put("userId", userId);
+
         if (optionalUser.isPresent()) {
             optionalUser.get().setLastLoginAt(new Date());
             save(optionalUser.get());
@@ -254,6 +268,58 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
                 .build());
 
     }
+
+
+
+    @Override
+    public ActionResult login(LoginReq loginDTO) {
+        ActionResult actionResult = new ActionResult();
+        if (findByEmail(loginDTO.getUserLogin()).isEmpty())
+            throw new UserNotFoundException("Account does not exist");
+        Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+//        optionalUser.get().setPassword(passwordEncoder.encode("28072002Thanh@"));
+//        userRepository.save(optionalUser.get());
+        if (optionalUser.isPresent() && !optionalUser.get().isVerified()) {
+
+            actionResult.setErrorCode(ErrorCodeEnum.ACCOUNT_NOT_VERIFIED);
+        }
+
+        if (optionalUser.isPresent() && !optionalUser.get().getIsActive()) {
+            actionResult.setErrorCode(ErrorCodeEnum.ACCOUNT_NOT_ACTIVE);
+        }
+
+
+        //Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(),
+                        loginDTO.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
+        String accessToken = jwtTokenProvider.generateAccessToken(userDetail);
+        RefreshToken refreshToken = new RefreshToken();
+        String token = jwtTokenProvider.generateRefreshToken(userDetail);
+        refreshToken.setToken(token);
+        refreshToken.setUser(userDetail.getUser());
+        //invalid all refreshToken before
+        refreshTokenService.revokeRefreshToken(userDetail.getUserId());
+        refreshTokenService.save(refreshToken);
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("accessToken", accessToken);
+        tokenMap.put("refreshToken", token);
+        tokenMap.put("role", userDetail.getUser().getRole().getName());
+
+        if (optionalUser.isPresent()) {
+            optionalUser.get().setLastLoginAt(new Date());
+            save(optionalUser.get());
+        }
+
+        actionResult.setData(tokenMap);
+        actionResult.setErrorCode(ErrorCodeEnum.LOGIN_SUCCESSFULLY);
+        return actionResult;
+
+
+    }
+
 
     @Override
     public ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request) {

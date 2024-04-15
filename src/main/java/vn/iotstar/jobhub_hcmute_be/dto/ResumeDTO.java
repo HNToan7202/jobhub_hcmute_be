@@ -1,11 +1,13 @@
 package vn.iotstar.jobhub_hcmute_be.dto;
 
 import lombok.Data;
+import vn.iotstar.jobhub_hcmute_be.entity.Skill;
 
 import java.util.Date;
 import java.util.List;
+
 @Data
-public class ResumeDTO{
+public class ResumeDTO {
     List<EducationDTO> educations;
     List<ExperienceDTO> experiences;
     List<CertificateDTO> certificates;
@@ -14,17 +16,19 @@ public class ResumeDTO{
     List<ProjectDTO> projects;
     List<SocialActivityDTO> socialActivities;
     List<SocialDTO> socials;
+    List<SkillDTO> skills;
     Date createAt;
     Date updateAt;
     Boolean isActive;
     //List<ResumeUpload> resumeUploads;
-    Boolean isEducationsEdited=false;
-    Boolean isExperiencesEdited=false;
-    Boolean isCertificatesEdited=false;
-    Boolean isPrizesEdited  =false;
-    Boolean isCoursesEdited=false;
-    Boolean isProjectsEdited=false;
-    Boolean isSocialActivitiesEdited=false;
-    Boolean isSocialsEdited=false;
-    
+    Boolean isEducationsEdited = false;
+    Boolean isExperiencesEdited = false;
+    Boolean isCertificatesEdited = false;
+    Boolean isPrizesEdited = false;
+    Boolean isCoursesEdited = false;
+    Boolean isProjectsEdited = false;
+    Boolean isSocialActivitiesEdited = false;
+    Boolean isSocialsEdited = false;
+    Boolean isSkillsEdited = false;
+
 }

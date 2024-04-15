@@ -40,7 +40,7 @@ import java.util.UUID;
 import static vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api")
 @Validated
 @Tag(name = "Authentication", description = "Auth API")
 public class AuthController {
@@ -88,20 +88,30 @@ public class AuthController {
         this.emailVerificationService = emailVerificationService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/v1/auth/login")
     @Transactional
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         //Xử lý login ở đây
         return userService.userLogin(loginDTO);
     }
 
-    @PostMapping("/refresh-access-token")
+
+    @PostMapping("/v2/auth/login")
+    public ResponseModel login(@Valid @RequestBody LoginReq loginReq) {
+        //Xử lý login ở đây
+        ActionResult actionResult = new ActionResult();
+        actionResult = userService.login(loginReq);
+        return responseBuild.build(actionResult);
+    }
+
+
+    @PostMapping("/v1/auth/refresh-access-token")
     public ResponseEntity<?> refreshAccessToken(@RequestBody TokenRequest tokenRequest) {
         String refreshToken = tokenRequest.getRefreshToken();
         return refreshTokenService.refreshAccessToken(refreshToken);
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/v1/auth/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorizationHeader) {
         String accessToken = authorizationHeader.substring(7);
         String userId = jwtTokenProvider.getUserIdFromJwt(accessToken);
@@ -117,7 +127,8 @@ public class AuthController {
                         .build());
     }
 
-    @PostMapping("/create-admin")
+
+    @PostMapping("/v1/auth/create-admin")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> create(@Valid @RequestBody SignUpMailDTO signUpMailDTO) {
         Admin admin = new Admin();
@@ -133,9 +144,10 @@ public class AuthController {
                         .statusCode(200)
                         .build()
         );
+
     }
 
-    @PostMapping("/signup-email")
+    @PostMapping("/v1/auth/signup-email")
     public ResponseEntity<GenericResponse> signUpMail(
             @RequestBody @Valid RegisterRequest signUpMailDTO,
             BindingResult bindingResult) {
@@ -151,11 +163,12 @@ public class AuthController {
                             .statusCode(200)
                             .build()
             );
+
         }
         return userService.userRegisterEmail(signUpMailDTO);
     }
 
-    @PostMapping("/employer-signup-email")
+    @PostMapping("/v1/auth/employer-signup-email")
     public ResponseEntity<?> employerSignUpMail(
             @RequestBody @Valid EmployerRegisterDTO employerRegisterDTO,
             BindingResult bindingResult) {
@@ -171,11 +184,12 @@ public class AuthController {
                             .statusCode(200)
                             .build()
             );
+
         }
         return userService.employerRegister(employerRegisterDTO);
     }
 
-    @PostMapping("/send-otp")
+    @PostMapping("/v1/auth/send-otp")
     public ResponseEntity<GenericResponse> sendOtp(@RequestBody EmailVerificationRequest emailVerificationRequest) {
         try {
             emailVerificationService.sendOtp(emailVerificationRequest.getEmail());
@@ -198,7 +212,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping("/v1/auth/forgot-password")
     public ResponseModel resetPassword(@RequestBody final ForgotPasswordto dto) throws MessagingException, UnsupportedEncodingException {
         ActionResult actionResult = new ActionResult();
         Optional<User> optionalUser = userService.findByEmail(dto.getEmail());
@@ -226,7 +240,7 @@ public class AuthController {
         return responseBuild.build(actionResult);
     }
 
-    @PutMapping("/reset-password")
+    @PutMapping("/v1/auth/reset-password")
     public ResponseModel resetPassword(@RequestParam("token") String token, @Valid @RequestBody PasswordResetRequest passwordResetRequest) {
         ActionResult actionResult = new ActionResult();
         String result = userService.validatePasswordResetOtp(token);
@@ -244,7 +258,7 @@ public class AuthController {
         return responseBuild.build(actionResult);
     }
 
-    @PutMapping("/confirm-password")
+    @PutMapping("/v1/auth/confirm-password")
     public ResponseModel confirmPassword(@Valid @RequestBody ConfirmPassword confirmPassword) {
         ActionResult actionResult = new ActionResult();
         try {

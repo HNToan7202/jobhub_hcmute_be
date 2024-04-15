@@ -7,10 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.EmployerRegisterDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.RegisterRequest;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.LoginDTO;
-import vn.iotstar.jobhub_hcmute_be.dto.Auth.SignUpMailDTO;
+import vn.iotstar.jobhub_hcmute_be.dto.Auth.*;
 import vn.iotstar.jobhub_hcmute_be.entity.PasswordResetOtp;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
@@ -47,6 +44,8 @@ public interface UserService {
     Optional<User> findByEmail(String email);
 
     ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO);
+
+    ActionResult login(LoginReq loginDTO);
 
     ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request);
 
