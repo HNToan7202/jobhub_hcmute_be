@@ -14,7 +14,8 @@ import vn.iotstar.jobhub_hcmute_be.service.PostService;
 @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT', 'EMPLOYER')")
 @RequestMapping("/api/v1/like")
 @Tag(name = "Like", description = "Like API")
-public class LikeController {
+public class
+LikeController {
     @Autowired
     ResponseBuild responseBuild;
 

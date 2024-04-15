@@ -6,6 +6,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.dto.JobModel;
 import vn.iotstar.jobhub_hcmute_be.dto.ShortListModel;
@@ -28,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class ShortListServiceImpl implements ShortListService {
+public class ShortListServiceImpl extends RedisServiceImpl implements ShortListService {
 
     @Autowired
     ShortListRepository shortListRepository;
@@ -41,6 +42,10 @@ public class ShortListServiceImpl implements ShortListService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    public ShortListServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
     @Override
     public void deleteAllInBatch(Iterable<ShortList> entities) {
@@ -149,11 +154,11 @@ public class ShortListServiceImpl implements ShortListService {
                 Job job = jobOptional.get();
                 shortList.setUser(user);
                 shortList.setJob(job);
-
                 shortList = shortListRepository.save(shortList);
-
+                this.delete("jobs:"+userId , jobId);
                 actionResult.setData(shortList);
                 actionResult.setErrorCode(ErrorCodeEnum.ADD_SHORT_LIST_SUCCESS);
+
 
             } else {
                 actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
@@ -270,6 +275,7 @@ public class ShortListServiceImpl implements ShortListService {
                 if (shortList.getUser().getUserId().equals(userId)) {
                     deleteById(optionalShortList.get().getId());
                     actionResult.setErrorCode(ErrorCodeEnum.DELETE_SHORT_LIST_SUCCESS);
+                    this.delete("jobs:"+userId , jobId);
                 } else {
                     actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
                 }

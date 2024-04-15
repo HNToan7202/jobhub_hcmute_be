@@ -7,6 +7,7 @@ import java.util.Map;
 
 public enum ErrorCodeEnum {
     OK(200, 200, "OK/Success"),
+    REDIS_GET_SUCCESS(200, 200, "Get data from redis success"),
     NO_CONTENT(204, 204, "Not have data"),
     BAD_REQUEST(400, 400, "Bad request"),
     NOT_FOUND(404, 404, "Not found"),

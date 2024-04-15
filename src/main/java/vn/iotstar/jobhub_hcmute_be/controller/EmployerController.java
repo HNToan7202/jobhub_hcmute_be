@@ -304,6 +304,7 @@ public class EmployerController {
             String recruiterId = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = jobService.employerChangeStateJob(recruiterId, jobId);
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);

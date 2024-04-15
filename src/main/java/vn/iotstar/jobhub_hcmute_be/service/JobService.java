@@ -55,7 +55,7 @@ public interface JobService {
     List<Job> findAllByIsActive(Boolean isActive);
 
 
-    ActionResult getAllJobs(Pageable pageable, Boolean isActive);
+    ActionResult getAllJobs(int index, int size, Boolean isActive);
 
     ActionResult getAlls(Boolean isActive);
 
