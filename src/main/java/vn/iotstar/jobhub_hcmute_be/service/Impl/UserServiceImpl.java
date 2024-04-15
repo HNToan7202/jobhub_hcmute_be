@@ -6,8 +6,13 @@ import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.*;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -34,17 +40,22 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
+
+import vn.iotstar.jobhub_hcmute_be.service.*;
+import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
+
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmailVerificationService;
 import vn.iotstar.jobhub_hcmute_be.service.RefreshTokenService;
 import vn.iotstar.jobhub_hcmute_be.service.UserService;
+
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends RedisServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
@@ -87,6 +98,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmployerRepository employerRepository;
+
+    public UserServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
 
     @Override
@@ -143,7 +158,6 @@ public class UserServiceImpl implements UserService {
     private Environment env;
 
 
-
     @Override
     public ActionResult getProfile(String userId) {
         ActionResult actionResult = new ActionResult();
@@ -180,7 +194,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-
+    // Lưu thông tin xác thực của người dùng vào Redis
+    public void saveUserDetailToRedis(UserDetail userDetails, String accessToken, Object credentials, Object principal) {
+        this.saveSession(accessToken, userDetails, credentials, principal);
+    }
     @Override
     public ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO) {
 
@@ -208,9 +225,9 @@ public class UserServiceImpl implements UserService {
         }
 
         //Optional<User> optionalUser = findByEmail(loginDTO.getUserLogin());
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(),
-                        loginDTO.getPassword()));
+        UsernamePasswordAuthenticationToken authRequest =
+                new UsernamePasswordAuthenticationToken(loginDTO.getUserLogin(), loginDTO.getPassword());
+        Authentication authentication = authenticationManager.authenticate(authRequest);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetail userDetail = (UserDetail) authentication.getPrincipal();
         String accessToken = jwtTokenProvider.generateAccessToken(userDetail);
@@ -218,13 +235,25 @@ public class UserServiceImpl implements UserService {
         String token = jwtTokenProvider.generateRefreshToken(userDetail);
         refreshToken.setToken(token);
         refreshToken.setUser(userDetail.getUser());
+        if(this.exists(userDetail.getUser().getUserId())){
+            this.deleteSession(userDetail.getUser().getUserId());
+        }
+        saveUserDetailToRedis(userDetail, userDetail.getUser().getUserId() ,authRequest.getCredentials(),authRequest.getPrincipal());
         //invalid all refreshToken before
         refreshTokenService.revokeRefreshToken(userDetail.getUserId());
         refreshTokenService.save(refreshToken);
+<
+        String username = CurrentUserUtils.getCurrentUserName();
+        String userId = CurrentUserUtils.getCurrentUserId();
+
+
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("accessToken", accessToken);
         tokenMap.put("refreshToken", token);
         tokenMap.put("role", userDetail.getUser().getRole().getName());
+
+        tokenMap.put("username", username);
+        tokenMap.put("userId", userId);
 
         if (optionalUser.isPresent()) {
             optionalUser.get().setLastLoginAt(new Date());
@@ -239,6 +268,7 @@ public class UserServiceImpl implements UserService {
                 .build());
 
     }
+
 
 
     @Override
@@ -289,6 +319,7 @@ public class UserServiceImpl implements UserService {
 
 
     }
+
 
     @Override
     public ResponseEntity<GenericResponse> changeUserPassord(User user, PasswordResetRequest request) {

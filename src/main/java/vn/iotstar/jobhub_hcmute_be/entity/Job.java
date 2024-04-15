@@ -19,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "job")
+@ToString
 public class Job implements Serializable {
 
     // attribute
@@ -89,6 +90,7 @@ public class Job implements Serializable {
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "job_skill", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
     @JsonManagedReference
+    @ToString.Exclude
     private List<Skill> skills;
 
     @PrePersist
@@ -105,6 +107,10 @@ public class Job implements Serializable {
     int status;
     @JsonBackReference
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<UserJobViews> userJobViews;
     private Integer totalView;
+
+    @Column(columnDefinition = "Nvarchar(max)")
+    private String engJob;
 }

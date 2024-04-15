@@ -21,9 +21,9 @@ public class JwtTokenProvider {
     @Autowired
     UserRepository userRepository;
 
-    private final Long JWT_ACCESS_EXPIRATION = 1080000L;
-    private final Long JWT_REFRESH_EXPIRATION = 604800000L;
-    //Sau 1 ngay token se het han
+    private final Long JWT_ACCESS_EXPIRATION = 24 * 60 * 60 * 1000L;
+    private final Long JWT_REFRESH_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
+    // Thời gian hết hạn cho mã thông báo làm mới: 1 tuần (7 ngày)
 
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
     private final String issuer = "Nhom 8 TLCN";

@@ -11,6 +11,7 @@ import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
 import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
+import vn.iotstar.jobhub_hcmute_be.service.RedisService;
 
 @RestController
 @RequestMapping("/api/v1/job")
@@ -25,6 +26,9 @@ public class JobController {
     final
     ResponseBuild responseBuild;
 
+
+
+
     public JobController(JwtTokenProvider jwtTokenProvider, JobService jobService, ResponseBuild responseBuild) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.jobService = jobService;
@@ -35,7 +39,7 @@ public class JobController {
     public ResponseModel getAllJobs(@RequestParam(defaultValue = "0") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "true", required = false) Boolean isActive) {
         ActionResult actionResult = new ActionResult();
         try {
-            actionResult = jobService.getAllJobs(PageRequest.of(index, size), isActive);
+            actionResult = jobService.getAllJobs(index, size, isActive);
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }

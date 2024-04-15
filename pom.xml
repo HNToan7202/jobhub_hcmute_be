@@ -28,8 +28,6 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -241,8 +239,6 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-
-
         <!-- https://mvnrepository.com/artifact/org.owasp.encoder/encoder -->
         <dependency>
             <groupId>org.owasp.encoder</groupId>
@@ -299,7 +295,17 @@
             <artifactId>flying-saucer-pdf</artifactId>
             <version>9.1.22</version> <!-- Kiểm tra phiên bản mới nhất -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
+        <!-- Lettuce Core (Redis client) -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.4.1</version>
+        </dependency>
 
     </dependencies>
 

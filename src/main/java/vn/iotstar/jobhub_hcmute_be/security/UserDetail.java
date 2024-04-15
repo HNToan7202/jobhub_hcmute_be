@@ -1,5 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.security;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,9 +16,8 @@ import java.util.List;
 
 @Data
 public class UserDetail implements UserDetails {
-
+    @JsonManagedReference("userDetail-user")
     private User user;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -26,6 +27,7 @@ public class UserDetail implements UserDetails {
         authorities.add(new SimpleGrantedAuthority("ROLE_"+user.getRole().getName()));
         return authorities;
     }
+
 
     public String getUserId() {
         return user.getUserId();

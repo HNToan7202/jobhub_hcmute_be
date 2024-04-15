@@ -1,13 +1,16 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
@@ -25,7 +28,7 @@ import java.util.*;
 @Service
 @Transactional
 @Slf4j
-public class JobServiceImpl implements JobService {
+public class JobServiceImpl extends RedisServiceImpl implements JobService {
 
     @Autowired
     JobRepository jobRepository;
@@ -40,6 +43,7 @@ public class JobServiceImpl implements JobService {
     SkillRepository skillRepository;
 
     ActionResult actionResult;
+    ObjectMapper objectMapper;
 
     Map<String, Object> response;
 
@@ -54,6 +58,10 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    public JobServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
 
     @Scheduled(cron = "0 0 0 * * *") // Chạy mỗi ngày lúc 00:00:00
@@ -129,13 +137,22 @@ public class JobServiceImpl implements JobService {
     public Page<Job> findAllByEmployer_UserId(String employerId, Pageable pageable) {
         return jobRepository.findAllByEmployer_UserId(employerId, pageable);
     }
-
-
+    private void deleteRedisJobs() {
+        if (this.exists("jobs")) this.delete("jobs");
+    }
     // @Cacheable(value = "applicationCache", key = "#jobId")
     @Override
     public ActionResult getDetail(String jobId) {
         ActionResult actionResult = new ActionResult();
         try {
+            objectMapper = new ObjectMapper();
+            if(this.hashExists("jobs", jobId)) {
+                Object jobs = this.hashGet("jobs", jobId);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+            }
             Optional<Job> optional = findById(jobId);
             if (optional.isPresent()) {
                 JobDTO jobDTO = new JobDTO();
@@ -143,6 +160,7 @@ public class JobServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
+                this.hashSet("jobs", jobId, objectMapper.writeValueAsString(jobDTO));
                 actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
                 actionResult.setData(jobDTO);
                 return actionResult;
@@ -193,10 +211,23 @@ public class JobServiceImpl implements JobService {
                 // kiểm tra xem userId đã apply vao job hay chưa
                 boolean isApplied = job.getJobApplies().stream().anyMatch(jobApply -> jobApply.getStudent().getUserId().equals(userId));
                 // kiểm tra xem userId đã shortlist vao job hay chưa
-                Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
+//                Optional<ShortList> shortList = shortListRepository.findByJob_JobId(jobId);
+                Optional <ShortList> shortList1 = shortListRepository.findByJob_JobIdAndUser_UserId(jobId, userId);
                 boolean isShortList = false;
-                if (shortList.isPresent()) {
-                    isShortList = shortList.get().getUser().getUserId().equals(userId);
+                if(shortList1.isPresent()) {
+                    isShortList = true;
+                }
+                System.out.println(shortList1);
+//                if (shortList.isPresent()) {
+//                    isShortList = shortList.get().getUser().getUserId().equals(userId);
+//                }
+                objectMapper = new ObjectMapper();
+                if(this.hashExists("jobs:"+ userId , jobId)) {
+                    Object jobs = this.hashGet("jobs:"+ userId, jobId);
+                    HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                    actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                    actionResult.setData(data);
+                    return actionResult;
                 }
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
@@ -205,7 +236,7 @@ public class JobServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-
+                this.hashSet("jobs:"+userId, jobId, objectMapper.writeValueAsString(jobDTO));
                 actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
                 actionResult.setData(jobDTO);
                 return actionResult;
@@ -216,6 +247,7 @@ public class JobServiceImpl implements JobService {
             }
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            System.out.println(e.getMessage());
             return actionResult;
         }
     }
@@ -281,26 +313,36 @@ public class JobServiceImpl implements JobService {
 
     // @Cacheable("jobs")
     @Override
-    public ActionResult getAllJobs(Pageable pageable, Boolean isActive) {
+    public ActionResult getAllJobs( int index, int size , Boolean isActive) {
         actionResult = new ActionResult();
         try {
-            Page<Job> jobs = findAllByIsActiveOrderByCreatedAtDesc(isActive, pageable);
+            objectMapper = new ObjectMapper();
+            String indexStr = String.valueOf(index);
+            if(this.hashExists("jobs",indexStr )) {
+               Object jobs = this.hashGet("jobs", indexStr);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+            }
+            Page<Job> jobs = findAllByIsActiveOrderByCreatedAtDesc(isActive, PageRequest.of(index, size));
             response = new HashMap<>();
             response.put("jobs", jobs.getContent());
             response.put("currentPage", jobs.getNumber());
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
+            String jsonData = objectMapper.writeValueAsString(response);
+            this.hashSet("jobs", indexStr, jsonData);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
             actionResult.setData(response);
             return actionResult;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
             return actionResult;
         }
     }
 
-
-    // @Cacheable("jobList")
     @Override
     public ActionResult getAlls(Boolean isActive) {
         actionResult = new ActionResult();
@@ -325,10 +367,7 @@ public class JobServiceImpl implements JobService {
             actionResult.setErrorCode(ErrorCodeEnum.JOB_EXISTED);
             return actionResult;
         }
-
-
         try {
-
             Job job = new Job();
             Optional<Employer> optional = employerRepository.findById(employerId);
             if (optional.isPresent() && optional.get().getEmployState() == EmployState.ACTIVE) {
@@ -387,12 +426,10 @@ public class JobServiceImpl implements JobService {
             job.setSkills(skills);
             job.setIsActive(true);
 
-
             job = jobRepository.save(job);
-
+            deleteRedisJobs();
 //            JobModel jobModel = convertJobToJobModel(job);
 //            save(jobModel);
-
 
             JobDTO jobResponse = new JobDTO();
             BeanUtils.copyProperties(job, jobResponse);
@@ -459,6 +496,7 @@ public class JobServiceImpl implements JobService {
                     job.setSkills(skills);
 
                     Job updatedJob = updateJob(job);
+                    deleteRedisJobs();
                     JobDTO jobResponse = new JobDTO();
                     BeanUtils.copyProperties(updatedJob, jobResponse);
                     if (updatedJob != null) {
@@ -485,30 +523,42 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ActionResult getAllJobsByFilters(String name, String posName, String location, Pageable pageable) {
-
         ActionResult actionResult = new ActionResult();
-
-        Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
-
-        List<JobDTO> jobDTOs = jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
-            JobDTO jobDTO = new JobDTO();
-            BeanUtils.copyProperties(job, jobDTO);
-            CompanyDTO companyDTO = new CompanyDTO();
-            BeanUtils.copyProperties(job.getEmployer(), companyDTO);
-            jobDTO.setCompany(companyDTO);
-            return jobDTO;
-        }).toList();
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("content", jobDTOs);
-        map.put("pageNumber", jobs.getNumber());
-        map.put("pageSize", jobs.getSize());
-        map.put("totalPages", jobs.getTotalPages());
-        map.put("totalElements", jobs.getTotalElements());
-        actionResult.setData(map);
-        actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_FILTER_SUCCESS);
-
-        return actionResult;
+        try{
+            objectMapper = new ObjectMapper();
+            String key = name + posName + location + pageable.getPageNumber() + pageable.getPageSize();
+            if(this.hashExists("jobs", key)) {
+                Object jobs = this.hashGet("jobs", key);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+            }
+            Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
+            List<JobDTO> jobDTOs = jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
+                JobDTO jobDTO = new JobDTO();
+                BeanUtils.copyProperties(job, jobDTO);
+                CompanyDTO companyDTO = new CompanyDTO();
+                BeanUtils.copyProperties(job.getEmployer(), companyDTO);
+                jobDTO.setCompany(companyDTO);
+                return jobDTO;
+            }).toList();
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("content", jobDTOs);
+            map.put("pageNumber", jobs.getNumber());
+            map.put("pageSize", jobs.getSize());
+            map.put("totalPages", jobs.getTotalPages());
+            map.put("totalElements", jobs.getTotalElements());
+            String jsonData = objectMapper.writeValueAsString(map);
+            this.hashSet("jobs", key, jsonData);
+            actionResult.setData(map);
+            actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_FILTER_SUCCESS);
+            return actionResult;
+        }
+        catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            return actionResult;
+        }
     }
 
     @Override
@@ -521,6 +571,7 @@ public class JobServiceImpl implements JobService {
             Job job = jobOptional.get(); //(5)
             job.setIsActive(!job.getIsActive()); //(6)
             jobRepository.save(job); //(7)
+            deleteRedisJobs();
             actionResult.setData(job); //(8)
             actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
         }
@@ -538,6 +589,7 @@ public class JobServiceImpl implements JobService {
             if (job.getEmployer().getUserId().equals(userId)) {
                 job.setIsActive(!job.getIsActive()); //(6)
                 jobRepository.save(job); //(7)
+                deleteRedisJobs();
                 actionResult.setData(job); //(8)
                 actionResult.setErrorCode(ErrorCodeEnum.OK); //(9)
             } else {

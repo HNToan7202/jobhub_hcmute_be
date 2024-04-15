@@ -1,10 +1,13 @@
 package vn.iotstar.jobhub_hcmute_be.utils;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
+import vn.iotstar.jobhub_hcmute_be.service.Impl.RedisServiceImpl;
 
 public class CurrentUserUtils {
+
     public static String getCurrentUserName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication != null) {
@@ -22,4 +25,5 @@ public class CurrentUserUtils {
             return "";
         }
     }
+
 }
