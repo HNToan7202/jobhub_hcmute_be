@@ -242,7 +242,6 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         //invalid all refreshToken before
         refreshTokenService.revokeRefreshToken(userDetail.getUserId());
         refreshTokenService.save(refreshToken);
-<
         String username = CurrentUserUtils.getCurrentUserName();
         String userId = CurrentUserUtils.getCurrentUserId();
 
