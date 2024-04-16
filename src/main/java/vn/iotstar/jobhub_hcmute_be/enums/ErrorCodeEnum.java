@@ -153,7 +153,9 @@ public enum ErrorCodeEnum {
     ACCOUNT_NOT_VERIFIED(400, 400, "Account not verified"),
 
     LOGIN_SUCCESSFULLY(200, 200, "Login successfully"),
-    FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed");
+    REDIS_GET_ERROR(400, 400, "Get data from redis error"),
+    FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed"),
+    PHONE_EXISTED(400, 400, "Phone existed");
 
 
     private static final Map<Integer, ErrorCodeEnum> map = new HashMap<>();

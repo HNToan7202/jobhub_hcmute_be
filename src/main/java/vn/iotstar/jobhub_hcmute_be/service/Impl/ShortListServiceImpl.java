@@ -22,6 +22,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.ShortListRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.service.ShortListService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -155,7 +156,7 @@ public class ShortListServiceImpl extends RedisServiceImpl implements ShortListS
                 shortList.setUser(user);
                 shortList.setJob(job);
                 shortList = shortListRepository.save(shortList);
-                this.delete("jobs:"+userId , jobId);
+                this.delete(Constants.JOBS, userId + jobId);
                 actionResult.setData(shortList);
                 actionResult.setErrorCode(ErrorCodeEnum.ADD_SHORT_LIST_SUCCESS);
 
@@ -275,7 +276,8 @@ public class ShortListServiceImpl extends RedisServiceImpl implements ShortListS
                 if (shortList.getUser().getUserId().equals(userId)) {
                     deleteById(optionalShortList.get().getId());
                     actionResult.setErrorCode(ErrorCodeEnum.DELETE_SHORT_LIST_SUCCESS);
-                    this.delete("jobs:"+userId , jobId);
+                    this.delete(Constants.JOBS, userId + jobId);
+
                 } else {
                     actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
                 }

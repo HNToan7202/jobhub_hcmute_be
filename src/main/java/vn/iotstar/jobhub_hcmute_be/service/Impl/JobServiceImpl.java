@@ -21,6 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.JobService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
 
 import java.util.*;
@@ -138,7 +139,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         return jobRepository.findAllByEmployer_UserId(employerId, pageable);
     }
     private void deleteRedisJobs() {
-        if (this.exists("jobs")) this.delete("jobs");
+        if (this.exists(Constants.JOBS)) this.delete(Constants.JOBS);
     }
     // @Cacheable(value = "applicationCache", key = "#jobId")
     @Override
@@ -146,12 +147,13 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         ActionResult actionResult = new ActionResult();
         try {
             objectMapper = new ObjectMapper();
-            if(this.hashExists("jobs", jobId)) {
-                Object jobs = this.hashGet("jobs", jobId);
+            if (this.hashExists(Constants.JOBS, jobId)) {
+                Object jobs = this.hashGet(Constants.JOBS, jobId);
                 HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
                 actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
                 actionResult.setData(data);
                 return actionResult;
+
             }
             Optional<Job> optional = findById(jobId);
             if (optional.isPresent()) {
@@ -160,7 +162,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-                this.hashSet("jobs", jobId, objectMapper.writeValueAsString(jobDTO));
+                this.hashSet(Constants.JOBS, jobId, objectMapper.writeValueAsString(jobDTO));
                 actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
                 actionResult.setData(jobDTO);
                 return actionResult;
@@ -179,6 +181,14 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
     public ActionResult getDetail(String jobId, String userId) {
         ActionResult actionResult = new ActionResult();
         try {
+            if (this.hashExists(Constants.JOBS ,userId + jobId)) {
+                Object jobs = this.hashGet(Constants.JOBS ,userId + jobId);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+
+            }
             Optional<Job> optional = findById(jobId);
             Optional<User> user = userRepository.findByUserId(CurrentUserUtils.getCurrentUserId());
             Optional<Student> student = studentRepository.findById(userId);
@@ -222,13 +232,6 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
 //                    isShortList = shortList.get().getUser().getUserId().equals(userId);
 //                }
                 objectMapper = new ObjectMapper();
-                if(this.hashExists("jobs:"+ userId , jobId)) {
-                    Object jobs = this.hashGet("jobs:"+ userId, jobId);
-                    HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
-                    actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
-                    actionResult.setData(data);
-                    return actionResult;
-                }
                 JobDTO jobDTO = new JobDTO();
                 BeanUtils.copyProperties(optional.get(), jobDTO);
                 jobDTO.setIsApplied(isApplied);
@@ -236,7 +239,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
                 CompanyDTO companyDTO = new CompanyDTO();
                 BeanUtils.copyProperties(optional.get().getEmployer(), companyDTO);
                 jobDTO.setCompany(companyDTO);
-                this.hashSet("jobs:"+userId, jobId, objectMapper.writeValueAsString(jobDTO));
+                this.hashSet(Constants.JOBS,userId+ jobId, objectMapper.writeValueAsString(jobDTO));
                 actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_DETAIL_SUCCESS);
                 actionResult.setData(jobDTO);
                 return actionResult;
@@ -317,9 +320,9 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         actionResult = new ActionResult();
         try {
             objectMapper = new ObjectMapper();
-            String indexStr = String.valueOf(index);
-            if(this.hashExists("jobs",indexStr )) {
-               Object jobs = this.hashGet("jobs", indexStr);
+            String indexStr = String.valueOf(index)+String.valueOf(size);
+            if (this.hashExists(Constants.JOBS, indexStr)) {
+                Object jobs = this.hashGet(Constants.JOBS, indexStr);
                 HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
                 actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
                 actionResult.setData(data);
@@ -332,7 +335,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
             response.put("totalItems", jobs.getTotalElements());
             response.put("totalPages", jobs.getTotalPages());
             String jsonData = objectMapper.writeValueAsString(response);
-            this.hashSet("jobs", indexStr, jsonData);
+            this.hashSet(Constants.JOBS, indexStr, jsonData);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
             actionResult.setData(response);
             return actionResult;
@@ -527,12 +530,13 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         try{
             objectMapper = new ObjectMapper();
             String key = name + posName + location + pageable.getPageNumber() + pageable.getPageSize();
-            if(this.hashExists("jobs", key)) {
-                Object jobs = this.hashGet("jobs", key);
+            if (this.hashExists(Constants.JOBS, key)) {
+                Object jobs = this.hashGet(Constants.JOBS, key);
                 HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
                 actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
                 actionResult.setData(data);
                 return actionResult;
+
             }
             Page<Job> jobs = jobRepository.findJobs(name, posName, location, pageable);
             List<JobDTO> jobDTOs = jobs.getContent().stream().filter(job -> job.getIsActive() == true).map(job -> {
@@ -550,7 +554,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
             map.put("totalPages", jobs.getTotalPages());
             map.put("totalElements", jobs.getTotalElements());
             String jsonData = objectMapper.writeValueAsString(map);
-            this.hashSet("jobs", key, jsonData);
+            this.hashSet(Constants.JOBS, key, jsonData);
             actionResult.setData(map);
             actionResult.setErrorCode(ErrorCodeEnum.GET_JOB_BY_FILTER_SUCCESS);
             return actionResult;

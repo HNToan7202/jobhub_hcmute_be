@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.dto.EmployerRequest;
@@ -15,6 +16,7 @@ import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.AdminService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl extends RedisServiceImpl implements AdminService {
 
     @Autowired
     private AdminRepository adminRepository;
@@ -53,6 +55,10 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     TransactionsRepository transactionsRepository;
+
+    public AdminServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
     @Override
     @Deprecated
@@ -99,12 +105,14 @@ public class AdminServiceImpl implements AdminService {
             if (employerRequest.getEmployState() == EmployState.ACTIVE) {
                 employer.setEmployState(EmployState.ACTIVE);
                 employerRepository.save(employer);
+                if (this.exists(Constants.EMPLOYERS)) this.delete(Constants.EMPLOYERS);
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYR_ACCEPT_SUCCESS);
                 return actionResult;
             }
             if (employerRequest.getEmployState() == EmployState.NOT_ACTIVE) {
                 employer.setEmployState(EmployState.NOT_ACTIVE);
                 employerRepository.save(employer);
+                if (this.exists(Constants.EMPLOYERS)) this.delete(Constants.EMPLOYERS);
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYER_NOT_ACTIVE_SUCCESS);
                 return actionResult;
             }
