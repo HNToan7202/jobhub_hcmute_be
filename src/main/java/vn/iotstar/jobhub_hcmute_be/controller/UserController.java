@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -107,7 +108,7 @@ public class UserController {
         ActionResult actionResult = new ActionResult();
         try {
             actionResult = userService.getProfile(userId);
-        } catch (ClassCastException e) {
+        } catch (ClassCastException | JsonProcessingException e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
@@ -128,6 +129,8 @@ public class UserController {
             actionResult = userService.getAllEmployer(PageRequest.of(index, size), companyName, address, teamSize);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
         return responseBuild.build(actionResult);
     }
@@ -139,6 +142,9 @@ public class UserController {
             actionResult = userService.detailProfileEmployer(employerId);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
         return responseBuild.build(actionResult);
     }

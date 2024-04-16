@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,9 @@ public class AdminController {
             actionResult = userService.getProfileAdmin(userId);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+        } catch (JsonProcessingException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
         return responseBuild.build(actionResult);
     }

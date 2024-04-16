@@ -1,5 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
@@ -42,6 +44,7 @@ import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 
 import vn.iotstar.jobhub_hcmute_be.service.*;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
 
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
@@ -99,8 +102,11 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
     @Autowired
     private EmployerRepository employerRepository;
 
-    public UserServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+    ObjectMapper objectMapper;
+
+    public UserServiceImpl(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
         super(redisTemplate);
+        this.objectMapper = objectMapper;
     }
 
 
@@ -159,31 +165,49 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
 
 
     @Override
-    public ActionResult getProfile(String userId) {
+    public ActionResult getProfile(String userId) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
+        objectMapper = new ObjectMapper();
+        if (this.hashExists(Constants.USERS, userId)) {
+                Object jobs = this.hashGet(Constants.USERS, userId);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                data.put("dateOfBirth", new Date((Long) data.get("dateOfBirth")));
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+        }
         Optional<Student> student = studentRepository.findById(userId);
-
         if (student.isEmpty())
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         else {
             ProfileDTO profileDTO = new ProfileDTO();
             BeanUtils.copyProperties(student.get(), profileDTO);
             actionResult.setData(profileDTO);
+            this.hashSet(Constants.USERS, userId, objectMapper.writeValueAsString(profileDTO));
             actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
         }
         return actionResult;
     }
 
     @Override
-    public ActionResult getProfileAdmin(String userId) {
+    public ActionResult getProfileAdmin(String userId) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
         Optional<Admin> student = adminRepository.findById(userId);
         if (student.isEmpty())
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         else {
+            objectMapper = new ObjectMapper();
+            if (this.hashExists(Constants.USERS, userId)) {
+                Object jobs = this.hashGet(Constants.USERS, userId);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+                return actionResult;
+            }
             ProfileDTO profileDTO = new ProfileDTO();
             BeanUtils.copyProperties(student.get(), profileDTO);
             actionResult.setData(profileDTO);
+            this.hashSet(Constants.USERS, userId, objectMapper.writeValueAsString(profileDTO));
             actionResult.setErrorCode(ErrorCodeEnum.GET_ADMIN_PROFILE_SUCCESSFULLY);
         }
         return actionResult;
@@ -383,6 +407,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
 
         user.setEmployState(EmployState.PENDDING);
         user = save(user);
+        if (this.exists(Constants.EMPLOYERS)) this.delete(Constants.EMPLOYERS);
         emailVerificationService.sendOtpEmployer(employerRegisterDTO.getEmail(), employerRegisterDTO.getFullName());
 
         return ResponseEntity.ok(
@@ -607,10 +632,17 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         save(user);
     }
-
     @Override
-    public ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize) {
+    public ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
+        String field = pageable.getPageNumber() + pageable.getPageSize()  + companyName + teamSize;
+        if (this.hashExists(Constants.EMPLOYERS, field)) {
+            Object jobs = this.hashGet(Constants.EMPLOYERS, field);
+            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+            actionResult.setData(data);
+            return actionResult;
+        }
         Page<Employer> employers = employerRepository.findEmployers(pageable, companyName, teamSize);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("employers", employers.getContent());
@@ -618,20 +650,31 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         map.put("pageSize", employers.getSize());
         map.put("totalPages", employers.getTotalPages());
         map.put("totalElements", employers.getTotalElements());
+        this.hashSet(Constants.EMPLOYERS, field, objectMapper.writeValueAsString(map));
         actionResult.setData(map);
         actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_EMPLOYER_SUCCESSFULLY);
         return actionResult;
     }
 
     @Override
-    public ActionResult detailProfileEmployer(String employerId) {
+    public ActionResult detailProfileEmployer(String employerId) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
+        objectMapper = new ObjectMapper();
+        if (this.hashExists(Constants.EMPLOYERS, employerId)) {
+            Object jobs = this.hashGet(Constants.EMPLOYERS, employerId);
+            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+            actionResult.setData(data);
+            return actionResult;
+        }
         Optional<Employer> employer = employerRepository.findById(employerId);
         if (employer.isEmpty()) {
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
         } else {
+
             EmployerDTO employerDTO = new EmployerDTO();
             BeanUtils.copyProperties(employer.get(), employerDTO);
+            this.hashSet(Constants.EMPLOYERS, employerId, objectMapper.writeValueAsString(employerDTO));
             actionResult.setData(employerDTO);
             actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_EMPLOYER_SUCCESSFULLY);
         }

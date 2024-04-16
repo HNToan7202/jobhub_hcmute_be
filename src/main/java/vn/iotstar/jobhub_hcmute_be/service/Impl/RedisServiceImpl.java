@@ -1,19 +1,20 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.entity.Permission;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
+import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
+import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.SessionModel;
 import vn.iotstar.jobhub_hcmute_be.security.UserDetail;
 import vn.iotstar.jobhub_hcmute_be.service.RedisService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 @Service
 public class RedisServiceImpl  implements RedisService {
@@ -21,6 +22,7 @@ public class RedisServiceImpl  implements RedisService {
     private final HashOperations<String, String, Object> hashOperations;
     private static final String REDIS_SESSION_PREFIX = "session:";
     private static final long SESSION_EXPIRATION_DAY = 1;
+
 
     public RedisServiceImpl(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -134,4 +136,31 @@ public class RedisServiceImpl  implements RedisService {
         hashOperations.delete(key, fields.toArray());
 
     }
+
+    public ActionResult check_Exits(String key, String field) {
+        ActionResult actionResult = new ActionResult();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (this.hashExists(key, field)) {
+                Object jobs = this.hashGet(key, field);
+                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+                actionResult.setData(data);
+
+            }
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_ERROR);
+        }
+        finally {
+            actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+        }
+
+        return actionResult;
+    }
+
+
+    public void delete_Exits(String key, String field) {
+        if (this.hashExists(key, field)) this.delete(key, field);
+    }
+
 }

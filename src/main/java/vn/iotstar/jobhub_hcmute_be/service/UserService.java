@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +38,9 @@ public interface UserService {
 
     Page<User> findAll(Pageable pageable);
 
-    ActionResult getProfile(String userId);
+    ActionResult getProfile(String userId) throws JsonProcessingException;
 
-    ActionResult getProfileAdmin(String userId);
+    ActionResult getProfileAdmin(String userId) throws JsonProcessingException;
 
     Optional<User> findByEmail(String email);
 
@@ -69,9 +70,9 @@ public interface UserService {
 
     void changeUserPassword(User user, String newPassword, String confirmPassword);
 
-    ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize);
+    ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize) throws JsonProcessingException;
 
-    ActionResult detailProfileEmployer(String employerId);
+    ActionResult detailProfileEmployer(String employerId) throws JsonProcessingException;
 
     ActionResult confirmPassword(ConfirmPassword confirmPassword);
 

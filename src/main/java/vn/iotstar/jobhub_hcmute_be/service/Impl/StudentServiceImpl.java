@@ -3,6 +3,7 @@ package vn.iotstar.jobhub_hcmute_be.service.Impl;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.ResumeUploadRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.StudentService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,7 +30,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class StudentServiceImpl implements StudentService {
+public class StudentServiceImpl extends RedisServiceImpl implements StudentService {
 
     @Autowired
     StudentRepository studentRepository;
@@ -44,6 +46,10 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     ResumeUploadRepository resumeUploadRepository;
+
+    public StudentServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
     @Override
     public List<Student> findAll() {
@@ -135,14 +141,18 @@ public class StudentServiceImpl implements StudentService {
         ActionResult actionResult = new ActionResult();
         Optional<Student> user = findById(userId);
         String phone =  request.getPhone();
-        if (user.isEmpty())
-            throw new Exception("User doesn't exist");
-        if(!phone.isEmpty()){
-            Optional<Student> optional = studentRepository.findByPhoneAndIsActiveIsTrue(phone);
-            if(optional.isPresent() && !optional.get().getUserId().equals(userId))
-                throw new Exception("Phone number already in use");
+        if (user.isEmpty()){
+            actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+            return actionResult;
         }
-
+//        if(!phone.isEmpty()){
+//            Optional<Student> optional = studentRepository.findByPhoneAndIsActiveIsTrue(phone);
+//            if(optional.isPresent() && !optional.get().getUserId().equals(userId))
+//            {
+//                actionResult.setErrorCode(ErrorCodeEnum.PHONE_EXISTED);
+//                return actionResult;
+//            }
+//        }
         user.get().setGender(Gender.valueOf(String.valueOf(request.getGender())));
         user.get().setPhone(phone);
         user.get().setFullName(request.getFullName());
@@ -150,7 +160,7 @@ public class StudentServiceImpl implements StudentService {
         user.get().setAddress(request.getAddress());
         user.get().setAbout(request.getAbout());
         save(user.get());
-
+        this.delete(Constants.USERS, userId);
         actionResult.setData(user.get());
         actionResult.setErrorCode(ErrorCodeEnum.UPDATE_PROFILE_SUCCESS);
         return actionResult;

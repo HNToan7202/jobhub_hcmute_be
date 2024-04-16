@@ -1,5 +1,6 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,9 @@ public class StudentController {
             actionResult = userService.getProfile(userId);
         } catch (ClassCastException e) {
             actionResult.setErrorCode(ErrorCodeEnum.UNAUTHORIZED);
+        } catch (JsonProcessingException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
         return responseBuild.build(actionResult);
     }
@@ -195,6 +199,7 @@ public class StudentController {
             String userIdFromToken = jwtTokenProvider.getUserIdFromJwt(token);
             actionResult = studentService.updateProfile(userIdFromToken, request);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
         }
         return responseBuild.build(actionResult);
