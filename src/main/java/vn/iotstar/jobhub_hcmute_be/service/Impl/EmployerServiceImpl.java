@@ -9,6 +9,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import vn.iotstar.jobhub_hcmute_be.model.InterviewModel;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.EmployerService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -38,7 +40,7 @@ import java.util.function.Function;
 
 @Service
 @Transactional
-public class EmployerServiceImpl implements EmployerService {
+public class EmployerServiceImpl extends RedisServiceImpl implements EmployerService {
 
     @Autowired
     EmployerRepository employerRepository;
@@ -74,6 +76,10 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Autowired
     TransactionsRepository transactionsRepository;
+
+    public EmployerServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
 
     public Page<JobApply> findAllByJob_Employer_UserId(Pageable pageable, String userId) {
@@ -219,7 +225,9 @@ public class EmployerServiceImpl implements EmployerService {
         BeanUtils.copyProperties(request, employer);
 
         employer = save(employer);
-
+        if(this.hashExists(Constants.EMPLOYERS, userId))
+            this.delete(Constants.EMPLOYERS, userId);
+        if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
         return ResponseEntity.ok(
                 GenericResponse.builder()
                         .success(true)

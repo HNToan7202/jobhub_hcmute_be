@@ -106,6 +106,7 @@ public class AdminServiceImpl extends RedisServiceImpl implements AdminService {
                 employer.setEmployState(EmployState.ACTIVE);
                 employerRepository.save(employer);
                 if (this.exists(Constants.EMPLOYERS)) this.delete(Constants.EMPLOYERS);
+                if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYR_ACCEPT_SUCCESS);
                 return actionResult;
             }
@@ -113,6 +114,7 @@ public class AdminServiceImpl extends RedisServiceImpl implements AdminService {
                 employer.setEmployState(EmployState.NOT_ACTIVE);
                 employerRepository.save(employer);
                 if (this.exists(Constants.EMPLOYERS)) this.delete(Constants.EMPLOYERS);
+                if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
                 actionResult.setErrorCode(ErrorCodeEnum.EMPLOYER_NOT_ACTIVE_SUCCESS);
                 return actionResult;
             }

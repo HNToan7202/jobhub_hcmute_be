@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
 import vn.iotstar.jobhub_hcmute_be.entity.User;
@@ -166,5 +168,16 @@ public class UserController {
         }
         return responseBuild.build(actionResult);
     }
-
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYER','ADMIN')")
+    @PutMapping("/setting-mail")
+    public ResponseModel settingMail(@Validated @RequestBody SettingSendMailDto settingSendMailDto) {
+        ActionResult actionResult = userService.settingSendMail(settingSendMailDto);
+        return responseBuild.build(actionResult);
+    }
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYER','ADMIN')")
+    @GetMapping("/get-setting-mail")
+    public ResponseModel getSettingMail() {
+        ActionResult actionResult = userService.getSettingMail();
+        return responseBuild.build(actionResult);
+    }
 }

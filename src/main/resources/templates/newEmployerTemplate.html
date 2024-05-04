@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JOB_HUB_Scheduler</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .verify-text {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .verify-link {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            background-color:#3498db;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            max-width: 300px;
+            margin: 0 auto;
+            border: none;
+        }
+        .dropdown {
+            padding: 12px ;
+            display: flex;
+            justify-content: space-between;
+
+        }
+        .dropbtn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: black;
+            width: 100%;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown-content button:hover {background-color: #f1f1f1;}
+
+        .dropdown:hover .dropdown-content {display: block;}
+
+        .dropdown:hover .dropbtn {background-color: #2980b9;}
+
+
+    </style>
+</head>
+<script>
+    function handleSelection(element) {
+        var selectedPage = element.textContent;
+        // Thực hiện yêu cầu API với trang được chọn
+        fetch('http://localhost:8080/api/v1/sendMail/listUser/' + selectedPage, {
+            method: 'GET', // Sử dụng phương thức GET
+            headers: {
+                'Content-Type': 'application/json'
+                // Thêm bất kỳ tiêu đề nào khác cần thiết cho yêu cầu của bạn
+            }
+        })
+            .then(response => {
+                // Xử lý phản hồi từ API ở đây
+                console.log('Đã gọi API thành công');
+            })
+            .catch(error => {
+                // Xử lý lỗi nếu có
+                console.error('Đã xảy ra lỗi khi gọi API:', error);
+            });
+    }
+</script>
+<body>
+<h1>NEW EMPLOYER LIST</h1>
+<p>Time: <span th:text="${startOfDayYesterday}"></span> - <span th:text="${endOfDayYesterday}"></span></p>
+<p>Number of new users: <span th:text="${count}"></span></p>
+<div class="verify-text">
+    <a th:href="@{'http://localhost:8080/api/v1/file/downloadNewUserList?page='+${currentPage} +'&size=100&roleStr=EMPLOYER&startOfDayYesterday='+${startOfDayYesterday} +'&endOfDayYesterday='+ ${endOfDayYesterday } }">
+        <button class="verify-link">
+            DOWNLOAD EXCEL
+        </button>
+    </a>
+</div>
+<div class="dropdown">
+    <div class="verify-text">
+        <button class="dropbtn">Page</button>
+    </div>
+    <div class="dropdown-content">
+        <button th:each="page : ${#numbers.sequence(0, totalPage - 1)}"
+                th:text="${page + 1}"
+                th:if="${page != currentPage}"
+                onclick="handleSelection(this)">
+        </button>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Avatar</th>
+        <th>Email</th>
+        <th>FullName</th>
+        <th>Phone</th>
+        <th>IsVerified</th>
+        <th>isActive</th>
+        <th>CreatedDate</th>
+        <th>LastLoginAt</th>
+        <th>Link</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="employers : ${employers}">
+        <td>
+            <img th:src="${employers.avatar}" alt="Avatar" style="width: 50px; height: auto;">
+        </td>
+        <td th:text="${employers.email}">Email</td>
+        <td th:text="${employers.fullName}">FullName</td>
+        <td th:text="${employers.phone}">Phone</td>
+        <td th:text="${employers.isVerified}">IsVerified</td>
+        <td th:text="${employers.isActive}">isActive</td>
+        <td th:text="${employers.createdAt}">CreatedDate</td>
+        <td th:text="${employers.lastLoginAt}">LastLoginAt</td>
+        <td>
+            <div class="verify-text">
+                <a th:href="@{'https://job-hub-hcmute.vercel.app/employers/'+ ${employers.userId}}">
+                    <button class="verify-link">
+                        GET NOW
+                    </button>
+                </a>
+            </div>
+        </td>
+
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

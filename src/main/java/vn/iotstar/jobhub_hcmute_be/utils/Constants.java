@@ -5,5 +5,8 @@ public class Constants {
     public static final String JOBS = "jobs";
     public static final String USERS = "users";
     public static final String EMPLOYERS = "employers";
+    public static final String RESUMES = "resumes";
+    public static final String RECEIVER_EMAIL = "nguyencongthanh280702@gmail.com";
+
 
 }

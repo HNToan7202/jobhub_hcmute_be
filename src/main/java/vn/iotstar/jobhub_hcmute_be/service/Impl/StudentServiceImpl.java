@@ -161,6 +161,7 @@ public class StudentServiceImpl extends RedisServiceImpl implements StudentServi
         user.get().setAbout(request.getAbout());
         save(user.get());
         this.delete(Constants.USERS, userId);
+        if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
         actionResult.setData(user.get());
         actionResult.setErrorCode(ErrorCodeEnum.UPDATE_PROFILE_SUCCESS);
         return actionResult;

@@ -80,8 +80,10 @@ public interface UserService {
 
     ActionResult replyActive(SendMailDTO request) throws MessagingException, UnsupportedEncodingException;
 
-//    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
+    //    ResponseEntity<GenericResponse> changeAvatar(String userId, MultipartFile imageFile) throws IOException;
 //
 //    ResponseEntity<GenericResponse> updateProfile(String userId, UserUpdateRequest request) throws Exception;
+    ActionResult settingSendMail(SettingSendMailDto request);
+    ActionResult getSettingMail();
 
 }

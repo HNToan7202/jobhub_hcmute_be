@@ -169,12 +169,12 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         ActionResult actionResult = new ActionResult();
         objectMapper = new ObjectMapper();
         if (this.hashExists(Constants.USERS, userId)) {
-                Object jobs = this.hashGet(Constants.USERS, userId);
-                HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
-                data.put("dateOfBirth", new Date((Long) data.get("dateOfBirth")));
-                actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
-                actionResult.setData(data);
-                return actionResult;
+            Object jobs = this.hashGet(Constants.USERS, userId);
+            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+            data.put("dateOfBirth", new Date((Long) data.get("dateOfBirth")));
+            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+            actionResult.setData(data);
+            return actionResult;
         }
         Optional<Student> student = studentRepository.findById(userId);
         if (student.isEmpty())
@@ -222,6 +222,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
     public void saveUserDetailToRedis(UserDetail userDetails, String accessToken, Object credentials, Object principal) {
         this.saveSession(accessToken, userDetails, credentials, principal);
     }
+
     @Override
     public ResponseEntity<GenericResponse> userLogin(LoginDTO loginDTO) {
 
@@ -259,10 +260,10 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         String token = jwtTokenProvider.generateRefreshToken(userDetail);
         refreshToken.setToken(token);
         refreshToken.setUser(userDetail.getUser());
-        if(this.exists(userDetail.getUser().getUserId())){
+        if (this.exists(userDetail.getUser().getUserId())) {
             this.deleteSession(userDetail.getUser().getUserId());
         }
-        saveUserDetailToRedis(userDetail, userDetail.getUser().getUserId() ,authRequest.getCredentials(),authRequest.getPrincipal());
+        saveUserDetailToRedis(userDetail, userDetail.getUser().getUserId(), authRequest.getCredentials(), authRequest.getPrincipal());
         //invalid all refreshToken before
         refreshTokenService.revokeRefreshToken(userDetail.getUserId());
         refreshTokenService.save(refreshToken);
@@ -291,7 +292,6 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
                 .build());
 
     }
-
 
 
     @Override
@@ -508,6 +508,14 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
     @Override
     public ActionResult getAccounts(int size, int page, String role, Boolean isActive) throws Exception {
         ActionResult actionResult = new ActionResult();
+        String field = String.valueOf(page) + String.valueOf(size) + role + String.valueOf(isActive);
+        if (this.hashExists(Constants.USERS, field)) {
+            Object jobs = this.hashGet(Constants.USERS, field);
+            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+            actionResult.setData(data);
+            return actionResult;
+        }
         if (page < 0) {
             actionResult.setErrorCode(ErrorCodeEnum.PAGE_INDEX_MUST_NOT_BE_LESS_THAN_0);
         }
@@ -525,6 +533,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
                 Map<String, Object> response = toMap(users);
                 actionResult.setData(response);
                 actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
+                this.hashSet(Constants.USERS, field, objectMapper.writeValueAsString(response));
             }
             case "STUDENT", "EMPLOYER", "ADMIN" -> {
                 if (isActive == null) {
@@ -536,6 +545,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
                 Map<String, Object> response = toMap(users);
                 actionResult.setData(response);
                 actionResult.setErrorCode(ErrorCodeEnum.GET_ALL_USER_SUCCESSFULLY);
+                this.hashSet(Constants.USERS, field, objectMapper.writeValueAsString(response));
             }
             default -> throw new Exception("Invalid role");
         }
@@ -632,10 +642,11 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         save(user);
     }
+
     @Override
     public ActionResult getAllEmployer(Pageable pageable, String companyName, String address, String teamSize) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
-        String field = pageable.getPageNumber() + pageable.getPageSize()  + companyName + teamSize;
+        String field = pageable.getPageNumber() + pageable.getPageSize() + companyName + teamSize;
         if (this.hashExists(Constants.EMPLOYERS, field)) {
             Object jobs = this.hashGet(Constants.EMPLOYERS, field);
             HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
@@ -709,6 +720,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         } else {
             user.get().setIsActive(!user.get().getIsActive());
             user = Optional.of(save(user.get()));
+            if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
             actionResult.setData(user);
             actionResult.setErrorCode(ErrorCodeEnum.CHANGE_STATE_SUCCESSFULLY);
         }
@@ -727,6 +739,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         helper.setText(Utils.cleanHTML(request.getContent()), true);
         helper.setFrom(env.getProperty("spring.mail.username"), request.getAuthor());
         javaMailSender.send(message);
+        if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
         ActionResult actionResult = new ActionResult();
         actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_SUCCESSFULLY);
         return actionResult;
@@ -737,6 +750,50 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
         Context context = new Context();
         context.setLocale(new Locale("vi", "VN"));
 
+        return actionResult;
+    }
+    @Override
+    public ActionResult settingSendMail(SettingSendMailDto request) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional <User> userOptional = userRepository.findById(CurrentUserUtils.getCurrentUserId());
+            if (userOptional.isEmpty()) {
+                actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+            } else {
+                User user = userOptional.get();
+                user.setIsReceiveEmail(request.getIsReceiveEmail());
+                if(request.getReceiveEmail()!=null)
+                    user.setReceiveEmail(request.getReceiveEmail());
+                if(request.getTimeGetData()!=null)
+                    user.setTimeGetData(request.getTimeGetData());
+                user = save(user);
+                actionResult.setErrorCode(ErrorCodeEnum.SETTING_MAIL_SUCCESSFULLY);
+            }
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+
+        }
+        return actionResult;
+    }
+    @Override
+    public ActionResult getSettingMail() {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional <User> userOptional = userRepository.findById(CurrentUserUtils.getCurrentUserId());
+            if (userOptional.isEmpty()) {
+                actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
+            } else {
+                User user = userOptional.get();
+                SettingSendMailDto settingSendMailDto = new SettingSendMailDto();
+                settingSendMailDto.setIsReceiveEmail(user.getIsReceiveEmail());
+                settingSendMailDto.setReceiveEmail(user.getReceiveEmail());
+                settingSendMailDto.setTimeGetData(user.getTimeGetData());
+                actionResult.setData(settingSendMailDto);
+                actionResult.setErrorCode(ErrorCodeEnum.OK);
+            }
+        } catch (Exception e) {
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
         return actionResult;
     }
 }

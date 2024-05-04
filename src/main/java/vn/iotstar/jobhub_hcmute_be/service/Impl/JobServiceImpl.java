@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import vn.iotstar.jobhub_hcmute_be.constant.EmployState;
 import vn.iotstar.jobhub_hcmute_be.constant.JobType;
 import vn.iotstar.jobhub_hcmute_be.dto.*;
@@ -59,6 +61,8 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
 
     @Autowired
     StudentRepository studentRepository;
+    @Autowired
+    private WebClient webClient;
 
     public JobServiceImpl(RedisTemplate<String, Object> redisTemplate) {
         super(redisTemplate);
@@ -320,7 +324,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         actionResult = new ActionResult();
         try {
             objectMapper = new ObjectMapper();
-            String indexStr = String.valueOf(index)+String.valueOf(size);
+            String indexStr = String.valueOf(index)+String.valueOf(size) + String.valueOf(isActive);
             if (this.hashExists(Constants.JOBS, indexStr)) {
                 Object jobs = this.hashGet(Constants.JOBS, indexStr);
                 HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
@@ -359,6 +363,13 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
         return actionResult;
     }
 
+    public Mono<String> translate_to_english(TranslateToEnglishDTO translateToEnglishDTO) {
+        return webClient.put()
+                .uri("/translate_to_english")
+                .bodyValue(translateToEnglishDTO)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
 
     //  @CachePut(value = "applicationCache", key = "#employerId")
     @Override
@@ -429,6 +440,18 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
             job.setSkills(skills);
             job.setIsActive(true);
 
+            TranslateToEnglishDTO translateToEnglishDTO = new TranslateToEnglishDTO();
+            translateToEnglishDTO.setName(jobRequest.getName());
+            translateToEnglishDTO.setRequirement(jobRequest.getRequirement());
+            translateToEnglishDTO.setDescription(jobRequest.getDescription());
+            translateToEnglishDTO.setBenefit(jobRequest.getBenefit());
+            try {
+                Mono<String> resultMono = translate_to_english(translateToEnglishDTO);
+                String result = resultMono.block();
+                job.setEngJob(result);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
             job = jobRepository.save(job);
             deleteRedisJobs();
 //            JobModel jobModel = convertJobToJobModel(job);
@@ -442,7 +465,7 @@ public class JobServiceImpl extends RedisServiceImpl implements JobService {
             return actionResult;
 
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
             return actionResult;
 

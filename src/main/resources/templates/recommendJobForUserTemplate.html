@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JJob Recommendation</title>
+</head>
+
+<body>
+<h1>Job Recommendation </h1>
+<p>Time: <span th:text="${startOfDayYesterday}"></span> - <span th:text="${endOfDayYesterday}"></span></p>
+<p>Number of Job Recommendations: <span th:text="${count}"></span></p>
+<div th:each="i : ${jobs}" >
+    <div style="margin-bottom: 20px;">
+        <div style=" border: 1px solid #2B2B2B; border-radius: 20px; overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; justify-content: space-between; width: 100%;"  >
+                <div th:text="${i.jobType}"
+                    style=" margin-left: 2px; width: 80px; border: 1px solid #FFFFFF; color: #1967D2; background-color: #DDE8F8; padding: 3px 15px; border-radius: 20px;"></div>
+                       </div>
+            <div style="display: flex;   width: 100%;" >
+                <img th:src="${i.logo}" alt="Avatar"
+                     style="width: 80px; height: 80px; border-radius: 50%; margin: 40px 20px; display: block;">
+                <div style="margin-left: 20px;  width: 100%;">
+                    <a th:text="${i.name}" target="_blank"
+                       th:href="@{'https://job-hub-hcmute.vercel.app/job/'+ ${i.jobId}}"
+                       style="text-decoration: none; color: inherit; font-weight: bold; text-align: left; margin: 10px 0;"> (Click View)</a>
+                    <div th:text="${i.salaryRange}"
+                         style=" color: #F9AB00;  padding: 3px 15px; "></div>
+                    <div th:text="@{'Skills: '+ ${i.skills}}" style="text-align: left; margin: 10px 0; padding: 3px 15px;"></div>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="margin-right: 5px" th:text="@{'Experience: '+ ${i.experience}}"></div>
+                        <div style="margin-right: 5px" th:text="@{'Quantity: ' + ${i.quantity}}"></div>
+                        <div style="margin-right: 5px" th:text="@{'Position: ' + ${i.position}}"></div>
+                    </div>
+                    <div th:text="@{'CreatedAt: '+ ${i.createdAt}}"></div>
+                    <div th:text="@{'Deadline: '+ ${i.deadline}}"></div>
+                    <div th:text="@{'Location: '+ ${i.location}}" style="text-align: left; margin: 10px 0; border: 1px solid #FFFFFF; color: #10763B;  padding: 3px 15px; border-radius: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
