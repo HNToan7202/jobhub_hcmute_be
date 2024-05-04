@@ -1,11 +1,13 @@
 package vn.iotstar.jobhub_hcmute_be.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,16 +19,14 @@ import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
+import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
-public class ResumeServiceImpl implements ResumeService {
+public class ResumeServiceImpl extends RedisServiceImpl implements ResumeService {
 
     @Autowired
     private ResumeRepository resumeRepository;
@@ -66,6 +66,12 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Autowired
     SkillRepository skillRepository;
+
+    ObjectMapper objectMapper;
+
+    public ResumeServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        super(redisTemplate);
+    }
 
     @Override
     public <S extends Resume> List<S> saveAll(Iterable<S> entities) {
@@ -560,6 +566,7 @@ public class ResumeServiceImpl implements ResumeService {
             resume.setUpdateAt(new Date());
             resume.setStudent(student);
             resume = resumeRepository.save(resume);
+            this.delete(Constants.RESUMES, studentId);
             return ResponseEntity.status(200).body(GenericResponse.builder()
                     .success(true)
                     .message("Update Resume Successfully!")
@@ -580,25 +587,40 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public ResponseEntity<?> getDetailResume(String studentId) {
-        Optional<Student> opt = studentRepository.findById(studentId);
-
-        if (opt.isEmpty()) {
+        try {
+//            objectMapper = new ObjectMapper();
+//            if (this.hashExists(Constants.RESUMES, studentId)) {
+//                Object resume = this.hashGet(Constants.RESUMES, studentId);
+//                HashMap<String, Object> data = objectMapper.readValue(resume.toString(), HashMap.class);
+//                return ResponseEntity.status(200).body(GenericResponse.builder()
+//                        .success(true)
+//                        .message("Get Resume Successfully from Redis!")
+//                        .result(data)
+//                        .statusCode(HttpStatus.OK.value())
+//                        .build());
+//            }
+            Optional<Student> opt = studentRepository.findById(studentId);
+            if (opt.isEmpty()) {
+               throw new Exception("Student Not Found");
+            }
+            Student student = opt.get();
+//            this.hashSet(Constants.RESUMES, studentId, student.getResume().toString());
+            return ResponseEntity.status(200).body(GenericResponse.builder()
+                    .success(true)
+                    .message("Get Resume Successfully!")
+                    .result(student.getResume())
+                    .statusCode(HttpStatus.OK.value())
+                    .build());
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.status(404).body(GenericResponse.builder()
                     .success(false)
-                    .message("Student Not Found")
+                    .message("Internal Server Error")
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .build());
         }
 
-        Student student = opt.get();
-        return ResponseEntity.status(200).body(GenericResponse.builder()
-                .success(true)
-                .message("Get Resume Successfully!")
-                .result(student.getResume())
-                .statusCode(HttpStatus.OK.value())
-                .build());
     }
-
 
     @Override
     public ActionResult deleteResume(String resumeId, String userId) {

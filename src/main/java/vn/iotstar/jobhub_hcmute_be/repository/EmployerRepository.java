@@ -37,4 +37,5 @@ public interface EmployerRepository extends JpaRepository<Employer, String> {
     Long countByUserIdIsNotNull();
 
 
+    Optional<Employer> findByUserId(String userId);
 }

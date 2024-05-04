@@ -27,6 +27,8 @@ public class Employer extends User implements Serializable {
     @ToString.Exclude
     private List<Job> jobs;
 
+
+
     @ElementCollection
     @CollectionTable(name = "recruiter_linkContacts", joinColumns = @JoinColumn(name = "recruiter_id"))
     @MapKeyColumn(name = "linkContact_key")

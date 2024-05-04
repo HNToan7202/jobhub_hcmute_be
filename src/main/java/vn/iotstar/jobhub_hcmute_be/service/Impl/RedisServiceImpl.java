@@ -158,7 +158,6 @@ public class RedisServiceImpl  implements RedisService {
         return actionResult;
     }
 
-
     public void delete_Exits(String key, String field) {
         if (this.hashExists(key, field)) this.delete(key, field);
     }

@@ -64,10 +64,12 @@ public class User implements Serializable {
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();
+        this.lastSendEmail = new Date();
         this.friendCount = 0;
         this.senderCount = 0;
         this.receiverCount = 0;
         this.isPublicFriend = true;
+        this.isReceiveEmail = false;
     }
 
     @PreUpdate
@@ -107,7 +109,13 @@ public class User implements Serializable {
     private Integer receiverCount;
 
     private Integer friendCount;
-    private Boolean isPublicFriend;
+    private Boolean isPublicFriend;// Tạo moot bien kiem tra user dó có nhan email hay không
+
+    private Boolean isReceiveEmail;
+    private String receiveEmail;
+    private Integer timeGetData;
+
+    private Date lastSendEmail;
 
 //  following: Danh sách các người dùng mà người dùng hiện tại đang theo dõi.
 //  followers: Danh sách các người dùng khác đang theo dõi người dùng hiện tại.
