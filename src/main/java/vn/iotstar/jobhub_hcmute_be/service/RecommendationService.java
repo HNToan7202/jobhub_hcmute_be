@@ -16,4 +16,6 @@ public interface RecommendationService {
 
 
     ActionResult getRecommendationBJobSimilar(String jobId, Integer page, Integer size);
+
+    ActionResult getLinkCVAndSaveToMongo(String linkCV, String userId);
 }

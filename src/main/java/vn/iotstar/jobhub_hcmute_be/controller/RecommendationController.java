@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.iotstar.jobhub_hcmute_be.dto.LinkCV;
+import vn.iotstar.jobhub_hcmute_be.dto.SaveToMongoDTO;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseBuild;
 import vn.iotstar.jobhub_hcmute_be.model.ResponseModel;
@@ -22,22 +23,25 @@ public class RecommendationController {
     ResponseBuild responseBuild;
     @Autowired
     RecommendationService recommendationService;
+
     @PreAuthorize("hasAnyRole( 'STUDENT')")
     @RequestMapping("/user/{userId}")
     public ResponseModel getRecommendationByUserId(@PathVariable("userId") String userId,
                                                    @RequestParam(defaultValue = "1") Integer page,
                                                    @RequestParam(defaultValue = "10") Integer size) {
-        ActionResult actionResult = recommendationService.getRecommendationByUserId(userId,page,size);
+        ActionResult actionResult = recommendationService.getRecommendationByUserId(userId, page, size);
         return responseBuild.build(actionResult);
     }
+
     @PreAuthorize("hasAnyRole( 'EMPLOYER')")
     @RequestMapping("/job/{jobId}")
     public ResponseModel getRecommendationByJobId(@PathVariable("jobId") String jobId,
                                                   @RequestParam(defaultValue = "1") Integer page,
                                                   @RequestParam(defaultValue = "10") Integer size) {
-        ActionResult actionResult = recommendationService.getRecommendationByJobId(jobId,page,size);
+        ActionResult actionResult = recommendationService.getRecommendationByJobId(jobId, page, size);
         return responseBuild.build(actionResult);
     }
+
     @PreAuthorize("hasAnyRole( 'STUDENT')")
     @PostMapping("/jobs/cv")
     public ResponseModel getRecommendationJobsCv(@Validated @RequestBody LinkCV linkCV) {
@@ -45,11 +49,19 @@ public class RecommendationController {
         return responseBuild.build(actionResult);
     }
 
+    @PreAuthorize("hasAnyRole( 'STUDENT')")
+    @PutMapping("/analysis/cv")
+    public ResponseModel putCVToMongo(@Validated @RequestBody SaveToMongoDTO save) {
+        ActionResult actionResult = recommendationService.getLinkCVAndSaveToMongo(save.getLink_cv(), save.getUser_id());
+        return responseBuild.build(actionResult);
+    }
+
+
     @GetMapping("/job-similar/{jobId}")
-    public ResponseModel getRecommendationBJobSimilar( @PathVariable("jobId") String jobId,
-                                                       @RequestParam(defaultValue = "1") Integer page,
-                                                       @RequestParam(defaultValue = "10") Integer size) {
-        ActionResult actionResult = recommendationService.getRecommendationBJobSimilar(jobId,page,size);
+    public ResponseModel getRecommendationBJobSimilar(@PathVariable("jobId") String jobId,
+                                                      @RequestParam(defaultValue = "1") Integer page,
+                                                      @RequestParam(defaultValue = "10") Integer size) {
+        ActionResult actionResult = recommendationService.getRecommendationBJobSimilar(jobId, page, size);
         return responseBuild.build(actionResult);
     }
 
