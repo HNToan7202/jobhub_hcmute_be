@@ -56,7 +56,7 @@ public class QuartzSchedulerConfig {
                 .build();
         scheduler.scheduleJob(jobDetail, trigger);
     }
-    @Scheduled(cron = "0 15 20 * * ?")
+    @Scheduled(cron = "0 0 9 * * ?")
     public void scheduleRefreshDataCollaborativeFiltering() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(DailyRefreshDataCollaborativeFiltering.class)
                 .withIdentity("dailyRefreshDataCollaborativeFiltering")
