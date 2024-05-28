@@ -18,6 +18,7 @@ import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.repository.*;
 import vn.iotstar.jobhub_hcmute_be.service.CloudinaryService;
+import vn.iotstar.jobhub_hcmute_be.service.RecommendationService;
 import vn.iotstar.jobhub_hcmute_be.service.ResumeService;
 import vn.iotstar.jobhub_hcmute_be.utils.Constants;
 
@@ -66,6 +67,9 @@ public class ResumeServiceImpl extends RedisServiceImpl implements ResumeService
 
     @Autowired
     SkillRepository skillRepository;
+
+    @Autowired
+    RecommendationServiceImpl recommendationService;
 
     ObjectMapper objectMapper;
 
@@ -197,6 +201,9 @@ public class ResumeServiceImpl extends RedisServiceImpl implements ResumeService
         resumeUploads.add(resume);
         student.getResume().setResumeUploads(resumeUploads);
         student = studentRepository.save(student);
+        String result = String.valueOf(recommendationService.putCVToMongo(url, userId));
+        System.out.println("Result:" + result);
+
         return ResponseEntity.status(200).body(GenericResponse.builder()
                 .success(true)
                 .message("Upload Resume Successfully!")
@@ -601,7 +608,7 @@ public class ResumeServiceImpl extends RedisServiceImpl implements ResumeService
 //            }
             Optional<Student> opt = studentRepository.findById(studentId);
             if (opt.isEmpty()) {
-               throw new Exception("Student Not Found");
+                throw new Exception("Student Not Found");
             }
             Student student = opt.get();
 //            this.hashSet(Constants.RESUMES, studentId, student.getResume().toString());

@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import vn.iotstar.jobhub_hcmute_be.dto.LinkCV;
+import vn.iotstar.jobhub_hcmute_be.dto.PutResumeApplyDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.RecommendJobWithCVDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.SaveToMongoDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
@@ -35,7 +36,6 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Autowired
     private JobRepository jobRepository;
 
-
     @Autowired
     private StudentRepository studentRepository;
 
@@ -53,6 +53,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .bodyToMono(String[].class);
     }
 
+
     public Mono<String[]> getRecommendationBJobSimilar(String jobId) {
         return webClient.get()
                 .uri("/recommendation/job_detail/" + jobId)
@@ -64,6 +65,25 @@ public class RecommendationServiceImpl implements RecommendationService {
         return webClient.put()
                 .uri("/save-to-mongo")
                 .bodyValue(new SaveToMongoDTO(linkCV, userId))
+                .retrieve()
+                .bodyToMono(String[].class);
+    }
+
+    public Mono<String[]> putCVApplyToMongo(PutResumeApplyDTO dto) {
+        return webClient.put()
+                .uri("/save_to_mong_application_CV")
+                .bodyValue(dto)
+                .retrieve()
+                .bodyToMono(String[].class);
+    }
+
+    public Mono<String[]> getReomendationCandidate(String jobId, int noOfCv) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/reomendation_candidate")
+                        .queryParam("job_id", jobId)
+                        .queryParam("no_of_cv", noOfCv)
+                        .build())
                 .retrieve()
                 .bodyToMono(String[].class);
     }
@@ -177,11 +197,13 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public ActionResult getLinkCVAndSaveToMongo(String linkCV, String userId) {
+    public ActionResult getRecommendUserByJobId(String jobId, int noOfCv) {
         ActionResult actionResult = new ActionResult();
         try {
-            String[] result = putCVToMongo(linkCV, userId).block();
-            actionResult.setData(result);
+            String[] result = getReomendationCandidate(jobId, noOfCv).block();
+            Page<Student> students = studentRepository.findByUserIdIn(Arrays.asList(result), PageRequest.of(0, noOfCv));
+            List<ResponUserModel> responUserModels = students.getContent().stream().map(ResponUserModel::transform).toList();
+            actionResult.setData(PageModel.transform(students, responUserModels));
             actionResult.setErrorCode(ErrorCodeEnum.OK);
         } catch (Exception e) {
             System.out.println(e);
@@ -190,5 +212,17 @@ public class RecommendationServiceImpl implements RecommendationService {
         return actionResult;
     }
 
-
+    @Override
+    public ActionResult getLinkCVAndSaveToMongo(String linkCV, String userId) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            //     String result = putCVToMongo(linkCV, userId).block();
+            //  actionResult.setData(result);
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        } catch (Exception e) {
+            System.out.println(e);
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return actionResult;
+    }
 }

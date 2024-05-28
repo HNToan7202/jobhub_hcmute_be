@@ -65,5 +65,12 @@ public class RecommendationController {
         return responseBuild.build(actionResult);
     }
 
+    @GetMapping("/reomendation_candidate")
+    public ResponseModel getRecommendationCandidate(@RequestParam("jobId") String jobId,
+                                                    @RequestParam(defaultValue = "10") Integer no_of_cv) {
+        ActionResult actionResult = recommendationService.getRecommendationByJobId(jobId, 1, no_of_cv);
+        return responseBuild.build(actionResult);
+    }
+
 }
 
