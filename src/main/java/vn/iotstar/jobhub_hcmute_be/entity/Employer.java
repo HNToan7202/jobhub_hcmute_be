@@ -67,5 +67,10 @@ public class Employer extends User implements Serializable {
 
     private String sponsor = Rating.NORMAL.getCode().toString();
 
+    @OneToMany(mappedBy = "employer")
+    @JsonBackReference
+    @ToString.Exclude
+    private List<Courses> courses;
+
 
 }

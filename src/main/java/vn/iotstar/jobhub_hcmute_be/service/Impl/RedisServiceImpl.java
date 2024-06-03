@@ -121,20 +121,17 @@ public class RedisServiceImpl  implements RedisService {
     @Override
     public void delete(String key) {
         redisTemplate.delete(key);
-
     }
     //redisServiceImpl.delete("user:1", "name");
     @Override
     public void delete(String key, String field) {
         hashOperations.delete(key, field);
-
     }
     //List<String> fieldsToDelete = Arrays.asList("name", "age", "email");
     //redisServiceImpl.delete("user:1", fieldsToDelete);
     @Override
     public void delete(String key, List<String> fields) {
         hashOperations.delete(key, fields.toArray());
-
     }
 
     public ActionResult check_Exits(String key, String field) {
