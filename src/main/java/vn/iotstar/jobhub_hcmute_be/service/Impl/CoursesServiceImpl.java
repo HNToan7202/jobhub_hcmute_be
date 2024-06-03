@@ -17,6 +17,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.UserRepository;
 import vn.iotstar.jobhub_hcmute_be.service.CoursesService;
 import vn.iotstar.jobhub_hcmute_be.utils.CurrentUserUtils;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -61,15 +62,27 @@ public class CoursesServiceImpl implements CoursesService {
 
 
     @Override
-    public ActionResult getCoursesListAdmin(Integer page, Integer size, String type) {
+    public ActionResult getCoursesListAdmin(Integer page, Integer size, String type, boolean status, boolean active) {
         actionResult = new ActionResult();
         try {
             Page<Courses> courses;
             if (type == null)
-                courses = coursesRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page - 1, size));
+//                courses = coursesRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page - 1, size));
+                courses = coursesRepository.findAllByStatusAndActiveOrderByCreatedAtDesc(
+                        status,
+                        active,
+                        PageRequest.of(page - 1, size)
+                );
             else
-                courses = coursesRepository.findAllByTypeOrderByCreatedAtDesc(
+//                courses = coursesRepository.findAllByTypeOrderByCreatedAtDesc(
+//                        type,
+//                        PageRequest.of(page - 1, size)
+//                );
+            // String type, boolean status, boolean active
+                courses = coursesRepository.findAllByTypeAndStatusAndActiveOrderByCreatedAtDesc(
                         type,
+                        status,
+                        active,
                         PageRequest.of(page - 1, size)
                 );
             PageModel pageModel = PageModel.transform(courses);
@@ -107,8 +120,10 @@ public class CoursesServiceImpl implements CoursesService {
             }
             coursesRepository.save(courses);
             actionResult.setErrorCode(ErrorCodeEnum.OK);
+            actionResult.setData(courses.getId());
         } catch (Exception e) {
             actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+
         }
         return actionResult;
     }
@@ -129,6 +144,7 @@ public class CoursesServiceImpl implements CoursesService {
             Courses course = courses.get();
             BeanUtils.copyProperties(courseDTO, course);
             course.setActive(false);
+            course.setUpdatedAt(new Date());
             coursesRepository.save(course);
             actionResult.setData(course);
             actionResult.setErrorCode(ErrorCodeEnum.OK);

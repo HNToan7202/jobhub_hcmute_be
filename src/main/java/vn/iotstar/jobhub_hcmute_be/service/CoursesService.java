@@ -9,7 +9,7 @@ public interface CoursesService {
 
     ActionResult getCoursesList(Integer page, Integer size, String type);
 
-    ActionResult getCoursesListAdmin(Integer page, Integer size, String type);
+    ActionResult getCoursesListAdmin(Integer page, Integer size, String type, boolean status, boolean active);
 
     ActionResult addCourses(CoursesDTO courseDTO);
 

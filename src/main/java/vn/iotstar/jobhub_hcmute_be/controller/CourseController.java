@@ -25,8 +25,12 @@ public class CourseController {
     }
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/get-all")
-    public ResponseModel getAllCourses(@RequestParam(defaultValue = "1") int index, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String type) {
-        return responseBuild.build(coursesService.getCoursesListAdmin(index, size, type));
+    public ResponseModel getAllCourses(@RequestParam(defaultValue = "1") int index,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(required = false) String type,
+                                       @RequestParam(required = false, defaultValue = "true") boolean status,
+                                       @RequestParam(required = false, defaultValue = "true") boolean active) {
+        return responseBuild.build(coursesService.getCoursesListAdmin(index, size, type, status, active));
     }
     @PreAuthorize("hasAnyRole('EMPLOYER')")
     @GetMapping("/get-all-courses")

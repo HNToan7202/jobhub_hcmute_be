@@ -15,4 +15,9 @@ public interface CoursesRepository extends JpaRepository<Courses, String> {
     Page<Courses> findAllByTypeOrderByCreatedAtDesc(String type, PageRequest of);
 
     Page<Courses> findAllByOrderByCreatedAtDesc(PageRequest of);
+
+    Page<Courses> findAllByStatusAndActiveOrderByCreatedAtDesc(boolean b, boolean b1, PageRequest of);
+
+
+    Page<Courses> findAllByTypeAndStatusAndActiveOrderByCreatedAtDesc(String type, boolean status, boolean active, PageRequest of);
 }
