@@ -108,6 +108,7 @@ public class CoursesServiceImpl implements CoursesService {
                 courses.setEmployer(null);
                 courses.setActive(true);
                 courses.setStatus(true);
+                courses.setAdmin(true);
             } else {
                 Optional<Employer> employer = employerRepository.findById(userId);
                 if (!employer.isPresent()) {
@@ -117,6 +118,8 @@ public class CoursesServiceImpl implements CoursesService {
                 courses.setEmployer(employer.get());
                 courses.setActive(false);
                 courses.setStatus(true);
+                courses.setAdmin(false);
+                courses.setEmail(employer.get().getEmail());
             }
             coursesRepository.save(courses);
             actionResult.setErrorCode(ErrorCodeEnum.OK);

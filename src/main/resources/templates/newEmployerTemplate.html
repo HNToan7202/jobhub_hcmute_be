@@ -107,7 +107,7 @@
 <p>Time: <span th:text="${startOfDayYesterday}"></span> - <span th:text="${endOfDayYesterday}"></span></p>
 <p>Number of new users: <span th:text="${count}"></span></p>
 <div class="verify-text">
-    <a th:href="@{'https://jobhub-kltn.azurewebsites.net/api/v1/file/downloadNewUserList?page='+${currentPage} +'&size=100&roleStr=EMPLOYER&startOfDayYesterday='+${startOfDayYesterday} +'&endOfDayYesterday='+ ${endOfDayYesterday } }">
+    <a th:href="@{'http://localhost:8080/api/v1/file/downloadNewUserList?page='+${currentPage} +'&size=100&roleStr=EMPLOYER&startOfDayYesterday='+${startOfDayYesterday} +'&endOfDayYesterday='+ ${endOfDayYesterday } }">
         <button class="verify-link">
             DOWNLOAD EXCEL
         </button>

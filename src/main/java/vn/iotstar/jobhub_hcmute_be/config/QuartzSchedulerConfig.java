@@ -20,7 +20,7 @@ public class QuartzSchedulerConfig {
     @Autowired
     private DailyRefreshDataCollaborativeFiltering dailyRefreshDataCollaborativeFiltering;
 
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 32 21 * * ?")
     public void scheduleSendNewUser() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(DailySendNewUser.class)
                 .withIdentity("dailyEmailJob")
@@ -32,7 +32,7 @@ public class QuartzSchedulerConfig {
                 .build();
         scheduler.scheduleJob(jobDetail, trigger);
     }
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 32 21 * * ?")
     public void scheduleSendNewApply() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(DailySendNewApplyJob.class)
                 .withIdentity("dailySendNewApplyJob")
@@ -44,7 +44,7 @@ public class QuartzSchedulerConfig {
                 .build();
         scheduler.scheduleJob(jobDetail, trigger);
     }
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 32 21 * * ?")
     public void scheduleRecommendForUser() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(DailyRecommendForUser.class)
                 .withIdentity("dailyRecommendForUser")
@@ -56,7 +56,7 @@ public class QuartzSchedulerConfig {
                 .build();
         scheduler.scheduleJob(jobDetail, trigger);
     }
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 32 21 * * ?")
     public void scheduleRefreshDataCollaborativeFiltering() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(DailyRefreshDataCollaborativeFiltering.class)
                 .withIdentity("dailyRefreshDataCollaborativeFiltering")
