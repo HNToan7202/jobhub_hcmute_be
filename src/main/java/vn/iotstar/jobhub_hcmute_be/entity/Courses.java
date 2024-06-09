@@ -29,13 +29,12 @@ public class Courses {
     private String type;
     private Date createdAt;
     private Date updatedAt;
-
-   //khóa học thuộc employer nào
-   @JsonBackReference
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employer_id")
     private Employer employer;
-
+    private String email;
+    private boolean admin;
     @PrePersist
     void createdAt() {
         this.createdAt = new Date();
