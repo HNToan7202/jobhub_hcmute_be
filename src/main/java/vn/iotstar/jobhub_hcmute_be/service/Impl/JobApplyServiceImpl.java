@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
+import vn.iotstar.jobhub_hcmute_be.dto.PutResumeApplyDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.ResumeUpload;
@@ -20,6 +21,7 @@ import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.JobApplyService;
 import vn.iotstar.jobhub_hcmute_be.service.NotificationService;
+import vn.iotstar.jobhub_hcmute_be.service.RecommendationService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +44,9 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    RecommendationServiceImpl recommendationService;
 
     public Page<JobApply> findAllByStudent_UserIdOrderByCreatedAtDesc(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, userId);
@@ -203,6 +208,13 @@ public class JobApplyServiceImpl implements JobApplyService {
 
         // Lưu đơn ứng tuyển vào database
         JobApply jobApply = jobApplyRepository.save(application);
+
+        PutResumeApplyDTO dto = new PutResumeApplyDTO();
+        dto.setJob_id(jobId);
+        dto.setUser_id(userId);
+        dto.setLink_cv(resumeLink);
+        recommendationService.putCVApplyToMongo(dto);
+
         actionResult.setData(jobApply);
         actionResult.setErrorCode(ErrorCodeEnum.APPLICATION_SUCCESSFULLY);
 //        notificationService.sendApplyJob(job.getEmployer().getEmail(), candidate.getFullName(), job.getName());
