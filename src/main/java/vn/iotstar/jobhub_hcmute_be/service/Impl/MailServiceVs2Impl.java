@@ -194,7 +194,6 @@ public class MailServiceVs2Impl {
                     user.setLastSendEmail(new Date());
                     userRepository.save(user);
                 }
-
             }
 
         } catch (Exception e) {

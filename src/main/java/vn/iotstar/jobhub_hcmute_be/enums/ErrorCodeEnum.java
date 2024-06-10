@@ -156,10 +156,6 @@ public enum ErrorCodeEnum {
     REDIS_GET_ERROR(400, 400, "Get data from redis error"),
     FILE_EXTENSION_NOT_ALLOWED(400, 400, "File extension not allowed"),
     SETTING_MAIL_SUCCESSFULLY(200, 200, "Setting mail successfully"),
-
-    SEND_MAIL_INVITE_SUCCESSFULLY(200, 200, "Send mail invite successfully"),
-
-    //REQUEST_ALREADY_SENT(400, 400, "Request already sent"),
     PHONE_EXISTED(400, 400, "Phone existed");
 
 
