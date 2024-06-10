@@ -69,4 +69,6 @@ public interface EmployerService {
     ActionResult getTransactionByMonth(String employerId, long monthsAgo);
 
     ActionResult getAllTransaction(String employerId, Pageable pageable);
+
+    ActionResult inviteApplyForJob(String jobId, String userId) throws MessagingException, UnsupportedEncodingException;
 }

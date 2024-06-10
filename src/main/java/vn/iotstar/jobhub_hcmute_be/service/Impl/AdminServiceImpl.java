@@ -124,7 +124,7 @@ public class AdminServiceImpl extends RedisServiceImpl implements AdminService {
     }
 
     @Override
-    public ActionResult addNewEvent(EventDto eventDto,  String adminId){
+    public ActionResult addNewEvent(EventDto eventDto, String adminId) {
         ActionResult actionResult = new ActionResult();
         Optional<Admin> optional = adminRepository.findById(adminId);
 

@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import vn.iotstar.jobhub_hcmute_be.constant.State;
 import vn.iotstar.jobhub_hcmute_be.dto.Apply.JobApplyResponseDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.JobApplyDto;
+import vn.iotstar.jobhub_hcmute_be.dto.JobApplyResponse;
 import vn.iotstar.jobhub_hcmute_be.dto.PutResumeApplyDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
 import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
@@ -47,6 +50,9 @@ public class JobApplyServiceImpl implements JobApplyService {
 
     @Autowired
     RecommendationServiceImpl recommendationService;
+
+    @Autowired
+    private WebClient webClient;
 
     public Page<JobApply> findAllByStudent_UserIdOrderByCreatedAtDesc(Pageable pageable, String userId) {
         return jobApplyRepository.findAllByStudent_UserIdOrderByCreatedAtDesc(pageable, userId);
@@ -213,9 +219,11 @@ public class JobApplyServiceImpl implements JobApplyService {
         dto.setJob_id(jobId);
         dto.setUser_id(userId);
         dto.setLink_cv(resumeLink);
-        recommendationService.putCVApplyToMongo(dto);
+        // String result = String.valueOf(putCVApplyToMongo(dto));
 
-        actionResult.setData(jobApply);
+        JobApplyResponse jobApplyResponse = JobApplyResponse.transform(jobApply);
+
+        actionResult.setData(jobApplyResponse);
         actionResult.setErrorCode(ErrorCodeEnum.APPLICATION_SUCCESSFULLY);
 //        notificationService.sendApplyJob(job.getEmployer().getEmail(), candidate.getFullName(), job.getName());
         return actionResult;

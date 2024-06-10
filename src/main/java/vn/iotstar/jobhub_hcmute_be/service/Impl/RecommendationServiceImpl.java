@@ -15,11 +15,14 @@ import vn.iotstar.jobhub_hcmute_be.dto.PutResumeApplyDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.RecommendJobWithCVDTO;
 import vn.iotstar.jobhub_hcmute_be.dto.SaveToMongoDTO;
 import vn.iotstar.jobhub_hcmute_be.entity.Job;
+import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 import vn.iotstar.jobhub_hcmute_be.enums.ErrorCodeEnum;
 import vn.iotstar.jobhub_hcmute_be.model.ActionResult;
 import vn.iotstar.jobhub_hcmute_be.model.PageModel;
 import vn.iotstar.jobhub_hcmute_be.model.ResponUserModel;
+import vn.iotstar.jobhub_hcmute_be.model.ResponseApplyModel;
+import vn.iotstar.jobhub_hcmute_be.repository.JobApplyRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.JobRepository;
 import vn.iotstar.jobhub_hcmute_be.repository.StudentRepository;
 import vn.iotstar.jobhub_hcmute_be.service.RecommendationService;
@@ -27,6 +30,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
@@ -38,6 +42,8 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private JobApplyRepository jobApplyRepository;
 
     public Mono<String[]> getRecommendationByUserIdWebClient(String userId) {
         return webClient.get()
@@ -69,13 +75,6 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .bodyToMono(String[].class);
     }
 
-    public Mono<String[]> putCVApplyToMongo(PutResumeApplyDTO dto) {
-        return webClient.put()
-                .uri("/save_to_mong_application_CV")
-                .bodyValue(dto)
-                .retrieve()
-                .bodyToMono(String[].class);
-    }
 
     public Mono<String[]> getReomendationCandidate(String jobId, int noOfCv) {
         return webClient.get()
@@ -84,6 +83,13 @@ public class RecommendationServiceImpl implements RecommendationService {
                         .queryParam("job_id", jobId)
                         .queryParam("no_of_cv", noOfCv)
                         .build())
+                .retrieve()
+                .bodyToMono(String[].class);
+    }
+
+    public Mono<String[]> getRecommendationByApplicantJob(String jobId, int no_of_cv) {
+        return webClient.get()
+                .uri("/recommendation_application_CV?job_id=" + jobId + "&no_of_cv=" + no_of_cv)
                 .retrieve()
                 .bodyToMono(String[].class);
     }
@@ -204,6 +210,29 @@ public class RecommendationServiceImpl implements RecommendationService {
             Page<Student> students = studentRepository.findByUserIdIn(Arrays.asList(result), PageRequest.of(0, noOfCv));
             List<ResponUserModel> responUserModels = students.getContent().stream().map(ResponUserModel::transform).toList();
             actionResult.setData(PageModel.transform(students, responUserModels));
+            actionResult.setErrorCode(ErrorCodeEnum.OK);
+        } catch (Exception e) {
+            System.out.println(e);
+            actionResult.setErrorCode(ErrorCodeEnum.INTERNAL_SERVER_ERROR);
+        }
+        return actionResult;
+    }
+
+    @Override
+    public ActionResult getRecommendUserByJobApplicant(String jobId, int no_of_cv) {
+        ActionResult actionResult = new ActionResult();
+        try {
+            Optional<Job> job = jobRepository.findById(jobId);
+            if (job.isEmpty()) {
+                actionResult.setErrorCode(ErrorCodeEnum.JOB_NOT_FOUND);
+                return actionResult;
+            }
+            String[] result = getRecommendationByApplicantJob(jobId, no_of_cv).block();
+            assert result != null;
+            Page<JobApply> jobApplies = jobApplyRepository.findByJobApplyIdIn(Arrays.asList(result), PageRequest.of(0, no_of_cv));
+            // Page<Student> students = studentRepository.findByUserIdIn(Arrays.asList(result), PageRequest.of(0, no_of_cv));
+            List<ResponseApplyModel> responseUserModels = jobApplies.getContent().stream().map(ResponseApplyModel::transform).toList();
+            actionResult.setData(PageModel.transform(jobApplies, responseUserModels));
             actionResult.setErrorCode(ErrorCodeEnum.OK);
         } catch (Exception e) {
             System.out.println(e);

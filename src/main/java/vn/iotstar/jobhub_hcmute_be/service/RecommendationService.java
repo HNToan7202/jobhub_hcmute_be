@@ -23,5 +23,7 @@ public interface RecommendationService {
 
     ActionResult getRecommendUserByJobId(String jobId, int noOfCv);
 
+    ActionResult getRecommendUserByJobApplicant(String jobId, int no_of_cv);
+
     ActionResult getLinkCVAndSaveToMongo(String linkCV, String userId);
 }

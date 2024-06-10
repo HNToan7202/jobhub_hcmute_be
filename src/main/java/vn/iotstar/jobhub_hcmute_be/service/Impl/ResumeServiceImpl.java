@@ -201,8 +201,8 @@ public class ResumeServiceImpl extends RedisServiceImpl implements ResumeService
         resumeUploads.add(resume);
         student.getResume().setResumeUploads(resumeUploads);
         student = studentRepository.save(student);
-        String result = String.valueOf(recommendationService.putCVToMongo(url, userId));
-        System.out.println("Result:" + result);
+        //String result = String.valueOf(recommendationService.putCVToMongo(url, userId));
+        //System.out.println("Result:" + result);
 
         return ResponseEntity.status(200).body(GenericResponse.builder()
                 .success(true)

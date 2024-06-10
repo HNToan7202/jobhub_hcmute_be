@@ -6,8 +6,6 @@ import lombok.Data;
 public class PutResumeApplyDTO {
     private String link_cv;
     private String user_id;
-
     private String job_id;
-
 
 }

@@ -77,6 +77,9 @@ public class EmployerServiceImpl extends RedisServiceImpl implements EmployerSer
     @Autowired
     TransactionsRepository transactionsRepository;
 
+    @Autowired
+    StudentRepository userRepository;
+
     public EmployerServiceImpl(RedisTemplate<String, Object> redisTemplate) {
         super(redisTemplate);
     }
@@ -225,7 +228,7 @@ public class EmployerServiceImpl extends RedisServiceImpl implements EmployerSer
         BeanUtils.copyProperties(request, employer);
 
         employer = save(employer);
-        if(this.hashExists(Constants.EMPLOYERS, userId))
+        if (this.hashExists(Constants.EMPLOYERS, userId))
             this.delete(Constants.EMPLOYERS, userId);
         if (this.exists(Constants.USERS)) this.delete(Constants.USERS);
         return ResponseEntity.ok(
@@ -367,7 +370,6 @@ public class EmployerServiceImpl extends RedisServiceImpl implements EmployerSer
         actionResult.setErrorCode(ErrorCodeEnum.OK);
         return actionResult;
     }
-
 
 
     @Override
@@ -566,6 +568,57 @@ public class EmployerServiceImpl extends RedisServiceImpl implements EmployerSer
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return actionResult;
+    }
+
+    @Override
+    public ActionResult inviteApplyForJob(String jobId, String userId) throws MessagingException, UnsupportedEncodingException {
+        ActionResult actionResult = new ActionResult();
+        Optional<Job> optJob = jobRepository.findById(jobId);
+        Optional<Student> user = userRepository.findById(userId);
+        if (optJob.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.JOB_NOT_FOUND);
+            return actionResult;
+        }
+        if (user.isEmpty()) {
+            actionResult.setErrorCode(ErrorCodeEnum.USER_NOT_FOUND);
+            return actionResult;
+        }
+        Job job = optJob.get();
+        Context context = new Context();
+        context.setVariable("benefit", job.getBenefit());
+        context.setVariable("salaryRange", job.getSalaryRange());
+        context.setVariable("requirement", job.getRequirement());
+        StringBuilder skill = new StringBuilder();
+        for (Skill i : job.getSkills()) {
+            skill.append(i.getName()).append(", ");
+        }
+        context.setVariable("skill", skill.toString().replaceAll(",\\s*$", ""));
+        context.setVariable("location", job.getLocation());
+        context.setVariable("deadline", job.getDeadline());
+        context.setVariable("jobId", job.getJobId());
+        context.setVariable("jobName", job.getName());
+        String url = "http://localhost:3000/jobs/" + jobId;
+        context.setVariable("nameCandidate", user.get().getFullName());
+        context.setVariable("url", url);
+        String content = templateEngine.process("suggest-candidate", context);
+        System.out.println(url + jobId);
+
+        String subject = "One of Our Employees Thinks You Are Amazing!";
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        helper.setTo(user.get().getEmail());
+        helper.setFrom(Objects.requireNonNull(env.getProperty("spring.mail.username")), "Recruiment Manager");
+        javaMailSender.send(message);
+        actionResult.setErrorCode(ErrorCodeEnum.SEND_MAIL_INVITE_SUCCESSFULLY);
+        return actionResult;
+//        return ResponseEntity.ok(GenericResponse.builder()
+//                .success(true)
+//                .message("Email :" + user.get().getEmail())
+//                .result("Send Mail Invite Candidate Successfully!")
+//                .statusCode(HttpStatus.OK.value())
+//                .build());
     }
 
 }

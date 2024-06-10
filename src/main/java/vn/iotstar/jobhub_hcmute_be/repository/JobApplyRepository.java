@@ -11,6 +11,7 @@ import vn.iotstar.jobhub_hcmute_be.entity.JobApply;
 import vn.iotstar.jobhub_hcmute_be.entity.Student;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Hidden
@@ -34,6 +35,7 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
             Date startDate,
             Date endDate
     );
+
     Page<JobApply> findAllByJob_Employer_UserIdAndCreatedAtBetweenAndState(
             Pageable pageable,
             String userId,
@@ -48,5 +50,9 @@ public interface JobApplyRepository extends JpaRepository<JobApply, String> {
     Page<JobApply> findAllByJob_JobIdAndJob_Employer_UserIdAndState(Pageable pageable, String jobId, String userId, State state);
 
     Long countByJobApplyIdIsNotNull();
+
+    Page<JobApply> findByStudent_UserIdIn(List<String> list, Pageable pageable);
+
+    Page<JobApply> findByJobApplyIdIn(List<String> list, Pageable pageable);
 
 }

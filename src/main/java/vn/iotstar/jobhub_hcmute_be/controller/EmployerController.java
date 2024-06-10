@@ -1,6 +1,7 @@
 package vn.iotstar.jobhub_hcmute_be.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ import vn.iotstar.jobhub_hcmute_be.security.JwtTokenProvider;
 import vn.iotstar.jobhub_hcmute_be.service.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,6 +53,10 @@ public class EmployerController {
 
     @Autowired
     TransactionsService transactionsService;
+
+    private static final Map<String, Long> userLastRequestTimeMap = new HashMap<>();
+
+    private static final long FIVE_MINUTES_IN_MILLIS = 60 * 1000;
 
     public EmployerController(JobService jobService, JwtTokenProvider jwtTokenProvider, EmployerService employerService) {
         this.jobService = jobService;
@@ -389,6 +397,29 @@ public class EmployerController {
             actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
         }
         return responseBuild.build(actionResult);
+    }
+
+    @PostMapping("/jobs/invite/{jobId}")
+    public ResponseModel sendMailInviteJob(@PathVariable("jobId") String jobId,
+                                           @RequestParam String userId) {
+        ActionResult actionResult = new ActionResult();
+
+        long currentTime = System.currentTimeMillis();
+        Long lastRequestTime = userLastRequestTimeMap.get(userId);
+
+        if (lastRequestTime != null && currentTime - lastRequestTime < FIVE_MINUTES_IN_MILLIS) {
+            actionResult.setErrorCode(ErrorCodeEnum.REQUEST_ALREADY_SENT);
+            return responseBuild.build(actionResult);
+        }
+
+        try {
+            userLastRequestTimeMap.put(userId, currentTime);
+            actionResult = employerService.inviteApplyForJob(jobId, userId);
+            return responseBuild.build(actionResult);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            actionResult.setErrorCode(ErrorCodeEnum.BAD_REQUEST);
+            return responseBuild.build(actionResult);
+        }
     }
 
 
