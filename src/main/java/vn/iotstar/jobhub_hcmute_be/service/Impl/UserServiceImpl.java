@@ -168,14 +168,14 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
     public ActionResult getProfile(String userId) throws JsonProcessingException {
         ActionResult actionResult = new ActionResult();
         objectMapper = new ObjectMapper();
-        if (this.hashExists(Constants.USERS, userId)) {
-            Object jobs = this.hashGet(Constants.USERS, userId);
-            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
-            data.put("dateOfBirth", new Date((Long) data.get("dateOfBirth")));
-            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
-            actionResult.setData(data);
-            return actionResult;
-        }
+//        if (this.hashExists(Constants.USERS, userId)) {
+//            Object jobs = this.hashGet(Constants.USERS, userId);
+//            HashMap<String, Object> data = objectMapper.readValue(jobs.toString(), HashMap.class);
+//            data.put("dateOfBirth", new Date((Long) data.get("dateOfBirth")));
+//            actionResult.setErrorCode(ErrorCodeEnum.REDIS_GET_SUCCESS);
+//            actionResult.setData(data);
+//            return actionResult;
+//        }
         Optional<Student> student = studentRepository.findById(userId);
         if (student.isEmpty())
             actionResult.setErrorCode(ErrorCodeEnum.NOT_FOUND);
@@ -183,7 +183,7 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
             ProfileDTO profileDTO = new ProfileDTO();
             BeanUtils.copyProperties(student.get(), profileDTO);
             actionResult.setData(profileDTO);
-            this.hashSet(Constants.USERS, userId, objectMapper.writeValueAsString(profileDTO));
+//            this.hashSet(Constants.USERS, userId, objectMapper.writeValueAsString(profileDTO));
             actionResult.setErrorCode(ErrorCodeEnum.GET_PROFILE_SUCCESSFULLY);
         }
         return actionResult;
