@@ -290,7 +290,6 @@ public class UserServiceImpl extends RedisServiceImpl implements UserService {
                 .result(tokenMap)
                 .statusCode(HttpStatus.OK.value())
                 .build());
-
     }
 
 
