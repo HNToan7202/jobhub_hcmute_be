@@ -597,7 +597,7 @@ public class EmployerServiceImpl extends RedisServiceImpl implements EmployerSer
         context.setVariable("deadline", job.getDeadline());
         context.setVariable("jobId", job.getJobId());
         context.setVariable("jobName", job.getName());
-        String url = "http://localhost:3000/jobs/" + jobId;
+        String url = "https://job-hub-hcmute.vercel.app/jobs/" + jobId;
         context.setVariable("nameCandidate", user.get().getFullName());
         context.setVariable("url", url);
         String content = templateEngine.process("suggest-candidate", context);
